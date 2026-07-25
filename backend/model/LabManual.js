@@ -6,10 +6,10 @@ const LabManualSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Please provide the subject name'],
         },
-        labName: {
-            type: String,
-            required: [true, 'Please provide the lab name'],
-        },
+        // labName: {
+        //     type: String,
+        //     required: [true, 'Please provide the lab name'],
+        // },
         title: {
             type: String,
             required: [true, 'Please provide a manual title'],
@@ -23,9 +23,9 @@ const LabManualSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Please provide the file location'],
         },
-        size: {
-            type: String,
-        },
+        // size: {
+        //     type: String,
+        // },
         // used to filter which manuals a student sees once they set their semester
         semester: {
             type: String,

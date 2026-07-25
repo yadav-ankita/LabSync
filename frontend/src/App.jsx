@@ -1,12 +1,13 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import Login from "./components/StudentLogin";
 import StudentDashboard from "./pages/Student/StudentDashboard";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import StudentRegister from "./components/StudentRegister";
 import StudentLogin from "./components/StudentLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { LabInchargeDashboard } from "./pages/LabIncharge/LabInchargeDashboard";
+import { LabAdminDashboard } from "./pages/LabAdmin/LabAdminDashboard";
 export default function App() {
     return (
         <>
@@ -14,10 +15,13 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 {/* <Route path="/student-register" element={<StudentRegister/>} /> */}
                 <Route path="/student-login" element={<StudentLogin/>} />
-                <Route path="/student-dashboard" element={
+                <Route path="/student-dashboard" 
+                 element={
                     <ProtectedRoute><StudentDashboard /></ProtectedRoute>                
                     } />
-                <Route path="/login" element={<Login />} />
+                 <Route path="/labIncharge-dashboard" element={<LabInchargeDashboard/>} />
+                 <Route path="/labAdmin-dashboard" element={<LabAdminDashboard/>} />
+
                 <Route path="*" element={<Navigate to="/student-login" replace />} />
             </Routes>
         </>

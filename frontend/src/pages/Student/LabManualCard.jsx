@@ -30,11 +30,14 @@ export function LabManualCard({ manual }) {
       </div>
       <p className="text-sm font-medium mt-3" style={{ color: "#1F2A24" }}>{manual.title}</p>
       <p className="text-xs mt-1" style={{ color: "#5B6A5F" }}>{manual.subject}</p>
-      <p className="text-xs mt-0.5" style={{ color: "#8A968D" }}>{manual.labName}</p>
+      {/* <p className="text-xs mt-0.5" style={{ color: "#8A968D" }}>{manual.labName}</p> */}
 
       <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "#E3E6DF" }}>
-        <span className="text-xs" style={{ color: "#8A968D" }}>
+        {/* <span className="text-xs" style={{ color: "#8A968D" }}>
           {manual.size} · Updated {manual.updated}
+        </span> */}
+        <span className="text-xs" style={{ color: "#8A968D" }}>
+           Updated {manual.updated}
         </span>
         <button
           className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border hover:bg-gray-50"
