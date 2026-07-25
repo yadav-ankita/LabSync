@@ -1,4 +1,4 @@
- const STUDENT = {
+const STUDENT = {
   name: "Aarav Mehta",
   rollNo: "21CS1042",
   branch: "Computer Science Engineering",
@@ -19,13 +19,20 @@ import {
   CircleDot,
   CheckCircle2,
   Loader2,
+  LogOut
 } from "lucide-react";
- export function Sidebar({ activeView, setActiveView }) {
+import { useAppContext } from "../../context/AppContext";
+export function Sidebar({ activeView, setActiveView }) {
+  const { currentUser, logout } = useAppContext();
+  const handleLogout = () => {
+    logout();
+  }
   const navItems = [
     { key: "home", label: "Overview", icon: LayoutGrid },
     { key: "manuals", label: "Lab Manuals", icon: BookOpen },
     { key: "raise", label: "Raise a Complaint", icon: MessageSquarePlus },
     { key: "complaints", label: "My Complaints", icon: ListChecks },
+    { key: "profile", label: "Edit Profile", icon: FileText },
   ];
 
   return (
@@ -87,15 +94,28 @@ import {
             className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold"
             style={{ backgroundColor: "#D89A4E", color: "#1F2A24" }}
           >
-            {STUDENT.name.split(" ").map((n) => n[0]).join("")}
+          {currentUser?.name
+              ? currentUser.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+              : "-"
+          }
           </div>
           <div className="min-w-0">
-            <p className="text-white text-sm truncate">{STUDENT.name}</p>
+            <p className="text-white text-sm truncate">{currentUser?.name}</p>
             <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.45)" }}>
-              {STUDENT.rollNo}
+              {currentUser?.studentId}
             </p>
           </div>
         </div>
+        <button onClick={handleLogout}>
+          <div className="flex items-center gap-2 mt-3 text-sm font-medium text-white cursor-pointer">
+            <LogOut size={16} color="#D89A4E" className="mt-1 ml-2" />
+            <p>Logout</p>
+          </div>
+        </button>
       </div>
     </aside>
   );

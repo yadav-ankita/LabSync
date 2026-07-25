@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import { useAppContext } from "../../context/AppContext";
 
 const LAB_OPTIONS = [
   "DS Lab - Block A",
@@ -25,33 +26,36 @@ const LAB_OPTIONS = [
   "WebTech Lab - Block C",
   "Micro Lab - Block C",
 ];
-export function ComplaintForm({ onSubmit }) {
+export function ComplaintForm() {
+  const { raiseComplaint } = useAppContext();
   const [labName, setLabName] = useState(LAB_OPTIONS[0]);
   const [issueType, setIssueType] = useState("Hardware");
   const [resourceId, setResourceId] = useState("");
   const [description, setDescription] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!resourceId.trim() || !description.trim()) return;
+    try {
+      const result = await raiseComplaint({
+        labName,
+        issueType,
+        resourceId: resourceId.trim(),
+        description: description.trim(),
+        status: "Pending",
+        date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      });
+      setSubmitted(true);
+      setResourceId("");
+      setDescription("");
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (error) {
+      console.log("the error in complaint form occurse");
+      console.log(error);
+    }
 
-    onSubmit({
-      id: `CMP-${Math.floor(1000 + Math.random() * 9000)}`,
-      labName,
-      type: issueType,
-      resourceId: resourceId.trim(),
-      description: description.trim(),
-      status: "Pending",
-      date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-    });
-
-    setSubmitted(true);
-    setResourceId("");
-    setDescription("");
-    setTimeout(() => setSubmitted(false), 3000);
   };
-
   const labelStyle = { color: "#1F2A24", fontWeight: 500 };
   const inputStyle = {
     borderColor: "#D8DCD4",

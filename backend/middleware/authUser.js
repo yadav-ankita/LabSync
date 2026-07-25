@@ -13,11 +13,11 @@ const authenticationMiddleware = (req, res, next) => {
    if (!token) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'Access Denied. No token provided' });
    }   
-   //console.log('token is', token)
+   console.log('token is', token)
    try {
       const payload = jwt.verify(token, process.env.JWT_SECRET)
       //attach the user 
-     // console.log('in authentication middleware payload is', payload)
+      console.log('in authentication middleware payload is', payload)
       req.user = payload;
       next()
    }
@@ -27,4 +27,24 @@ const authenticationMiddleware = (req, res, next) => {
 }
 module.exports = authenticationMiddleware;
 
+// const jwt = require('jsonwebtoken')
+// const { UnauthenticatedError } = require('../error')
+// const authenticateUser = async (req, res, next) => {
+//     // supports either a cookie (if you set one on login) or a Bearer token header
+//     const authHeader = req.headers.authorization
+//     const token = req.cookies?.token || (authHeader && authHeader.split(' ')[1])
 
+//     if (!token) {
+//         throw new UnauthenticatedError('Authentication invalid')
+//     }
+
+//     try {
+//         const payload = jwt.verify(token, process.env.JWT_SECRET)
+//         req.user = { userId: payload.userId, studentId: payload.studentId }
+//         next()
+//     } catch (error) {
+//         throw new UnauthenticatedError('Authentication invalid')
+//     }
+// }
+
+// module.exports = authenticateUser

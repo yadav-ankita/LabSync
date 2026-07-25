@@ -18,13 +18,17 @@ import { TopBar } from "./TopBar";
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
+import { useAppContext } from "../../context/AppContext";
+import { useEffect } from "react";
 const STUDENT = {
   name: "Aarav Mehta",
   rollNo: "21CS1042",
   branch: "Computer Science Engineering",
   semester: "5th Semester",
 };
-export  function DashboardHome({ complaints, setActiveView }) {
+export  function DashboardHome({setActiveView }) {
+  const {currentUser,complaints,getComplaints}=useAppContext();
+  const firstName = currentUser?.name?.split(" ")[0] || "Student";
   const pending = complaints.filter((c) => c.status === "Pending").length;
   const inProgress = complaints.filter((c) => c.status === "In Progress").length;
   const resolved = complaints.filter((c) => c.status === "Resolved").length;
@@ -48,9 +52,12 @@ export  function DashboardHome({ complaints, setActiveView }) {
       view: "complaints",
     },
   ];
+  useEffect(()=>{
+       getComplaints();
+  },[])
   return (
     <div>
-      <TopBar title={`Welcome back, ${STUDENT.name.split(" ")[0]}`} subtitle="Here's what's happening across your labs." />
+      <TopBar title={`Welcome back, ${firstName}`} subtitle="Here's what's happening across your labs." />
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard label="Pending" value={pending} icon={CircleDot} accent="#C9782E" />
@@ -88,7 +95,7 @@ export  function DashboardHome({ complaints, setActiveView }) {
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
         {complaints.slice(0, 3).map((c, i) => (
           <div
-            key={c.id}
+            key={c._id}
             className="flex items-center justify-between px-5 py-3.5"
             style={{ borderTop: i === 0 ? "none" : "1px solid #E3E6DF" }}
           >

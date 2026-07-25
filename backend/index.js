@@ -8,14 +8,17 @@ const app = express();
 
 const connectDb = require('./db/connect');
 
-//Routers
-const AuthRoute = require('./routes/user');
-
 
 //Middlewares
 const notFound = require('./middleware/notFound')
 const errorHandlerMiddleware = require('./middleware/errorHandler')
 const authenticationMiddleware = require('./middleware/authUser')
+
+
+//Routers
+const AuthRoute = require('./routes/user');
+const StudentRoute=require('./routes/student');
+
 
 app.use(cors({
   origin: [
@@ -39,14 +42,14 @@ app.get("/", (req, res) => {
 })
 
 app.use('/api/v1/auth', AuthRoute);
-
+app.use('/api/v1/student',StudentRoute);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 4000;
-//const url = 'mongodb://localhost:27017/BookStore'
-const url = process.env.MONGO_URI;
+const url = 'mongodb://localhost:27017/LabSync'
+//const url = process.env.MONGO_URI;
 const start = async () => {
   try {
     await connectDb(url)

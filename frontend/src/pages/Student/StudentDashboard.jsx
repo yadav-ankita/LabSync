@@ -26,15 +26,10 @@ import { ComplaintForm } from "./ComplaintForm";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { StatCard } from "./StatCard";
+import { EditProfile } from "./EditProfile";
 /* =========================================================
    DUMMY DATA
    ========================================================= */
-const STUDENT = {
-  name: "Aarav Mehta",
-  rollNo: "21CS1042",
-  branch: "Computer Science Engineering",
-  semester: "5th Semester",
-};
 const INITIAL_COMPLAINTS = [
   {
     id: "CMP-1042",
@@ -69,12 +64,6 @@ const INITIAL_COMPLAINTS = [
    ========================================================= */
 export default function StudentDashboard() {
   const [activeView, setActiveView] = useState("home");
-  const [complaints, setComplaints] = useState(INITIAL_COMPLAINTS);
-
-  const addComplaint = (complaint) => {
-    setComplaints((prev) => [complaint, ...prev]);
-  };
-
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "#F2F4F1", fontFamily: "'IBM Plex Sans', sans-serif" }}>
       <link
@@ -83,10 +72,11 @@ export default function StudentDashboard() {
       />
       <Sidebar activeView={activeView} setActiveView={setActiveView} />
       <main className="flex-1 px-10 py-8 overflow-y-auto">
-        {activeView === "home" && <DashboardHome complaints={complaints} setActiveView={setActiveView} />}
+        {activeView === "home" && <DashboardHome setActiveView={setActiveView} />}
         {activeView === "manuals" && <LabManuals />}
-        {activeView === "raise" && <ComplaintForm onSubmit={addComplaint} />}
-        {activeView === "complaints" && <MyComplaints complaints={complaints} />}
+        {activeView === "raise" && <ComplaintForm/>}
+        {activeView === "complaints" && <MyComplaints  />}
+        {activeView === "profile" && <EditProfile />}
       </main>
     </div>
   );

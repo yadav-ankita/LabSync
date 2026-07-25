@@ -1,5 +1,7 @@
+import { useAppContext } from "../../context/AppContext";
 
- export function TopBar({ title, subtitle }) {
+export function TopBar({ title, subtitle }) {
+  const { currentUser } = useAppContext();
   return (
     <div className="flex items-center justify-between mb-7">
       <div>
@@ -13,13 +15,13 @@
       </div>
       <div className="text-right hidden sm:block">
         <p className="text-sm" style={{ color: "#1F2A24" }}>
-            {/* {STUDENT.branch} */}
-            Computer Engineering
+          {currentUser?.branch}
         </p>
         <p className="text-xs" style={{ color: "#5B6A5F" }}>
-            5th Semester
-            {/* {STUDENT.semester} */}
-            </p>
+          {currentUser?.semester
+            ? `${currentUser.semester}th Semester`
+            : ""}
+        </p>
       </div>
     </div>
   );

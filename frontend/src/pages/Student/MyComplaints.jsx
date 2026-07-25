@@ -1,6 +1,12 @@
+import { useEffect } from "react";
+import { useAppContext } from "../../context/AppContext";
 import { ComplaintRow } from "./ComplaintRow";
 import { TopBar } from "./TopBar";
- export function MyComplaints({ complaints }) {
+ export function MyComplaints() {
+  const {complaints,getComplaints}=useAppContext();
+  useEffect(()=>{
+      getComplaints();
+  },[])
   return (
     <div>
       <TopBar title="My Complaints" subtitle="Track the status of issues you've reported." />
@@ -10,7 +16,7 @@ import { TopBar } from "./TopBar";
             You haven't raised any complaints yet.
           </div>
         ) : (
-          complaints.map((c) => <ComplaintRow key={c.id} complaint={c} />)
+          complaints.map((c) => <ComplaintRow key={c._id} complaint={c} />)
         )}
       </div>
     </div>

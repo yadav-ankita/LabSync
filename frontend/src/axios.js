@@ -5,7 +5,7 @@ axios.defaults.baseURL = 'http://localhost:4000/api/v1';
  //Add request interceptor
 axios.interceptors.request.use(
     (req) => {
-        const user = localStorage.getItem('user');
+        const user = localStorage.getItem('student');
         if (user) {
             try {
                 const { token } = JSON.parse(user);

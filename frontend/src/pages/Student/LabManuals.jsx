@@ -1,6 +1,7 @@
 import React from "react";
 import { TopBar } from "./TopBar";
 import { LabManualCard } from "./LabManualCard";
+import { useAppContext } from "../../context/AppContext";
 const LAB_MANUALS = [
   {
     id: "LM001",
@@ -58,6 +59,10 @@ const LAB_MANUALS = [
   },
 ];
  export function LabManuals() {
+  //  const { labManuals, getLabManuals, loadingManuals, currentUser } = useAppContext();
+  // useEffect(() => {
+  //   getLabManuals();
+  // }, [getLabManuals]);
   return (
     <div>
       <TopBar title="Lab Manuals" subtitle="Manuals available for your enrolled subjects." />
@@ -67,5 +72,32 @@ const LAB_MANUALS = [
         ))}
       </div>
     </div>
+
+  // <div>
+  //     <TopBar
+  //       title="Lab Manuals"
+  //       subtitle={
+  //         currentUser?.semester
+  //           ? `Manuals available for semester ${currentUser.semester}.`
+  //           : "Set your semester under Edit Profile to see your manuals."
+  //       }
+  //     />
+ 
+  //     {loadingManuals && <p className="text-sm" style={{ color: "#5B6A5F" }}>Loading manuals…</p>}
+ 
+  //     {!loadingManuals && labManuals.length === 0 && (
+  //       <p className="text-sm" style={{ color: "#5B6A5F" }}>
+  //         No manuals found yet. Make sure your semester is set under Edit Profile.
+  //       </p>
+  //     )}
+ 
+  //     <div className="grid grid-cols-3 gap-4">
+  //       {labManuals.map((manual) => (
+  //         <LabManualCard key={manual._id || manual.id} manual={manual} />
+  //       ))}
+  //     </div>
+  //   </div>
+
+
   );
 }
