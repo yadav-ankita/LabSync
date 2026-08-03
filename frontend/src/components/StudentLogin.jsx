@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { FlaskConical, Mail, Lock, Eye, EyeOff, CalendarDays } from "lucide-react";
-import { useAppContext } from "../context/AppContext";
+import { loginStudent } from "../services/studentService";
 
 export default function StudentLogin() {
-  const { login, currentUser, error } = useAppContext();
+  
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
+if (token) {
+  return <Navigate to="/student-dashboard" replace />;
+}
   const [form, setForm] = useState({ studentId: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -29,14 +34,26 @@ export default function StudentLogin() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const result = await login(form.studentId, form.password);
-      if (!result.success) {
-        setErrors({ form: result.message });
-        return;
-      }
-      navigate("/student-dashboard");
+      const response = await loginStudent(form);
+
+localStorage.setItem("token", response.data.token);
+
+localStorage.setItem(
+    "student",
+    JSON.stringify(response.data.student)
+);
+
+alert("Login Successful!");
+
+navigate("/student-dashboard", {
+    replace: true,
+});
     } catch (error) {
-      setErrors({ form: "An unexpected error occurred. Please try again." });
+      setErrors({
+    form:
+        error.response?.data?.message ||
+        "Invalid Student ID or Password."
+});
     } finally {
       setSubmitting(false);
     }
@@ -44,7 +61,6 @@ export default function StudentLogin() {
   return (
     <div className="min-h-screen w-full flex bg-stone-100">
       {/* Brand panel */}
-      {currentUser && <Navigate to='/student-dashboard' />}
       <div className="hidden lg:flex lg:w-2/5 relative bg-neutral-900 flex-col justify-between p-12 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.07]"

@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { FlaskConical, User, Mail, Lock, Eye, EyeOff, GraduationCap, CalendarDays } from "lucide-react";
+import { FlaskConical, User, Mail, Lock, Eye, EyeOff} from "lucide-react";
 import { Link } from "react-router-dom";
+import { registerStudent } from "../services/studentService";
+import { useNavigate } from "react-router-dom";
+
+
 
 
 const BATCHES = [2023, 2024, 2025, 2026];
@@ -10,7 +14,7 @@ const ADMISSION_TYPES = [
   "D2D"
 ];
 
-export default function StudentRegister({ onSubmit}) {
+export default function StudentRegister() {
   const [form, setForm] = useState({
   studentId: "",
   name: "",
@@ -27,7 +31,7 @@ export default function StudentRegister({ onSubmit}) {
     setForm((f) => ({ ...f, [field]: e.target.value }));
     if (errors[field]) setErrors((er) => ({ ...er, [field]: null }));
   };
-
+  const navigate = useNavigate();
   const validate = () => {
     const next = {};
     if (!form.name.trim()) next.name = "Enter your full name.";
@@ -48,15 +52,30 @@ if (!form.admissionType)
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setSubmitting(true);
-    try {
-      await onSubmit?.(form);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  e.preventDefault();
+
+  if (!validate()) return;
+
+  setSubmitting(true);
+
+  try {
+    await registerStudent(form);
+
+    alert("Registration Successful!");
+
+navigate("/student-login", {
+    replace: true,
+});
+
+  } catch (error) {
+    alert(
+    error.response?.data?.message ||
+    "Something went wrong. Please try again."
+);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen w-full flex bg-stone-100">
@@ -139,8 +158,15 @@ if (!form.admissionType)
     value={form.studentId}
     onChange={handleChange("studentId")}
     placeholder="23CP056"
-    className="w-full rounded-lg border bg-white px-3 py-2.5"
+    className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-stone-400 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${
+    errors.studentId ? "border-red-400" : "border-stone-200"
+}`}
   />
+  {errors.studentId && (
+    <p className="text-xs text-red-500 mt-1.5">
+        {errors.studentId}
+    </p>
+)}
 </div>
             <div>
               <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5">
@@ -213,10 +239,11 @@ if (!form.admissionType)
     }`}
   >
     <option value="">Select Batch</option>
-    <option value="2023">2023</option>
-    <option value="2024">2024</option>
-    <option value="2025">2025</option>
-    <option value="2026">2026</option>
+    {BATCHES.map((batch) => (
+    <option key={batch} value={batch}>
+        {batch}
+    </option>
+))}
   </select>
 
   {errors.batch && (
@@ -244,9 +271,12 @@ if (!form.admissionType)
       errors.admissionType ? "border-red-400" : "border-stone-200"
     }`}
   >
-    <option value="">Select</option>
-    <option value="Regular">Regular</option>
-    <option value="D2D">D2D</option>
+    <option value="">Select Admission Type</option>
+    {ADMISSION_TYPES.map((type) => (
+    <option key={type} value={type}>
+        {type}
+    </option>
+))}
   </select>
 
   {errors.admissionType && (
