@@ -2,17 +2,23 @@ import { useState } from "react";
 import { FlaskConical, User, Mail, Lock, Eye, EyeOff, GraduationCap, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
-const SEMESTERS = ["1st Semester", "2nd Semester", "3rd Semester", "4th Semester", "5th Semester", "6th Semester", "7th Semester", "8th Semester"];
+
+const BATCHES = [2023, 2024, 2025, 2026];
+
+const ADMISSION_TYPES = [
+  "Regular",
+  "D2D"
+];
 
 export default function StudentRegister({ onSubmit}) {
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    year: "",
-    semester: "",
-  });
+  studentId: "",
+  name: "",
+  email: "",
+  password: "",
+  batch: "",
+  admissionType: "",
+});
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -29,8 +35,14 @@ export default function StudentRegister({ onSubmit}) {
     else if (!/^\S+@\S+\.\S+$/.test(form.email)) next.email = "Enter a valid email address.";
     if (!form.password) next.password = "Create a password.";
     else if (form.password.length < 6) next.password = "Password must be at least 6 characters.";
-    if (!form.year) next.year = "Select your current year.";
-    if (!form.semester) next.semester = "Select your current semester.";
+    if (!form.studentId.trim())
+    next.studentId = "Enter your Student ID.";
+
+if (!form.batch)
+    next.batch = "Select your batch.";
+
+if (!form.admissionType)
+    next.admissionType = "Select admission type.";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -113,7 +125,23 @@ export default function StudentRegister({ onSubmit}) {
               </div>
               {errors.name && <p className="text-xs text-red-500 mt-1.5">{errors.name}</p>}
             </div>
+            <div>
+  <label
+    htmlFor="studentId"
+    className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5"
+  >
+    Student ID
+  </label>
 
+  <input
+    id="studentId"
+    type="text"
+    value={form.studentId}
+    onChange={handleChange("studentId")}
+    placeholder="23CP056"
+    className="w-full rounded-lg border bg-white px-3 py-2.5"
+  />
+</div>
             <div>
               <label htmlFor="email" className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5">
                 Email
@@ -165,57 +193,72 @@ export default function StudentRegister({ onSubmit}) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="year" className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5">
-                  Current year
-                </label>
-                <div className="relative">
-                  <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                  <select
-                    id="year"
-                    value={form.year}
-                    onChange={handleChange("year")}
-                    className={`w-full appearance-none rounded-lg border bg-white pl-10 pr-3 py-2.5 text-sm text-neutral-900 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${
-                      errors.year ? "border-red-400" : "border-stone-200"
-                    } ${!form.year ? "text-stone-400" : ""}`}
-                  >
-                    <option value="">Select</option>
-                    {YEARS.map((y) => (
-                      <option key={y} value={y} className="text-neutral-900">
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {errors.year && <p className="text-xs text-red-500 mt-1.5">{errors.year}</p>}
-              </div>
 
-              <div>
-                <label htmlFor="semester" className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5">
-                  Current sem
-                </label>
-                <div className="relative">
-                  <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                  <select
-                    id="semester"
-                    value={form.semester}
-                    onChange={handleChange("semester")}
-                    className={`w-full appearance-none rounded-lg border bg-white pl-10 pr-3 py-2.5 text-sm text-neutral-900 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${
-                      errors.semester ? "border-red-400" : "border-stone-200"
-                    } ${!form.semester ? "text-stone-400" : ""}`}
-                  >
-                    <option value="">Select</option>
-                    {SEMESTERS.map((s) => (
-                      <option key={s} value={s} className="text-neutral-900">
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {errors.semester && <p className="text-xs text-red-500 mt-1.5">{errors.semester}</p>}
-              </div>
-            </div>
+    {/* Batch */}
 
+    <div>
+  <label
+    htmlFor="batch"
+    className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5"
+  >
+    Batch
+  </label>
+
+  <select
+    id="batch"
+    value={form.batch}
+    onChange={handleChange("batch")}
+    className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${
+      errors.batch ? "border-red-400" : "border-stone-200"
+    }`}
+  >
+    <option value="">Select Batch</option>
+    <option value="2023">2023</option>
+    <option value="2024">2024</option>
+    <option value="2025">2025</option>
+    <option value="2026">2026</option>
+  </select>
+
+  {errors.batch && (
+    <p className="text-xs text-red-500 mt-1.5">
+      {errors.batch}
+    </p>
+  )}
+</div>
+
+    {/* Admission */}
+
+    <div>
+  <label
+    htmlFor="admissionType"
+    className="block text-xs font-medium uppercase tracking-wide text-stone-500 mb-1.5"
+  >
+    Admission Type
+  </label>
+
+  <select
+    id="admissionType"
+    value={form.admissionType}
+    onChange={handleChange("admissionType")}
+    className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-neutral-900 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${
+      errors.admissionType ? "border-red-400" : "border-stone-200"
+    }`}
+  >
+    <option value="">Select</option>
+    <option value="Regular">Regular</option>
+    <option value="D2D">D2D</option>
+  </select>
+
+  {errors.admissionType && (
+    <p className="text-xs text-red-500 mt-1.5">
+      {errors.admissionType}
+    </p>
+  )}
+</div>
+
+</div>
+
+              
             <button
               type="submit"
               disabled={submitting}
