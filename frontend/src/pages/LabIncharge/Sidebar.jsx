@@ -6,7 +6,10 @@ import {
   Wrench,
   FileText,
   LogOut,
+  BookOpen,
+  MessageSquarePlus
 } from "lucide-react";
+import { useAppContext } from "../../context/AppContext";
 
 const LAB_INCHARGE = {
   name: "Dr. Neha Sharma",
@@ -15,6 +18,7 @@ const LAB_INCHARGE = {
 };
 
 export function Sidebar({ activeView, setActiveView }) {
+  const {currentUser} = useAppContext();
   const handleLogout = () => {
     window.location.href = "/student-login";
   };
@@ -22,10 +26,12 @@ export function Sidebar({ activeView, setActiveView }) {
   const navItems = [
     { key: "home", label: "Overview", icon: LayoutGrid },
     { key: "complaints", label: "Complaints", icon: MessageSquareWarning },
+     { key: "raise", label: "Raise a Complaint", icon: MessageSquarePlus },
     { key: "requests", label: "Resource Requests", icon: ClipboardCheck },
     { key: "resources", label: "Lab Resources", icon: FlaskConical },
     { key: "maintenance", label: "Maintenance", icon: Wrench },
     { key: "profile", label: "Edit Profile", icon: FileText },
+    { key: "manuals", label: "Lab Manuals", icon: BookOpen },
   ];
 
   return (
@@ -88,7 +94,7 @@ export function Sidebar({ activeView, setActiveView }) {
             className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold"
             style={{ backgroundColor: "#D89A4E", color: "#1F2A24" }}
           >
-            {LAB_INCHARGE.name
+            {currentUser?.faculty_name
               .split(" ")
               .map((n) => n[0])
               .join("")
@@ -96,7 +102,7 @@ export function Sidebar({ activeView, setActiveView }) {
               .slice(0, 2)}
           </div>
           <div className="min-w-0">
-            <p className="text-white text-sm truncate">{LAB_INCHARGE.name}</p>
+            <p className="text-white text-sm truncate">{currentUser?.faculty_name}</p>
             <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.45)" }}>
               {LAB_INCHARGE.facultyId}
             </p>

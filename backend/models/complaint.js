@@ -2,9 +2,14 @@ const mongoose = require('mongoose')
 
 const ComplaintSchema = new mongoose.Schema(
     {
-        student: {
+        // student: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: 'Student',
+        //     required: true,
+        // },
+        faculty:{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Student',
+            ref: 'Faculty',
             required: true,
         },
         labName: {

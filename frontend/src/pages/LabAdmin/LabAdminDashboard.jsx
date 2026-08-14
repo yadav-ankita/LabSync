@@ -4,10 +4,10 @@ import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./Complaintspanel";
 import { ResourceManagement } from "./ResourceManagement";
 import { Approvals } from "./Approvals";
-import { LabManuals } from "./LabManuals";
 import { MaintenanceLog } from "./MaintenanceLog";
 import { Reports } from "./Reports";
 import { EditProfile } from "./EditProfile";
+import { AddFaculty } from "./AddFaculty";
 
 export function LabAdminDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -23,10 +23,11 @@ export function LabAdminDashboard() {
         {activeView === "complaints" && <ComplaintsPanel />}
         {activeView === "resources" && <ResourceManagement />}
         {activeView === "approvals" && <Approvals />}
-        {activeView === "manuals" && <LabManuals />}
+        
         {activeView === "maintenance" && <MaintenanceLog />}
         {activeView === "reports" && <Reports />}
         {activeView === "profile" && <EditProfile />}
+        {activeView==="faculty" && <AddFaculty/>}
       </main>
     </div>
   );

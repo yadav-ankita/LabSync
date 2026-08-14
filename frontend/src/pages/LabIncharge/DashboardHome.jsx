@@ -13,8 +13,11 @@ import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
 import { INCHARGE_COMPLAINTS, RESOURCE_REQUESTS, LAB_RESOURCES } from "./dummyData";
 import { LAB_INCHARGE } from "./Sidebar";
+import { useAppContext } from "../../context/AppContext";
+import { Navigate } from "react-router-dom";
 
 export function DashboardHome({ setActiveView }) {
+  const { currentUser } = useAppContext();
   const pending = INCHARGE_COMPLAINTS.filter((c) => c.status === "Pending").length;
   const inProgress = INCHARGE_COMPLAINTS.filter((c) => c.status === "In Progress").length;
   const pendingRequests = RESOURCE_REQUESTS.filter((r) => r.status === "Pending").length;
@@ -42,9 +45,12 @@ export function DashboardHome({ setActiveView }) {
   ];
 
   return (
-    <div>
+    <>
+    {currentUser && <Navigate to='/labIncharge-dashboard' /> }
+     <div>
       <TopBar
-        title={`Welcome back, ${LAB_INCHARGE.name.split(" ")[1] || LAB_INCHARGE.name}`}
+        title={`Welcome , ${currentUser?.faculty_name?.split(" ,") || currentUser?.faculty_name || "Faculty"
+          }`}
         subtitle="Here's what's happening across your assigned labs."
       />
 
@@ -98,5 +104,7 @@ export function DashboardHome({ setActiveView }) {
         ))}
       </div>
     </div>
+    </>
+   
   );
 }

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { TopBar } from "./TopBar";
-import { ManualCard } from "./ManualCard";
-import { AddManualForm } from "./AddManualForm";
-import { LAB_MANUALS } from "./dummyData";
+import { TopBar } from "../LabAdmin/TopBar";
+import { ManualCard } from "../LabAdmin/ManualCard";
+import { AddManualForm } from "../LabAdmin/AddManualForm";
+import { LAB_MANUALS } from "../LabAdmin/dummyData";
 
 export function LabManuals() {
   const [manuals, setManuals] = useState(LAB_MANUALS);

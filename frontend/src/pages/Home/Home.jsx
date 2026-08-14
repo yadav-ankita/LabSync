@@ -1,10 +1,14 @@
 import React from 'react'
+import { Navigate } from 'react-router-dom'
+import { useAppContext } from '../../context/AppContext'
 
 const Home = () => {
+  const {currentUser}=useAppContext();
   return (
-    <div>
-           Home Page 
-    </div>
+   <>
+       {currentUser && <Navigate to='/labIncharge-dashboard' /> }
+       <div>Home Page</div>
+   </>
   )
 }
 

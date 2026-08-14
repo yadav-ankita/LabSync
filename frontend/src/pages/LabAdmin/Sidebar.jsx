@@ -9,6 +9,7 @@ import {
   FileText,
   FlaskConical,
   LogOut,
+  PlusCircleIcon
 } from "lucide-react";
 
 const LAB_ADMIN = {
@@ -27,10 +28,11 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "complaints", label: "All Complaints", icon: MessageSquareWarning },
     { key: "resources", label: "Resource Management", icon: Boxes },
     { key: "approvals", label: "Approvals", icon: ClipboardCheck },
-    { key: "manuals", label: "Lab Manuals", icon: BookOpen },
+   
     { key: "maintenance", label: "Maintenance", icon: Wrench },
     { key: "reports", label: "Reports", icon: BarChart3 },
     { key: "profile", label: "Edit Profile", icon: FileText },
+    { key: "faculty", label: "Add Faculty", icon:PlusCircleIcon  },
   ];
 
   return (

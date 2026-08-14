@@ -1,16 +1,13 @@
 export const LABS = [
-  "DS Lab - Block A",
-  "DBMS Lab - Block B",
-  "Networks Lab - Block A",
-  "OS Lab - Block B",
-  "WebTech Lab - Block C",
-  "Micro Lab - Block C",
+  "F206 Lab ",
+  "F207 Lab ",
+  "F208 Lab ",
 ];
 
 export const ALL_COMPLAINTS = [
   {
     id: "CMP-1042",
-    labName: "DBMS Lab - Block B",
+    labName: "F207 Lab ",
     issueType: "Hardware",
     resourceId: "PC-014",
     description: "Monitor flickers intermittently and turns black after 10 minutes.",
@@ -20,7 +17,7 @@ export const ALL_COMPLAINTS = [
   },
   {
     id: "CMP-1039",
-    labName: "Networks Lab - Block A",
+    labName: "F208 Lab ",
     issueType: "Software",
     resourceId: "PC-007",
     description: "Wireshark crashes on launch, packet capture not starting.",
@@ -30,7 +27,7 @@ export const ALL_COMPLAINTS = [
   },
   {
     id: "CMP-1051",
-    labName: "OS Lab - Block B",
+    labName: "F207 Lab ",
     issueType: "Hardware",
     resourceId: "PC-021",
     description: "Keyboard has three unresponsive keys (A, S, D).",
@@ -40,7 +37,7 @@ export const ALL_COMPLAINTS = [
   },
   {
     id: "CMP-1055",
-    labName: "DS Lab - Block A",
+    labName: "F206 Lab ",
     issueType: "Software",
     resourceId: "PC-003",
     description: "Code::Blocks fails to compile, missing MinGW path.",
@@ -50,7 +47,7 @@ export const ALL_COMPLAINTS = [
   },
   {
     id: "CMP-1058",
-    labName: "WebTech Lab - Block C",
+    labName: "F208 Lab ",
     issueType: "Hardware",
     resourceId: "PC-032",
     description: "Ethernet port not detecting cable, no network access.",
@@ -60,7 +57,7 @@ export const ALL_COMPLAINTS = [
   },
   {
     id: "CMP-1060",
-    labName: "Micro Lab - Block C",
+    labName: "F208 Lab ",
     issueType: "Hardware",
     resourceId: "KIT-8085-02",
     description: "8085 trainer kit display not powering on.",
@@ -71,17 +68,17 @@ export const ALL_COMPLAINTS = [
 ];
 
 export const ALL_RESOURCES = [
-  { id: "PC-001", name: "Lab PC (i5, 16GB)", labName: "DS Lab - Block A", category: "Hardware", status: "Available" },
-  { id: "PC-003", name: "Lab PC (i5, 16GB)", labName: "DS Lab - Block A", category: "Hardware", status: "Under Maintenance" },
-  { id: "PC-007", name: "Lab PC (i7, 16GB)", labName: "Networks Lab - Block A", category: "Hardware", status: "Available" },
-  { id: "PC-014", name: "Lab PC (i5, 16GB)", labName: "DBMS Lab - Block B", category: "Hardware", status: "Under Maintenance" },
-  { id: "PC-019", name: "Lab PC (i7, 16GB)", labName: "OS Lab - Block B", category: "Hardware", status: "Available" },
-  { id: "PC-021", name: "Lab PC (i7, 16GB)", labName: "OS Lab - Block B", category: "Hardware", status: "Under Maintenance" },
-  { id: "PC-032", name: "Lab PC (i5, 8GB)", labName: "WebTech Lab - Block C", category: "Hardware", status: "Under Maintenance" },
-  { id: "PROJ-002", name: "Epson Projector", labName: "DBMS Lab - Block B", category: "Hardware", status: "Borrowed" },
-  { id: "RPI-004", name: "Raspberry Pi 4 Kit", labName: "OS Lab - Block B", category: "Hardware", status: "Borrowed" },
-  { id: "KIT-8085-02", name: "8085 Microprocessor Trainer Kit", labName: "Micro Lab - Block C", category: "Hardware", status: "Under Maintenance" },
-  { id: "SW-MYSQL", name: "MySQL Workbench License", labName: "DBMS Lab - Block B", category: "Software", status: "Available" },
+  { id: "PC-001", name: "Lab PC (i5, 16GB)", labName: "F206 Lab - Block A", category: "Hardware", status: "Available" },
+  { id: "PC-003", name: "Lab PC (i5, 16GB)", labName: "F206 Lab - Block A", category: "Hardware", status: "Under Maintenance" },
+  { id: "PC-007", name: "Lab PC (i7, 16GB)", labName: "F208 Lab - Block A", category: "Hardware", status: "Available" },
+  { id: "PC-014", name: "Lab PC (i5, 16GB)", labName: "F207 Lab - Block B", category: "Hardware", status: "Under Maintenance" },
+  { id: "PC-019", name: "Lab PC (i7, 16GB)", labName: "F207 Lab - Block B", category: "Hardware", status: "Available" },
+  { id: "PC-021", name: "Lab PC (i7, 16GB)", labName: "F207 Lab - Block B", category: "Hardware", status: "Under Maintenance" },
+  { id: "PC-032", name: "Lab PC (i5, 8GB)", labName: "F208 Lab - Block A", category: "Hardware", status: "Under Maintenance" },
+  { id: "PROJ-002", name: "Epson Projector", labName: "F207 Lab - Block B", category: "Hardware", status: "Borrowed" },
+  { id: "RPI-004", name: "Raspberry Pi 4 Kit", labName: "F207 Lab - Block B", category: "Hardware", status: "Borrowed" },
+  { id: "KIT-8085-02", name: "8085 Microprocessor Trainer Kit", labName: "F208 Lab - Block A", category: "Hardware", status: "Under Maintenance" },
+  { id: "SW-MYSQL", name: "MySQL Workbench License", labName: "F207 Lab - Block B", category: "Software", status: "Available" },
 ];
 
 export const APPROVAL_REQUESTS = [
@@ -89,7 +86,7 @@ export const APPROVAL_REQUESTS = [
     id: "REQ-2081",
     resourceId: "PROJ-002",
     resourceName: "Epson Projector",
-    labName: "DBMS Lab - Block B",
+    labName: "F207 Lab - Block B",
     requestedBy: "Meera Iyer (21CS1051)",
     purpose: "Group project demo for DBMS mini-project evaluation.",
     requestedFor: "18 Jul 2026, 2:00 PM – 4:00 PM",
@@ -100,7 +97,7 @@ export const APPROVAL_REQUESTS = [
     id: "REQ-2076",
     resourceId: "RPI-004",
     resourceName: "Raspberry Pi 4 Kit",
-    labName: "OS Lab - Block B",
+    labName: "F207 Lab - Block B",
     requestedBy: "Kabir Malhotra (21CS1033)",
     purpose: "OS scheduling assignment prototype.",
     requestedFor: "12 Jul 2026 – 19 Jul 2026",

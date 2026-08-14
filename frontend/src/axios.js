@@ -5,10 +5,12 @@ axios.defaults.baseURL = 'http://localhost:4000/api/v1';
  //Add request interceptor
 axios.interceptors.request.use(
     (req) => {
-        const user = localStorage.getItem('student');
+        const user = localStorage.getItem('faculty');
+        console.log("the user in axios.js is",user);
         if (user) {
             try {
                 const { token } = JSON.parse(user);
+                console.log("the token is",token);
                 req.headers.Authorization = `Bearer ${token}`;
                 console.log('Added Authorization header to request:', req);
             } catch (error) {
