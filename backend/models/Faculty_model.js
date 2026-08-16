@@ -18,10 +18,14 @@ const FacultySchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    lab_no: {
-      type: Number,
-      required: true,
-    },
+    lab_name:{
+        type:String,
+        required: true,
+    }
+    // lab_no: {
+    //   type: Number,
+    //   required: true,
+    // },
   },
   {
     timestamps: true,

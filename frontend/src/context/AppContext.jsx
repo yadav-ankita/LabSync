@@ -18,13 +18,57 @@ const AppProvider = ({ children }) => {
 
     // ---------- lab manuals ----------
     const [labManuals, setLabManuals] = useState([]);
-
     //----------lab Admin----------------
+    const [labName, setLabName] = useState([]);
+    const AddLabs = async (LabName) => {
+        setError("");
+        try {
+            const { data } = await axios.post('/lab', LabName);
+            console.log("Lab added:", data);
+            setLabName(prev => [...prev, data.lab]);
+            return {
+                success: true,
+                lab: data.lab
+            };
+        } catch (err) {
+            const message =
+                err.response?.data?.msg ||
+                err.response?.data?.message ||
+                "Could not add lab.";
+            setError(message);
+            return {
+                success: false,
+                message
+            };
+        }
+    };
+    const getLabs = async () => {
+        setError("");
+        try {
+            const { data } = await axios.get('/lab');
+            console.log("Labs received from backend:", data.labs);
+            setLabName(data.labs);
+            return {
+                success: true,
+                labs: data.labs
+            };
+        } catch (err) {
+            const message =
+                err.response?.data?.msg ||
+                err.response?.data?.message ||
+                "Could not find Labs.";
+            setError(message);
+            return {
+                success: false,
+                message
+            };
+        }
+    };
     const addLabResource = async (resourceData) => {
         setError("");
         try {
             const { data } = await axios.post('/admin/LabResource', resourceData);
-            console.log("the data after adding lab resource in appcontext is", data);
+            console.log("the data after adding labs in appcontext is", data);
             // backend returns { resources: [...], count } — always an array,
             // since quantity can create more than one unit at a time.
             setLabResorces((prev) => [...data.resources, ...prev]);
@@ -281,7 +325,10 @@ const AppProvider = ({ children }) => {
                 getLabResources,
                 getAllComplaints,
                 editComplaintStatus,
-                getComplaintsByLab
+                getComplaintsByLab,
+                labName,
+                AddLabs,
+                getLabs,
             }}>
             {children}
         </AppContext.Provider>

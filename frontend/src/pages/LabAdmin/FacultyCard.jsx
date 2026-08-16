@@ -32,7 +32,7 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials }) {
             <div className="flex items-center gap-1.5 mt-3">
                 <FlaskConical size={13} color="#D89A4E" />
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F2F4F1", color: "#5B6A5F" }}>
-                    Lab {faculty.lab_no}
+                    Lab {faculty.lab_name}
                 </span>
             </div>
 

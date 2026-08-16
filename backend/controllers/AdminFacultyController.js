@@ -22,10 +22,10 @@ const generateRandomPassword = (length = 10) => {
 // the /faculty/credentials endpoint.
 const AddFaculties = async (req, res, next) => {
     try {
-        const { name, email, lab_no } = req.body
+        const { name, email, lab_name } = req.body
 
-        if (!name || !email || !lab_no) {
-            throw new BadRequestError('Please provide name, email and lab_no')
+        if (!name || !email || !lab_name) {
+            throw new BadRequestError('Please provide name, email and lab_name')
         }
 
         const existingFaculty = await Faculty.findOne({ email: email.toLowerCase().trim() })
@@ -38,7 +38,7 @@ const AddFaculties = async (req, res, next) => {
         const faculty = await Faculty.create({
             name,
             email,
-            lab_no,
+            lab_name,
             password,
         })
 
@@ -49,7 +49,7 @@ const AddFaculties = async (req, res, next) => {
                 name: faculty.name,
                 email: faculty.email,
                 password:faculty.password,
-                lab_no: faculty.lab_no,
+                lab_name: faculty.lab_name,
                 createdAt: faculty.createdAt,
             },
         })

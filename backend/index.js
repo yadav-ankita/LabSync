@@ -14,6 +14,7 @@ const StudentRoute = require("./routes/studentRoutes");
 const AdminFacultyRoute=require("./routes/AdminFacultyRoute");
 //const FacultyRoute=require("./routes/FacultyRoute");
 const AdminRoute=require("./routes/AdminRoute");
+const LabRoute=require("./routes/Lab")
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/v1/student", StudentRoute);
 app.use("/api/v1/admin/faculty",AdminFacultyRoute);
 //app.use("/api/v1/faculty",FacultyRoute);
 app.use("/api/v1/admin",AdminRoute);
+app.use("/api/v1/lab",LabRoute);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);
