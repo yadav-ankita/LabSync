@@ -14,6 +14,7 @@ const StudentRoute = require("./routes/studentRoutes");
 const AdminFacultyRoute=require("./routes/AdminFacultyRoute");
 //const FacultyRoute=require("./routes/FacultyRoute");
 const AdminRoute=require("./routes/AdminRoute");
+const PurchaseRoute = require("./routes/PurchaseRoute");
 
 const app = express();
 
@@ -43,17 +44,18 @@ app.use("/api/v1/student", StudentRoute);
 app.use("/api/v1/admin/faculty",AdminFacultyRoute);
 //app.use("/api/v1/faculty",FacultyRoute);
 app.use("/api/v1/admin",AdminRoute);
+app.use("/api/v1/admin/purchases", PurchaseRoute);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);
 
 //const PORT = process.env.PORT || 5000;
 const PORT=4000;
-const url='mongodb://localhost:27017/LabSyncDB'
+
 const start = async () => {
     try {
        // await connectDb(process.env.MONGO_URI);
-          await connectDb(url);
+          await connectDb(process.env.MONGO_URI);
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

@@ -15,11 +15,87 @@ const AppProvider = ({ children }) => {
     // ---------- admin: all complaints across labs ----------
     const [Allcomplaints, setAllComplaints] = useState([]);
     const [labResorces, setLabResorces] = useState([]);
+    const [purchases,setPurchases]=useState([]);
 
     // ---------- lab manuals ----------
     const [labManuals, setLabManuals] = useState([]);
 
     //----------lab Admin----------------
+    const addPurchase = async (purchaseData) => {
+        setError("");
+
+        try {
+            const { data } = await axios.post(
+                '/admin/purchases',
+                purchaseData
+            );
+
+            console.log(
+                "the data after adding purchase in appcontext is",
+                data
+            );
+
+            setPurchases((prev) => [data.purchase, ...prev]);
+
+            return {
+                success: true,
+                purchase: data.purchase
+            };
+
+        } catch (err) {
+            const message =
+                err.response?.data?.msg ||
+                err.response?.data?.message ||
+                "Could not record purchase.";
+
+            setError(message);
+
+            return {
+                success: false,
+                message
+            };
+        }
+    };
+    const getPurchases = async () => {
+    try {
+        const { data } = await axios.get('/admin/purchases');
+
+        console.log(
+            "the data after fetching purchases in appcontext is",
+            data
+        );
+
+        setPurchases(data.purchases);
+
+        return data.purchases;
+
+    } catch (error) {
+        console.error("Error fetching purchases:", error);
+        setPurchases([]);
+        return [];
+    }
+};
+    const getPurchase = async (id) => {
+    try {
+        const { data } = await axios.get(`/admin/purchases/${id}`);
+
+        return {
+            success: true,
+            purchase: data.purchase
+        };
+
+    } catch (error) {
+        console.error("Error fetching purchase:", error);
+
+        return {
+            success: false,
+            message:
+                error.response?.data?.msg ||
+                error.response?.data?.message ||
+                "Could not fetch purchase."
+        };
+    }
+};
     const addLabResource = async (resourceData) => {
         setError("");
         try {
@@ -270,6 +346,10 @@ const AppProvider = ({ children }) => {
                 raiseComplaint,
                 labManuals,
                 getLabManuals,
+                purchases,
+                addPurchase,
+                getPurchases,
+                getPurchase,
                 faculties,
                 addFaculty,
                 getFaculty,
