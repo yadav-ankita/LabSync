@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useEffect} from "react";
+import { useEffect } from "react";
 import { UserPlus, CheckCircle2, AlertCircle } from "lucide-react";
 import { TopBar } from "./TopBar";
 import { FacultyCard } from "./FacultyCard";
@@ -8,14 +8,25 @@ import { useAppContext } from "../../context/AppContext";
 const LAB_OPTIONS = [1, 2, 3, 4, 5, 6];
 
 export function AddFaculty() {
-  const { faculties, addFaculty, getFaculty, emailCredentialsToFaculty } = useAppContext();
+  const {
+    faculties,
+    addFaculty,
+    getFaculty,
+    emailCredentialsToFaculty,
+    getLabs,
+    labName,
+  } = useAppContext();
 
-  const [form, setForm] = useState({ name: "", email: "", lab_no: LAB_OPTIONS[0] });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    lab_name: "",
+  });
+
   const [submitting, setSubmitting] = useState(false);
-  const [formMessage, setFormMessage] = useState(null); // { type: 'success' | 'error', text }
+  const [formMessage, setFormMessage] = useState(null);
   const [loadingList, setLoadingList] = useState(true);
-  const [sendStatus, setSendStatus] = useState({}); // { [facultyId]: 'sending' | 'sent' | 'error' }
-
+  const [sendStatus, setSendStatus] = useState({});
   const inputStyle = { borderColor: "#D8DCD4", color: "#1F2A24" };
   const labelStyle = { color: "#1F2A24", fontWeight: 500 };
 
@@ -23,32 +34,62 @@ export function AddFaculty() {
     (async () => {
       setLoadingList(true);
       await getFaculty();
+      await getLabs();
       setLoadingList(false);
     })();
 
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.lab_no) return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setSubmitting(true);
-    setFormMessage(null);
-    const result = await addFaculty({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      lab_no: Number(form.lab_no),
+  if (!form.name.trim() || !form.email.trim() || !form.lab_name) {
+    setFormMessage({
+      type: "error",
+      text: "Please provide name, email and select a lab.",
     });
-    setSubmitting(false);
+    return;
+  }
 
-    if (result.success) {
-      setForm({ name: "", email: "", lab_no: LAB_OPTIONS[0] });
-      setFormMessage({ type: "success", text: "Faculty added. A random password was generated for them." });
-    } else {
-      setFormMessage({ type: "error", text: result.message });
-    }
-    setTimeout(() => setFormMessage(null), 4000);
-  };
+  setSubmitting(true);
+  setFormMessage(null);
+
+  console.log("Sending faculty data:", {
+    name: form.name.trim(),
+    email: form.email.trim(),
+    lab_name: form.lab_name,
+  });
+
+  const result = await addFaculty({
+    name: form.name.trim(),
+    email: form.email.trim(),
+    lab_name: form.lab_name,
+  });
+
+  console.log("addFaculty result:", result);
+
+  setSubmitting(false);
+
+  if (result.success) {
+    setForm({
+      name: "",
+      email: "",
+      lab_name: "",
+    });
+
+    setFormMessage({
+      type: "success",
+      text: "Faculty added. A random password was generated for them.",
+    });
+  } else {
+    setFormMessage({
+      type: "error",
+      text: result.message || "Failed to add faculty.",
+    });
+  }
+
+  setTimeout(() => setFormMessage(null), 4000);
+};
 
   const handleSendCredentials = async (password, email) => {
     setSendStatus((prev) => ({ ...prev, [email]: "sending" }));
@@ -95,13 +136,22 @@ export function AddFaculty() {
         <div>
           <label className="block text-xs mb-1" style={{ color: "#5B6A5F" }}>Assign Lab</label>
           <select
-            value={form.lab_no}
-            onChange={(e) => setForm({ ...form, lab_no: e.target.value })}
-            className="px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
+            value={form.lab_name}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                lab_name: e.target.value,
+              })
+            }
+            className="w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
             style={inputStyle}
           >
-            {LAB_OPTIONS.map((lab) => (
-              <option key={lab} value={lab}>Lab {lab}</option>
+            <option value="">Select a lab</option>
+
+            {(labName || []).map((lab) => (
+              <option key={lab._id} value={lab.LabName}>
+                {lab.LabName}
+              </option>
             ))}
           </select>
         </div>

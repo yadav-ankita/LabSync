@@ -9,6 +9,7 @@ import { Reports } from "./Reports";
 import { EditProfile } from "./EditProfile";
 import { AddFaculty } from "./AddFaculty";
 import { PurchaseRegister } from "./PurchaseRegister";
+import {AddLabs} from "./AddLabs";
 
 export function LabAdminDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -30,6 +31,7 @@ export function LabAdminDashboard() {
         {activeView === "profile" && <EditProfile />}
         {activeView==="faculty" && <AddFaculty/>}
         {activeView === "purchases" && <PurchaseRegister />}
+        {activeView==="labs" && <AddLabs/>}
       </main>
     </div>
   );

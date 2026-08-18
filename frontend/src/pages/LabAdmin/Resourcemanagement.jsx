@@ -5,7 +5,7 @@ import { AddResourceForm } from "./AddResourceForm";
 import { useAppContext } from "../../context/AppContext";
 
 export function ResourceManagement() {
-  const { labResorces, getLabResources } = useAppContext();
+  const { labResorces, getLabResources,getLabs } = useAppContext();
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [labFilter, setLabFilter] = useState("All Labs");
@@ -14,6 +14,7 @@ export function ResourceManagement() {
     (async () => {
       setLoading(true);
       await getLabResources();
+      await getLabs();
       setLoading(false);
     })();
   }, []);

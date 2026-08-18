@@ -9,7 +9,8 @@ import {
   FlaskConical,
   LogOut,
   PlusCircleIcon,
-  ShoppingCart
+  ShoppingCart,
+  PlusCircle
 } from "lucide-react";
 
 const LAB_ADMIN = {
@@ -33,6 +34,7 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "reports", label: "Reports", icon: BarChart3 },
     { key: "profile", label: "Edit Profile", icon: FileText },
     { key: "faculty", label: "Add Faculty", icon: PlusCircleIcon },
+    { key: "labs", label: "Add Labs", icon:PlusCircle  },
   ];
 
   return (
