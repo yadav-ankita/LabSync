@@ -12,7 +12,7 @@ const errorHandlerMiddleware = require("./middleware/errorHandler");
 const AuthRoute=require("./routes/AuthRoute")
 const StudentRoute = require("./routes/studentRoutes");
 const AdminFacultyRoute=require("./routes/AdminFacultyRoute");
-//const FacultyRoute=require("./routes/FacultyRoute");
+const FacultyRoute=require("./routes/FacultyRoute");
 const AdminRoute=require("./routes/AdminRoute");
 const PurchaseRoute = require("./routes/PurchaseRoute");
 const LabRoute = require("./routes/Lab");
@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth",AuthRoute);
 app.use("/api/v1/student", StudentRoute);
 app.use("/api/v1/admin/faculty",AdminFacultyRoute);
-//app.use("/api/v1/faculty",FacultyRoute);
+app.use("/api/v1/faculty", FacultyRoute);
 app.use("/api/v1/admin",AdminRoute);
 app.use("/api/v1/admin/purchases", PurchaseRoute);
 app.use("/api/v1/lab", LabRoute);

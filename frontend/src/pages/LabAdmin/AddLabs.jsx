@@ -117,7 +117,7 @@ const handleSubmit = async (e) => {
             <LabCard
               key={lab._id}
               labName={lab.LabName}
-              faculty="Not Yet Assigned"
+              faculty={lab.AssignFaculty?.name || lab.facultyName || "Not Yet Assigned"}
               numberOfResources={lab.NumResources || 0}
             />
           ))}

@@ -46,25 +46,36 @@ const login = async (req, res, next) => {
         if (!email || !password) {
             throw new BadRequestError("Please Provide email and Password")
         }
-        const user = await Faculty.findOne({ email });
+
+        const user = await Faculty.findOne({ email: email.toLowerCase().trim() });
         if (!user) {
             throw new NotFoundError("User not found!")
         }
         if (user.password !== password) {
             throw new UnauthenticatedError('Invalid  Credentials of password')
         }
+
         const token = jwt.sign(
-            { userId: user._id, username: user.name},
+            { userId: user._id, username: user.name, email: user.email, role: 'faculty' },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_LIFETIME }
         )
+
+        const faculty = {
+            _id: user._id,
+            id: user._id,
+            name: user.name,
+            faculty_name: user.name,
+            email: user.email,
+            lab_name: user.lab_name,
+            password: user.password,
+        }
+
         res.status(StatusCodes.OK).json(
             {
                 message: "Authentication successful",
                 token: token,
-                faculty: {
-                    faculty_name: user.name,
-                }
+                faculty,
             }
         )
     } catch (error) {

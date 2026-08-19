@@ -37,11 +37,11 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials }) {
             </div>
 
             <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "#E3E6DF" }}>
-                <div className="flex flex-col gap-0.5">
+                {/* <div className="flex flex-col gap-0.5">
                     <span className="text-xs" style={{ color: "#8A968D" }}>
                         Faculty Password: {faculty.password}
                     </span>
-                </div>
+                </div> */}
                 <button
                     onClick={() => onSendCredentials(faculty.password,faculty.email)}
                     disabled={isSending}

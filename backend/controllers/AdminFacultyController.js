@@ -1,5 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
 const Faculty=require('../models/Faculty_model')
+const Lab = require('../models/Lab')
 const sendEmail = require('../utils/sendEmail')
 const { BadRequestError, NotFoundError } = require('../error')
 const crypto = require('crypto')
@@ -22,10 +23,10 @@ const generateRandomPassword = (length = 10) => {
 // the /faculty/credentials endpoint.
 const AddFaculties = async (req, res, next) => {
     try {
-        const { name, email, lab_name } = req.body
+        const { name, email, lab_name, lab_id } = req.body
 
-        if (!name || !email || !lab_name) {
-            throw new BadRequestError('Please provide name, email and lab_name')
+        if (!name || !email || (!lab_name && !lab_id)) {
+            throw new BadRequestError('Please provide name, email and a lab assignment')
         }
 
         const existingFaculty = await Faculty.findOne({ email: email.toLowerCase().trim() })
@@ -33,14 +34,34 @@ const AddFaculties = async (req, res, next) => {
             throw new BadRequestError('A faculty with this email already exists')
         }
 
+        let selectedLab = null
+        if (lab_id) {
+            selectedLab = await Lab.findById(lab_id)
+        } else {
+            selectedLab = await Lab.findOne({ LabName: lab_name })
+        }
+
+        if (!selectedLab) {
+            throw new NotFoundError('Selected lab not found')
+        }
+
+        if (selectedLab.AssignFaculty) {
+            const assignedFaculty = await Faculty.findById(selectedLab.AssignFaculty)
+            throw new BadRequestError(`This lab is already assigned to ${assignedFaculty ? assignedFaculty.name : 'another faculty'}`)
+        }
+
         const password = generateRandomPassword()
 
         const faculty = await Faculty.create({
             name,
-            email,
-            lab_name,
+            email: email.toLowerCase().trim(),
+            lab_name: selectedLab.LabName,
+            lab: selectedLab._id,
             password,
         })
+
+        selectedLab.AssignFaculty = faculty._id
+        await selectedLab.save()
 
         res.status(StatusCodes.CREATED).json({
             message:"Faculty Added Successfully",
@@ -50,6 +71,7 @@ const AddFaculties = async (req, res, next) => {
                 email: faculty.email,
                 password:faculty.password,
                 lab_name: faculty.lab_name,
+                lab: faculty.lab,
                 createdAt: faculty.createdAt,
             },
         })
@@ -61,7 +83,7 @@ const AddFaculties = async (req, res, next) => {
 // GET /faculty/  -> list all faculties (password never returned to the client)
 const getFaculties = async (req, res, next) => {
     try {
-        const faculties = await Faculty.find({}).sort('-createdAt')
+        const faculties = await Faculty.find({}).populate('lab', 'LabName').sort('-createdAt')
         res.status(StatusCodes.OK).json({ faculties, count: faculties.length })
     } catch (error) {
         next(error)
@@ -87,7 +109,7 @@ const emailCredentials = async (req, res, next) => {
             subject: 'Your LabSync Lab Incharge Account Credentials',
             html: `
                 <p>Hello ${faculty.name},</p>
-                <p>Your LabSync Lab Incharge account has been created for <b>Lab ${faculty.lab_no}</b>.</p>
+                <p>Your LabSync Lab Incharge account has been created for <b>${faculty.lab_name}</b>.</p>
                 <p>
                     <b>Login email:</b> ${faculty.email}<br/>
                     <b>Password:</b> ${faculty.password}

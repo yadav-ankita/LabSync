@@ -1,25 +1,52 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TopBar } from "./TopBar";
 import { CheckCircle2 } from "lucide-react";
-import { LAB_INCHARGE } from "./Sidebar";
+import { useAppContext } from "../../context/AppContext";
 
 export function EditProfile() {
+  const { currentUser, editFacultyProfile } = useAppContext();
   const [form, setForm] = useState({
-    username: LAB_INCHARGE.name,
-    email: "neha.sharma@college.edu",
-    department: "Computer Engineering",
+    name: "",
+    email: "",
     password: "",
   });
   const [saved, setSaved] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (currentUser) {
+      setForm({
+        name: currentUser.name || currentUser.faculty_name || "",
+        email: currentUser.email || "",
+        password: "",
+      });
+    }
+  }, []);
 
   const labelStyle = { color: "#1F2A24", fontWeight: 500 };
   const inputStyle = { borderColor: "#D8DCD4", color: "#1F2A24" };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaved(true);
-    setForm((f) => ({ ...f, password: "" }));
-    setTimeout(() => setSaved(false), 3000);
+    setSaved(false);
+    setErrorMessage("");
+
+    const payload = {
+      name: form.name,
+      email: form.email,
+      ...(form.password ? { password: form.password } : {}),
+    };
+
+    const result = await editFacultyProfile(payload);
+
+    if (result.success) {
+      setSaved(true);
+      setForm((f) => ({ ...f, password: "" }));
+      setTimeout(() => setSaved(false), 3000);
+      return;
+    }
+
+    setErrorMessage(result.message || "Could not update profile.");
   };
 
   return (
@@ -31,8 +58,8 @@ export function EditProfile() {
           <label className="block text-sm mb-1.5" style={labelStyle}>Full name</label>
           <input
             type="text"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
             className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
             style={inputStyle}
           />
@@ -50,13 +77,13 @@ export function EditProfile() {
         </div>
 
         <div className="mb-5">
-          <label className="block text-sm mb-1.5" style={labelStyle}>Department</label>
+          <label className="block text-sm mb-1.5" style={labelStyle}>Assigned lab</label>
           <input
             type="text"
-            value={form.department}
-            onChange={(e) => setForm({ ...form, department: e.target.value })}
-            className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
-            style={inputStyle}
+            value={currentUser?.lab_name || "Not assigned"}
+            disabled
+            className="w-full px-3 py-2.5 rounded-lg border text-sm bg-stone-50"
+            style={{ borderColor: "#D8DCD4", color: "#5B6A5F" }}
           />
         </div>
 
@@ -79,6 +106,12 @@ export function EditProfile() {
         >
           Save changes
         </button>
+
+        {errorMessage && (
+          <div className="mt-4 px-3 py-2.5 rounded-lg text-sm" style={{ backgroundColor: "#FDECEC", color: "#B42318" }}>
+            {errorMessage}
+          </div>
+        )}
 
         {saved && (
           <div

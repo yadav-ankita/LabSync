@@ -18,6 +18,7 @@ const AppProvider = ({ children }) => {
     const [Allcomplaints, setAllComplaints] = useState([]);
 
     const [labResorces, setLabResorces] = useState([]);
+    const [facultyResources, setFacultyResources] = useState([]);
 
     // ---------- purchases ----------
     const [purchases, setPurchases] = useState([]);
@@ -38,20 +39,16 @@ const AppProvider = ({ children }) => {
 
     const addPurchase = async (purchaseData) => {
         setError("");
-
         try {
             const { data } = await axios.post(
                 "/admin/purchases",
                 purchaseData
             );
-
             console.log(
                 "the data after adding purchase in appcontext is",
                 data
             );
-
             setPurchases((prev) => [data.purchase, ...prev]);
-
             return {
                 success: true,
                 purchase: data.purchase
@@ -62,16 +59,13 @@ const AppProvider = ({ children }) => {
                 err.response?.data?.msg ||
                 err.response?.data?.message ||
                 "Could not record purchase.";
-
             setError(message);
-
             return {
                 success: false,
                 message
             };
         }
     };
-
 
     const getPurchases = async () => {
         try {
@@ -264,6 +258,25 @@ const AppProvider = ({ children }) => {
                 "Error fetching lab resources:",
                 error
             );
+        }
+    };
+
+    const getAssignedLabResources = async () => {
+        try {
+            const { data } = await axios.get("/faculty/labResource");
+            setFacultyResources(data.resources || []);
+            return {
+                success: true,
+                resources: data.resources || [],
+                labName: data.labName || currentUser?.lab_name || ""
+            };
+        } catch (error) {
+            console.error("Error fetching assigned lab resources:", error);
+            setFacultyResources([]);
+            return {
+                success: false,
+                message: error.response?.data?.msg || "Could not fetch assigned lab resources."
+            };
         }
     };
 
@@ -517,6 +530,46 @@ const AppProvider = ({ children }) => {
     // AUTH
     // =========================================================
 
+    const getFacultyProfile = useCallback(async () => {
+        try {
+            const { data } = await axios.get("/faculty/myprofile");
+            const faculty = data.faculty;
+            localStorage.setItem("faculty", JSON.stringify({ facultyInfo: faculty, token: JSON.parse(localStorage.getItem("faculty") || "{}")?.token || "" }));
+            setCurrentUser(faculty);
+            setIsAuthenticated(true);
+            return faculty;
+        } catch (error) {
+            console.error("Error fetching faculty profile:", error);
+            return null;
+        }
+    }, []);
+
+
+    const editFacultyProfile = async (updates) => {
+        setError("");
+
+        try {
+            const { data } = await axios.patch("/faculty/myprofile", updates);
+            const faculty = data.faculty;
+            const stored = JSON.parse(localStorage.getItem("faculty") || "{}");
+            localStorage.setItem("faculty", JSON.stringify({ ...stored, facultyInfo: faculty }));
+            setCurrentUser(faculty);
+            return {
+                success: true,
+                faculty,
+                message: data.message
+            };
+        } catch (err) {
+            const message = err.response?.data?.msg || err.response?.data?.message || "Could not update profile.";
+            setError(message);
+            return {
+                success: false,
+                message
+            };
+        }
+    };
+
+
     const login = async (
         studentId,
         password
@@ -757,6 +810,16 @@ const AppProvider = ({ children }) => {
 
     }, []);
 
+    useEffect(() => {
+        if (currentUser && !currentUser.name && currentUser.faculty_name) {
+            setCurrentUser((prev) => ({
+                ...prev,
+                name: currentUser.faculty_name,
+                faculty_name: currentUser.faculty_name,
+            }));
+        }
+    }, []);
+
 
     // =========================================================
     // PROVIDER
@@ -803,8 +866,14 @@ const AppProvider = ({ children }) => {
 
                 // Lab resources
                 labResorces,
+                facultyResources,
                 addLabResource,
                 getLabResources,
+                getAssignedLabResources,
+
+                // Profile
+                getFacultyProfile,
+                editFacultyProfile,
 
                 // Labs
                 labName,

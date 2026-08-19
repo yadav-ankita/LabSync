@@ -12,16 +12,25 @@ import {
 import { useAppContext } from "../../context/AppContext";
 
 const LAB_INCHARGE = {
-  name: "Dr. Neha Sharma",
-  facultyId: "FAC-1082",
-  labs: ["DBMS Lab - Block B", "OS Lab - Block B"],
+  name: "Faculty",
+  facultyId: "FAC-0000",
+  labs: [],
 };
 
 export function Sidebar({ activeView, setActiveView }) {
-  const {currentUser} = useAppContext();
+  const { currentUser } = useAppContext();
   const handleLogout = () => {
-    window.location.href = "/student-login";
+    window.location.href = "/login";
   };
+
+  const displayName = currentUser?.faculty_name || currentUser?.name || LAB_INCHARGE.name;
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "FI";
 
   const navItems = [
     { key: "home", label: "Overview", icon: LayoutGrid },
@@ -94,17 +103,12 @@ export function Sidebar({ activeView, setActiveView }) {
             className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold"
             style={{ backgroundColor: "#D89A4E", color: "#1F2A24" }}
           >
-            {currentUser?.faculty_name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2)}
+            {initials}
           </div>
           <div className="min-w-0">
-            <p className="text-white text-sm truncate">{currentUser?.faculty_name}</p>
+            <p className="text-white text-sm truncate">{displayName}</p>
             <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.45)" }}>
-              {LAB_INCHARGE.facultyId}
+              {currentUser?.lab_name || LAB_INCHARGE.labs[0] || "Assigned lab"}
             </p>
           </div>
         </div>

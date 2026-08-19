@@ -43,9 +43,15 @@ const AddResourcesToLab = async (req, res, next) => {
                 resourceCode,
                 resourceType,
                 serialNumber,
-                
             })
             createdResources.push(resource)
+        }
+
+        const lab = await require('../models/Lab').findOne({ LabName: labName.trim() })
+        if (lab) {
+            const totalResources = await LabResource.countDocuments({ labName: labName.trim() })
+            lab.NumResources = totalResources
+            await lab.save()
         }
 
         res.status(StatusCodes.CREATED).json({

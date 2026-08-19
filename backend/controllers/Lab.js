@@ -2,6 +2,8 @@ require('dotenv').config()
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
 const Lab=require("../models/Lab")
+const LabResource = require('../models/LabResource')
+
 const AddLab = async (req, res, next) => {
     try {
         const { LabName } = req.body;
@@ -31,14 +33,22 @@ const AddLab = async (req, res, next) => {
         next(error);
     }
 };
+
 const getAllLabsName = async (req, res, next) => {
     try {
-        const labNames=await Lab.find();
-        res.status(StatusCodes.OK).json(
-           {
-               labs:labNames
-           }
-        )
+        const labs = await Lab.find({}).populate('AssignFaculty', 'name email').sort('-createdAt');
+        const enrichedLabs = await Promise.all(labs.map(async (lab) => {
+            const resourceCount = await LabResource.countDocuments({ labName: lab.LabName.trim() });
+            return {
+                ...lab.toObject(),
+                NumResources: resourceCount,
+                facultyName: lab.AssignFaculty ? lab.AssignFaculty.name : 'Not Yet Assigned',
+            };
+        }));
+
+        res.status(StatusCodes.OK).json({
+            labs: enrichedLabs
+        })
     } catch (error) {
         next(error)
     }

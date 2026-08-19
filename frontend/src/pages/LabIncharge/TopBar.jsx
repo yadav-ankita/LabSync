@@ -1,6 +1,9 @@
-import { LAB_INCHARGE } from "./Sidebar";
+import { useAppContext } from "../../context/AppContext";
 
 export function TopBar({ title, subtitle }) {
+  const { currentUser } = useAppContext();
+  const assignedLab = currentUser?.lab_name || currentUser?.name || "No assigned lab";
+
   return (
     <div className="flex items-center justify-between mb-7">
       <div>
@@ -14,10 +17,10 @@ export function TopBar({ title, subtitle }) {
       </div>
       <div className="text-right hidden sm:block">
         <p className="text-sm" style={{ color: "#1F2A24" }}>
-          {LAB_INCHARGE.labs.join(" · ")}
+          {assignedLab}
         </p>
         <p className="text-xs" style={{ color: "#5B6A5F" }}>
-          Assigned laboratories
+          Assigned laboratory
         </p>
       </div>
     </div>

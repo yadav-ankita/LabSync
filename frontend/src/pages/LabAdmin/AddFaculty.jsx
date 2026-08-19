@@ -20,6 +20,7 @@ export function AddFaculty() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    lab_id: "",
     lab_name: "",
   });
 
@@ -43,10 +44,10 @@ export function AddFaculty() {
  const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (!form.name.trim() || !form.email.trim() || !form.lab_name) {
+  if (!form.name.trim() || !form.email.trim() || !form.lab_id) {
     setFormMessage({
       type: "error",
-      text: "Please provide name, email and select a lab.",
+      text: "Please provide name, email and select an available lab.",
     });
     return;
   }
@@ -54,16 +55,13 @@ export function AddFaculty() {
   setSubmitting(true);
   setFormMessage(null);
 
-  console.log("Sending faculty data:", {
-    name: form.name.trim(),
-    email: form.email.trim(),
-    lab_name: form.lab_name,
-  });
+  const selectedLab = (labName || []).find((lab) => lab._id === form.lab_id);
 
   const result = await addFaculty({
     name: form.name.trim(),
     email: form.email.trim(),
-    lab_name: form.lab_name,
+    lab_id: form.lab_id,
+    lab_name: selectedLab?.LabName || form.lab_name,
   });
 
   console.log("addFaculty result:", result);
@@ -74,6 +72,7 @@ export function AddFaculty() {
     setForm({
       name: "",
       email: "",
+      lab_id: "",
       lab_name: "",
     });
 
@@ -136,23 +135,27 @@ export function AddFaculty() {
         <div>
           <label className="block text-xs mb-1" style={{ color: "#5B6A5F" }}>Assign Lab</label>
           <select
-            value={form.lab_name}
-            onChange={(e) =>
+            value={form.lab_id}
+            onChange={(e) => {
+              const selected = (labName || []).find((lab) => lab._id === e.target.value);
               setForm({
                 ...form,
-                lab_name: e.target.value,
-              })
-            }
+                lab_id: e.target.value,
+                lab_name: selected?.LabName || "",
+              });
+            }}
             className="w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
             style={inputStyle}
           >
             <option value="">Select a lab</option>
 
-            {(labName || []).map((lab) => (
-              <option key={lab._id} value={lab.LabName}>
-                {lab.LabName}
-              </option>
-            ))}
+            {(labName || [])
+              .filter((lab) => !lab.AssignFaculty)
+              .map((lab) => (
+                <option key={lab._id} value={lab._id}>
+                  {lab.LabName}
+                </option>
+              ))}
           </select>
         </div>
         <button
