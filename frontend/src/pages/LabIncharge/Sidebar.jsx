@@ -18,8 +18,9 @@ const LAB_INCHARGE = {
 };
 
 export function Sidebar({ activeView, setActiveView }) {
-  const { currentUser } = useAppContext();
+  const { currentUser,logout} = useAppContext();
   const handleLogout = () => {
+    logout();
     window.location.href = "/login";
   };
 
