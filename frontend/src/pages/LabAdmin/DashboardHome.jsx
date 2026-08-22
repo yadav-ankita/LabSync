@@ -33,12 +33,12 @@ export function DashboardHome({ setActiveView }) {
       icon: Boxes,
       view: "resources",
     },
-    {
-      label: "Update lab manuals",
-      desc: "Publish manuals for students and faculty",
-      icon: BookOpen,
-      view: "manuals",
-    },
+    // {
+    //   label: "Update lab manuals",
+    //   desc: "Publish manuals for students and faculty",
+    //   icon: BookOpen,
+    //   view: "manuals",
+    // },
   ];
 
   const labBreakdown = LABS.map((lab) => ({
@@ -61,7 +61,7 @@ export function DashboardHome({ setActiveView }) {
       <h2 className="text-sm uppercase tracking-wide mb-3" style={{ color: "#5B6A5F" }}>
         Quick actions
       </h2>
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-8">
         {quickActions.map((qa) => {
           const Icon = qa.icon;
           return (
