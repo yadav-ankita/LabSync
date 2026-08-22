@@ -18,21 +18,23 @@ import {
 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
-const LAB_OPTIONS = [
+/* const LAB_OPTIONS = [
   "DS Lab - Block A",
   "DBMS Lab - Block B",
   "Networks Lab - Block A",
   "OS Lab - Block B",
   "WebTech Lab - Block C",
   "Micro Lab - Block C",
-];
+]; */
 export function ComplaintForm() {
-  const { raiseComplaint } = useAppContext();
-  const [labName, setLabName] = useState(LAB_OPTIONS[0]);
+  const { raiseComplaint,currentUser } = useAppContext();
+  // const [labName, setLabName] = useState(LAB_OPTIONS[0]);
   const [issueType, setIssueType] = useState("Hardware");
   const [resourceId, setResourceId] = useState("");
   const [description, setDescription] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  // Use the currently assigned lab instead of allowing lab selection
+  const labName = currentUser?.lab_name || "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +69,7 @@ export function ComplaintForm() {
       <TopBar title="Raise a Complaint" subtitle="Report a hardware or software issue with a lab resource." />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-6 max-w-xl" style={{ borderColor: "#E3E6DF" }}>
+        {/*
         <div className="mb-5">
           <label className="block text-sm mb-1.5" style={labelStyle}>Lab name</label>
           <select
@@ -80,7 +83,27 @@ export function ComplaintForm() {
             ))}
           </select>
         </div>
+        */}
+        {/* Assigned lab — automatically taken from currentUser */}
+        <div className="mb-5">
+          <label
+            className="block text-sm mb-1.5"
+            style={labelStyle}
+          >
+            Lab name
+          </label>
 
+          <input
+            type="text"
+            value={labName}
+            readOnly
+            className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
+            style={{
+              ...inputStyle,
+              backgroundColor: "#F8F9F7",
+            }}
+          />
+        </div>
         <div className="mb-5">
           <label className="block text-sm mb-1.5" style={labelStyle}>Issue type</label>
           <div className="flex gap-3">

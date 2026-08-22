@@ -44,25 +44,38 @@ export function AddFaculty() {
  const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (!form.name.trim() || !form.email.trim() || !form.lab_id) {
-    setFormMessage({
-      type: "error",
-      text: "Please provide name, email and select an available lab.",
-    });
-    return;
-  }
+  // if (!form.name.trim() || !form.email.trim() || !form.lab_id) {
+  //   setFormMessage({
+  //     type: "error",
+  //     text: "Please provide name, email and select an available lab.",
+  //   });
+  //   return;
+  // }
+  if (!form.name.trim() || !form.email.trim()) {
+  setFormMessage({
+    type: "error",
+    text: "Please provide name and email.",
+  });
+  return;
+}
 
   setSubmitting(true);
   setFormMessage(null);
 
   const selectedLab = (labName || []).find((lab) => lab._id === form.lab_id);
 
+  // const result = await addFaculty({
+  //   name: form.name.trim(),
+  //   email: form.email.trim(),
+  //   lab_id: form.lab_id,
+  //   lab_name: selectedLab?.LabName || form.lab_name,
+  // });
   const result = await addFaculty({
-    name: form.name.trim(),
-    email: form.email.trim(),
-    lab_id: form.lab_id,
-    lab_name: selectedLab?.LabName || form.lab_name,
-  });
+  name: form.name.trim(),
+  email: form.email.trim(),
+  lab_id: form.lab_id || null,
+  lab_name: selectedLab?.LabName || null,
+});
 
   console.log("addFaculty result:", result);
 

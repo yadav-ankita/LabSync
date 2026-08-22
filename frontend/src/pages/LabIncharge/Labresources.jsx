@@ -6,22 +6,23 @@ import { useAppContext } from "../../context/AppContext";
 
 export function LabResources() {
   const { currentUser, facultyResources, getAssignedLabResources } = useAppContext();
-  const [labFilter, setLabFilter] = useState("All Labs");
+  //const [labFilter, setLabFilter] = useState("All Labs");
 
   useEffect(() => {
     getAssignedLabResources();
   }, []);
 
-  const labs = ["All Labs", ...new Set((facultyResources || []).map((r) => r.labName || currentUser?.lab_name))].filter(Boolean);
+  /* const labs = ["All Labs", ...new Set((facultyResources || []).map((r) => r.labName || currentUser?.lab_name))].filter(Boolean);
   const visible =
     labFilter === "All Labs"
       ? facultyResources
-      : facultyResources.filter((r) => (r.labName || currentUser?.lab_name) === labFilter);
+      : facultyResources.filter((r) => (r.labName || currentUser?.lab_name) === labFilter); */
+  const visible=facultyResources || [];
 
   return (
     <div>
       <TopBar title="Lab Resources" subtitle="Inventory for the laboratory assigned to you." />
-
+    { /*
       {labs.length > 1 && (
         <div className="flex gap-2 mb-4 flex-wrap">
           {labs.map((lab) => (
@@ -40,7 +41,8 @@ export function LabResources() {
             </button>
           ))}
         </div>
-      )}
+      )} 
+      */}
 
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
         <div

@@ -20,7 +20,8 @@ const FacultySchema = new mongoose.Schema(
     },
     lab_name: {
       type: String,
-      required: true,
+      //required: true,
+      default: null
     },
     lab: {
       type: mongoose.Schema.Types.ObjectId,

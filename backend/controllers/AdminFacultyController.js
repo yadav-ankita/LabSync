@@ -25,8 +25,13 @@ const AddFaculties = async (req, res, next) => {
     try {
         const { name, email, lab_name, lab_id } = req.body
 
-        if (!name || !email || (!lab_name && !lab_id)) {
-            throw new BadRequestError('Please provide name, email and a lab assignment')
+        // if (!name || !email || (!lab_name && !lab_id)) {
+        //     throw new BadRequestError('Please provide name, email and a lab assignment')
+        // }
+        if (!name || !email) {
+                throw new BadRequestError(
+                'Please provide name and email'
+            )
         }
 
         const existingFaculty = await Faculty.findOne({ email: email.toLowerCase().trim() })
@@ -34,34 +39,72 @@ const AddFaculties = async (req, res, next) => {
             throw new BadRequestError('A faculty with this email already exists')
         }
 
-        let selectedLab = null
-        if (lab_id) {
-            selectedLab = await Lab.findById(lab_id)
-        } else {
-            selectedLab = await Lab.findOne({ LabName: lab_name })
-        }
+        // let selectedLab = null
+        // if (lab_id) {
+        //     selectedLab = await Lab.findById(lab_id)
+        // } else {
+        //     selectedLab = await Lab.findOne({ LabName: lab_name })
+        // }
 
-        if (!selectedLab) {
-            throw new NotFoundError('Selected lab not found')
-        }
+        // if (!selectedLab) {
+        //     throw new NotFoundError('Selected lab not found')
+        // }
 
-        if (selectedLab.AssignFaculty) {
-            const assignedFaculty = await Faculty.findById(selectedLab.AssignFaculty)
-            throw new BadRequestError(`This lab is already assigned to ${assignedFaculty ? assignedFaculty.name : 'another faculty'}`)
-        }
+        // if (selectedLab.AssignFaculty) {
+        //     const assignedFaculty = await Faculty.findById(selectedLab.AssignFaculty)
+        //     throw new BadRequestError(`This lab is already assigned to ${assignedFaculty ? assignedFaculty.name : 'another faculty'}`)
+        // }
+        let selectedLab = null;
+
+if (lab_id || lab_name) {
+    if (lab_id) {
+        selectedLab = await Lab.findById(lab_id);
+    } else {
+        selectedLab = await Lab.findOne({ LabName: lab_name });
+    }
+
+    if (!selectedLab) {
+        throw new NotFoundError('Selected lab not found');
+    }
+
+    if (selectedLab.AssignFaculty) {
+        const assignedFaculty = await Faculty.findById(
+            selectedLab.AssignFaculty
+        );
+
+        throw new BadRequestError(
+            `This lab is already assigned to ${
+                assignedFaculty
+                    ? assignedFaculty.name
+                    : 'another faculty'
+            }`
+        );
+    }
+}
 
         const password = generateRandomPassword()
 
+        // const faculty = await Faculty.create({
+        //     name,
+        //     email: email.toLowerCase().trim(),
+        //     lab_name: selectedLab.LabName,
+        //     lab: selectedLab._id,
+        //     password,
+        // })
         const faculty = await Faculty.create({
-            name,
-            email: email.toLowerCase().trim(),
-            lab_name: selectedLab.LabName,
-            lab: selectedLab._id,
-            password,
-        })
+    name,
+    email: email.toLowerCase().trim(),
+    lab_name: selectedLab ? selectedLab.LabName : null,
+    lab: selectedLab ? selectedLab._id : null,
+    password,
+});
 
-        selectedLab.AssignFaculty = faculty._id
-        await selectedLab.save()
+        // selectedLab.AssignFaculty = faculty._id
+        // await selectedLab.save()
+        if (selectedLab) {
+    selectedLab.AssignFaculty = faculty._id;
+    await selectedLab.save();
+}
 
         res.status(StatusCodes.CREATED).json({
             message:"Faculty Added Successfully",
