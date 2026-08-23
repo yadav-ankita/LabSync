@@ -23,6 +23,11 @@ const LabResourceSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    purchase:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Purchase",
+      required: true,
+    },
     resourceCode: {
       type: String,
       required: true,

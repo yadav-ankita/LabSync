@@ -88,7 +88,23 @@ const AppProvider = ({ children }) => {
             return [];
         }
     };
+    const getAvailableResources = async () => {
+    try {
+        const { data } = await axios.get(
+            "/admin/purchases/resources"
+        );
 
+        return data.resources;
+
+    } catch (error) {
+        console.error(
+            "Error fetching available resources:",
+            error
+        );
+
+        return [];
+    }
+};
 
     const getPurchase = async (id) => {
         try {
@@ -217,7 +233,17 @@ const AppProvider = ({ children }) => {
                 ...data.resources,
                 ...prev
             ]);
-
+            // Update remaining quantity immediately
+        setPurchases((prev) =>
+            prev.map((purchase) =>
+                purchase._id === data.purchaseId
+                    ? {
+                        ...purchase,
+                        remainingQuantity: data.remainingQuantity,
+                      }
+                    : purchase
+            )
+        );
             return {
                 success: true,
                 resources: data.resources
@@ -849,6 +875,7 @@ const AppProvider = ({ children }) => {
                 purchases,
                 addPurchase,
                 getPurchases,
+                getAvailableResources,
                 getPurchase,
 
                 // Faculty

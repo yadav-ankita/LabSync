@@ -1,32 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 export function AddResourceForm() {
   const {
-    labResorces,
     addLabResource,
-    getLabs,
     labName,
+    getAvailableResources,
   } = useAppContext();
 
-  const [resourceName, setResourceName] = useState("");
+  //const [resourceName, setResourceName] = useState("");
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState("");
   const [selectedLab, setSelectedLab] = useState("");
   const [resourceType, setResourceType] = useState("Hardware");
   const [quantity, setQuantity] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState(null);
+  const [availableResources, setAvailableResources] = useState([]);
+
+  const selectedPurchase = (availableResources || []).find(
+  (resource) => resource._id === selectedPurchaseId
+);
 
   const inputStyle = {
     borderColor: "#D8DCD4",
     color: "#1F2A24",
   };
+
+  useEffect(() => {
+  const fetchAvailableResources = async () => {
+    const resources = await getAvailableResources();
+    setAvailableResources(resources);
+  };
+
+  fetchAvailableResources();
+}, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!resourceName.trim() || !selectedLab) {
+    if (!selectedPurchaseId || !selectedLab) {
       setFormMessage({
         type: "error",
-        text: "Please enter resource name and select a lab.",
+        text: "Please select a purchase and a lab.",
       });
       return;
     }
@@ -34,9 +49,15 @@ export function AddResourceForm() {
     setSubmitting(true);
     setFormMessage(null);
 
+    // const result = await addLabResource({
+    //   labName: selectedLab,
+    //   resourceName: resourceName.trim(),
+    //   resourceType,
+    //   quantity: Number(quantity) || 1,
+    // });
     const result = await addLabResource({
+      purchaseId: selectedPurchaseId,
       labName: selectedLab,
-      resourceName: resourceName.trim(),
       resourceType,
       quantity: Number(quantity) || 1,
     });
@@ -44,8 +65,10 @@ export function AddResourceForm() {
     setSubmitting(false);
 
     if (result.success) {
-      const added = result.resources || [];
 
+      const added = result.resources || [];
+      const updatedResources = await getAvailableResources();
+setAvailableResources(updatedResources);
       setFormMessage({
         type: "success",
         text:
@@ -56,7 +79,7 @@ export function AddResourceForm() {
             : `Added — Asset ID: ${added[0]?.assetId}`,
       });
 
-      setResourceName("");
+      setSelectedPurchaseId("");
       setSelectedLab("");
       setQuantity(1);
     } else {
@@ -76,6 +99,7 @@ export function AddResourceForm() {
         style={{ borderColor: "#E3E6DF" }}
       >
         {/* Resource Name */}
+        {/* 
         <div className="flex-1 min-w-45">
           <label
             className="block text-xs mb-1"
@@ -93,7 +117,30 @@ export function AddResourceForm() {
             style={inputStyle}
           />
         </div>
+        */}
+        <div className="flex-1 min-w-45">
+  <label
+    className="block text-xs mb-1"
+    style={{ color: "#5B6A5F" }}
+  >
+    Purchase
+  </label>
 
+  <select
+    value={selectedPurchaseId}
+    onChange={(e) => setSelectedPurchaseId(e.target.value)}
+    className="w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
+    style={inputStyle}
+  >
+    <option value="">Select a purchased resource</option>
+
+          {(availableResources || []).map((resource) => (
+  <option key={resource._id} value={resource._id}>
+    {resource.particulars} — Remaining: {resource.remainingQuantity}
+  </option>
+))}
+  </select>
+</div>
         {/* Lab Select */}
         <div className="flex-1 min-w-40">
           <label

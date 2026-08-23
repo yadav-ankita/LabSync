@@ -3,6 +3,7 @@ const express = require("express");
 const {
     createPurchase,
     getPurchases,
+    getAvailableResources,
     getPurchase
 } = require("../controllers/PurchaseController");
 
@@ -14,6 +15,7 @@ router.post("/", createPurchase);
 
 // View complete Purchase Register
 router.get("/", getPurchases);
+router.get("/resources", getAvailableResources);
 
 // View a particular purchase
 router.get("/:id", getPurchase);

@@ -1,6 +1,8 @@
 const { StatusCodes } = require("http-status-codes");
 const Purchase = require("../models/Purchase_model");
+const LabResource=require("../models/LabResource");
 const { BadRequestError, NotFoundError } = require("../error");
+
 
 
 //POST /api/v1/admin/purchases
@@ -83,8 +85,61 @@ const getPurchases = async (req, res, next) => {
         next(error);
     }
 };
+// GET /api/v1/admin/purchases/resources
+// Get combined resource availability for Resource Management
+const getAvailableResources = async (req, res, next) => {
+    try {
+        const purchases = await Purchase.find({});
 
+        const LabResource = require("../models/LabResource");
 
+        // Group purchases by resource name
+        const resourceMap = {};
+
+        for (const purchase of purchases) {
+            const key = purchase.particulars.trim().toLowerCase();
+
+            if (!resourceMap[key]) {
+                resourceMap[key] = {
+                    _id: purchase._id,
+                    particulars: purchase.particulars,
+                    totalQuantity: 0
+                };
+            }
+
+            resourceMap[key].totalQuantity += purchase.quantity;
+        }
+
+        // Calculate assigned and remaining quantity
+        const resources = await Promise.all(
+            Object.values(resourceMap).map(async (resource) => {
+
+                const assignedQuantity =
+                    await LabResource.countDocuments({
+                        resourceName: {
+                            $regex: `^${resource.particulars}$`,
+                            $options: "i"
+                        }
+                    });
+
+                return {
+                    ...resource,
+                    assignedQuantity,
+                    remainingQuantity:
+                        resource.totalQuantity - assignedQuantity
+                };
+            })
+        );
+
+        res.status(StatusCodes.OK).json({
+            resources,
+            count: resources.length
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 // GET /api/v1/admin/purchases/:id
 // View a particular purchase
 const getPurchase = async (req, res, next) => {
@@ -110,5 +165,6 @@ const getPurchase = async (req, res, next) => {
 module.exports = {
     createPurchase,
     getPurchases,
+    getAvailableResources,
     getPurchase
 };
