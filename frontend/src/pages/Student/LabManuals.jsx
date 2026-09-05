@@ -1,7 +1,6 @@
 import React from "react";
 import { TopBar } from "./TopBar";
 import { LabManualCard } from "./LabManualCard";
-import { useAppContext } from "../../context/AppContext";
 const LAB_MANUALS = [
   {
     id: "LM001",

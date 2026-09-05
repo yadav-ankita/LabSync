@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Plus, CheckCircle2, AlertCircle } from "lucide-react";
-import { useAppContext } from "../../context/AppContext";
+import { useAdminContext } from "../../context/AdminContext";
 export function AddResourceForm() {
   const {
     addLabResource,
     labName,
     getAvailableResources,
-  } = useAppContext();
+  } = useAdminContext();
 
   //const [resourceName, setResourceName] = useState("");
   const [selectedPurchaseId, setSelectedPurchaseId] = useState("");

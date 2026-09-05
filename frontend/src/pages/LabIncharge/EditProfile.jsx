@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { TopBar } from "./TopBar";
 import { CheckCircle2 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
+import { useFacultyContext } from "../../context/FacultyContext";
 
 export function EditProfile() {
-  const { currentUser, editFacultyProfile } = useAppContext();
+  const { currentUser} = useAppContext();
+  const {editFacultyProfile}=useFacultyContext();
   const [form, setForm] = useState({
     name: "",
     email: "",

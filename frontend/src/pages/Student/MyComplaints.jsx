@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { useAppContext } from "../../context/AppContext";
 import { ComplaintRow } from "./ComplaintRow";
 import { TopBar } from "./TopBar";
+import { useComplaintContext } from "../../context/ComplaintContext";
  export function MyComplaints() {
-  const {complaints,getComplaints}=useAppContext();
+  const {complaints,getComplaints}=useComplaintContext()
   useEffect(()=>{
       getComplaints();
   },[])

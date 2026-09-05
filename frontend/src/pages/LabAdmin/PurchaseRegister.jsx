@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import { TopBar } from "./TopBar";
-import { useAppContext } from "../../context/AppContext";
+import { useAdminContext } from "../../context/AdminContext";
 
 const Detail = ({ label, value }) => {
     return (
@@ -34,21 +34,16 @@ const Detail = ({ label, value }) => {
 };
 
 export function PurchaseRegister() {
-
     const {
         purchases,
         getPurchases,
         getPurchase,
         addPurchase
-    } = useAppContext();
-
+    } = useAdminContext();
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-
     const [submitting, setSubmitting] = useState(false);
-
     const [formMessage, setFormMessage] = useState(null);
-
     const [form, setForm] = useState({
         date: "",
         particulars: "",
@@ -64,7 +59,6 @@ export function PurchaseRegister() {
         signature: "",
         remarks: ""
     });
-
     const [selectedPurchase, setSelectedPurchase] = useState(null);
     const [loadingPurchase, setLoadingPurchase] = useState(false);
     const [showPurchaseDetails, setShowPurchaseDetails] = useState(false);

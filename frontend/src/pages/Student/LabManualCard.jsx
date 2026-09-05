@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
-import { TopBar } from "./TopBar";
 
 export function LabManualCard({ manual }) {
   return (

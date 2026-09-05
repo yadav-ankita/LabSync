@@ -16,7 +16,7 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
-import { useAppContext } from "../../context/AppContext";
+import { useComplaintContext } from "../../context/ComplaintContext";
 
 const LAB_OPTIONS = [
   "DS Lab - Block A",
@@ -27,7 +27,7 @@ const LAB_OPTIONS = [
   "Micro Lab - Block C",
 ];
 export function ComplaintForm() {
-  const { raiseComplaint } = useAppContext();
+  const { raiseComplaint } = useComplaintContext();
   const [labName, setLabName] = useState(LAB_OPTIONS[0]);
   const [issueType, setIssueType] = useState("Hardware");
   const [resourceId, setResourceId] = useState("");

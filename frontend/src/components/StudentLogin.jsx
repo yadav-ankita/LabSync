@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { FlaskConical, Mail, Lock, Eye, EyeOff, CalendarDays } from "lucide-react";
-import { loginStudent } from "../services/studentService";
+import { useAppContext } from "../context/AppContext";
 
 export default function StudentLogin() {
   
   const navigate = useNavigate();
+  const { Studentlogin } = useAppContext();
   const token = localStorage.getItem("token");
 
 if (token) {
@@ -34,20 +35,12 @@ if (token) {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      const response = await loginStudent(form);
-
-localStorage.setItem("token", response.data.token);
-
-localStorage.setItem(
-    "student",
-    JSON.stringify(response.data.student)
-);
-
-alert("Login Successful!");
-
-navigate("/student-dashboard", {
-    replace: true,
-});
+      const result = await Studentlogin(form.studentId, form.password);
+      if (!result?.success) {
+        setErrors({ form: result?.message || "Invalid Student ID or Password." });
+        return;
+      }
+      navigate("/student-dashboard", { replace: true });
     } catch (error) {
       setErrors({
     form:
@@ -73,7 +66,7 @@ navigate("/student-dashboard", {
         <div className="relative z-10 flex items-center gap-3">
           <FlaskConical className="w-7 h-7 text-amber-500" strokeWidth={1.75} />
           <div>
-            <p className="text-white font-semibold text-lg leading-none">LabTrack</p>
+            <p className="text-white font-semibold text-lg leading-none">LabSync</p>
             <p className="text-stone-400 text-xs mt-1">Student Portal</p>
           </div>
         </div>
@@ -88,14 +81,14 @@ navigate("/student-dashboard", {
           </p>
         </div>
 
-        <p className="relative z-10 text-stone-500 text-xs">© {new Date().getFullYear()} LabTrack</p>
+        <p className="relative z-10 text-stone-500 text-xs">© {new Date().getFullYear()} LabSync</p>
       </div>
       {/* Form panel */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <FlaskConical className="w-6 h-6 text-amber-600" strokeWidth={1.75} />
-            <span className="font-semibold text-neutral-900 text-lg">LabTrack</span>
+            <span className="font-semibold text-neutral-900 text-lg">LabSync</span>
           </div>
           <h2 className="text-2xl font-semibold text-neutral-900">Sign in to your account</h2>
           <p className="text-stone-500 text-sm mt-1.5 mb-8">

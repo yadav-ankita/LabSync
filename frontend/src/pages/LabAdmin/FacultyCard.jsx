@@ -1,6 +1,6 @@
-import { Mail, FlaskConical, Send, CheckCheck, Loader2 } from "lucide-react";
+import { Mail, FlaskConical, Send, CheckCheck, Loader2, Trash2 } from "lucide-react";
 
-export function FacultyCard({ faculty, sendStatus, onSendCredentials }) {
+export function FacultyCard({ faculty, sendStatus, onSendCredentials, onDelete }) {
     const initials = faculty.name
         .split(" ")
         .map((n) => n[0])
@@ -8,9 +8,9 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials }) {
         .toUpperCase()
         .slice(0, 2);
 
-    const isSending = sendStatus === "sending";
-    const isSent = sendStatus === "sent";
-    const isError = sendStatus === "error";
+    const isSending = sendStatus?.status === "sending";
+    const isSent = sendStatus?.status === "sent";
+    const isError = sendStatus?.status === "error";
 
     return (
         <div className="p-5 rounded-xl border bg-white flex flex-col" style={{ borderColor: "#E3E6DF" }}>
@@ -42,8 +42,9 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials }) {
                         Faculty Password: {faculty.password}
                     </span>
                 </div> */}
+                <div className="flex items-center gap-2">
                 <button
-                    onClick={() => onSendCredentials(faculty.password,faculty.email)}
+                    onClick={() => onSendCredentials(faculty.password, faculty.email, faculty._id)}
                     disabled={isSending}
                     className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors"
                     style={{
@@ -57,7 +58,21 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials }) {
                     {!isSending && !isSent && <Send size={13} />}
                     {isSending ? "Sending..." : isSent ? "Sent" : isError ? "Retry" : "Send Credentials"}
                 </button>
+                <button
+                    onClick={() => onDelete(faculty._id)}
+                    className="p-1.5 rounded-lg hover:bg-gray-50"
+                    title="Delete faculty"
+                    aria-label="Delete faculty"
+                >
+                    <Trash2 size={14} color="#B3261E" />
+                </button>
+                </div>
             </div>
+            {sendStatus?.message && (
+                <p className="mt-2 text-xs" style={{ color: isError ? "#B3261E" : "#2F6F52" }}>
+                    {sendStatus.message}
+                </p>
+            )}
         </div>
     );
 }

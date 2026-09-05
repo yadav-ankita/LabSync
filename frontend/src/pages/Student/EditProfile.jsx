@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { TopBar } from "./TopBar";
 import { CheckCircle2 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
+import { useStudentContext } from "../../context/StudentContext";
 
 const SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
 export function EditProfile() {
-  const { currentUser, editProfile, getStudentData, error } = useAppContext();
+  const {currentUser}=useAppContext();
+  const { editProfile, getStudentData} =useStudentContext();
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -140,12 +142,12 @@ export function EditProfile() {
           </div>
         )}
 
-        {!saved && error && (
+        {!saved  && (
           <div
             className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-lg text-sm"
             style={{ backgroundColor: "#FBEAEA", color: "#B3261E" }}
           >
-            {error}
+            {"error here "}
           </div>
         )}
       </form>

@@ -3,9 +3,9 @@ import { LabCard } from './LabCard';
 import { UserPlus, CheckCircle2, AlertCircle, Plus } from "lucide-react";
 import { TopBar } from "./TopBar";
 import { FacultyCard } from "./FacultyCard";
-import { useAppContext } from "../../context/AppContext";
+import { useAdminContext } from "../../context/AdminContext";
 const AddLabs = () => {
-  const { getLabs, AddLabs, labName } = useAppContext();
+  const { getLabs, AddLabs, labName } = useAdminContext();
 
   const [LabName, setLabName] = useState("")
   const [submitting, setSubmitting] = useState(false);

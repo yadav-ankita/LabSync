@@ -17,6 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
+import { useComplaintContext } from "../../context/ComplaintContext";
 
 /* const LAB_OPTIONS = [
   "DS Lab - Block A",
@@ -27,7 +28,8 @@ import { useAppContext } from "../../context/AppContext";
   "Micro Lab - Block C",
 ]; */
 export function ComplaintForm() {
-  const { raiseComplaint,currentUser } = useAppContext();
+  const {raiseComplaint}=useComplaintContext();
+  const {currentUser } = useAppContext();
   // const [labName, setLabName] = useState(LAB_OPTIONS[0]);
   const [issueType, setIssueType] = useState("Hardware");
   const [resourceId, setResourceId] = useState("");

@@ -12,6 +12,8 @@ import {
   ShoppingCart,
   PlusCircle
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../../context/AppContext";
 
 const LAB_ADMIN = {
   name: "Priya Desai",
@@ -20,8 +22,12 @@ const LAB_ADMIN = {
 };
 
 export function Sidebar({ activeView, setActiveView }) {
+  const navigate = useNavigate();
+  const { logout,currentUser } = useAppContext();
+
   const handleLogout = () => {
-    window.location.href = "/student-login";
+    logout();
+    navigate("/login", { replace: true });
   };
 
   const navItems = [
@@ -61,7 +67,7 @@ export function Sidebar({ activeView, setActiveView }) {
               fontWeight: 600
             }}
           >
-            LabTrack
+            LabSync
           </span>
         </div>
 
@@ -133,7 +139,7 @@ export function Sidebar({ activeView, setActiveView }) {
               color: "#1F2A24"
             }}
           >
-            {LAB_ADMIN.name
+            {currentUser?.name
               .split(" ")
               .map((n) => n[0])
               .join("")
@@ -143,14 +149,7 @@ export function Sidebar({ activeView, setActiveView }) {
 
           <div className="min-w-0">
             <p className="text-white text-sm truncate">
-              {LAB_ADMIN.name}
-            </p>
-
-            <p
-              className="text-xs truncate"
-              style={{ color: "rgba(255,255,255,0.45)" }}
-            >
-              {LAB_ADMIN.adminId}
+              {currentUser?.name}
             </p>
           </div>
 

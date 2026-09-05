@@ -52,7 +52,7 @@ export function Sidebar({ activeView, setActiveView }) {
             className="text-white text-base"
             style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}
           >
-            LabTrack
+            LabSync
           </span>
         </div>
         <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>

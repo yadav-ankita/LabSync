@@ -92,7 +92,7 @@ navigate("/student-login", {
         <div className="relative z-10 flex items-center gap-3">
           <FlaskConical className="w-7 h-7 text-amber-500" strokeWidth={1.75} />
           <div>
-            <p className="text-white font-semibold text-lg leading-none">LabTrack</p>
+            <p className="text-white font-semibold text-lg leading-none">LabSync</p>
             <p className="text-stone-400 text-xs mt-1">Student Portal</p>
           </div>
         </div>
@@ -107,7 +107,7 @@ navigate("/student-login", {
           </p>
         </div>
 
-        <p className="relative z-10 text-stone-500 text-xs">© {new Date().getFullYear()} LabTrack</p>
+        <p className="relative z-10 text-stone-500 text-xs">© {new Date().getFullYear()} LabSync</p>
       </div>
 
       {/* Form panel */}
@@ -115,7 +115,7 @@ navigate("/student-login", {
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex items-center gap-2 mb-8">
             <FlaskConical className="w-6 h-6 text-amber-600" strokeWidth={1.75} />
-            <span className="font-semibold text-neutral-900 text-lg">LabTrack</span>
+            <span className="font-semibold text-neutral-900 text-lg">LabSync</span>
           </div>
 
           <h2 className="text-2xl font-semibold text-neutral-900">Create your account</h2>

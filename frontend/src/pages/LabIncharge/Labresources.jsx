@@ -3,9 +3,11 @@ import { TopBar } from "./TopBar";
 import { ResourceTag } from "../../components/ResourceTag";
 import { ResourceStatusPill } from "../../components/ResourceStatusPill";
 import { useAppContext } from "../../context/AppContext";
+import { useFacultyContext } from "../../context/FacultyContext";
 
 export function LabResources() {
-  const { currentUser, facultyResources, getAssignedLabResources } = useAppContext();
+  const { currentUser} = useAppContext();
+  const {facultyResources, getAssignedLabResources }=useFacultyContext();
   //const [labFilter, setLabFilter] = useState("All Labs");
 
   useEffect(() => {

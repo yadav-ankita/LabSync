@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { UserPlus, CheckCircle2, AlertCircle } from "lucide-react";
 import { TopBar } from "./TopBar";
 import { FacultyCard } from "./FacultyCard";
-import { useAppContext } from "../../context/AppContext";
+import { useAdminContext } from "../../context/AdminContext";
 
 const LAB_OPTIONS = [1, 2, 3, 4, 5, 6];
 
@@ -13,9 +13,10 @@ export function AddFaculty() {
     addFaculty,
     getFaculty,
     emailCredentialsToFaculty,
+    deleteFaculty,
     getLabs,
     labName,
-  } = useAppContext();
+  } = useAdminContext();
 
   const [form, setForm] = useState({
     name: "",
@@ -103,14 +104,21 @@ export function AddFaculty() {
   setTimeout(() => setFormMessage(null), 4000);
 };
 
-  const handleSendCredentials = async (password, email) => {
-    setSendStatus((prev) => ({ ...prev, [email]: "sending" }));
+  const handleSendCredentials = async (password, email, facultyId) => {
+    setSendStatus((prev) => ({ ...prev, [facultyId]: { status: "sending" } }));
     const result = await emailCredentialsToFaculty({ password, email });
-    setSendStatus((prev) => ({ ...prev, [email]: result.success ? "sent" : "error" }));
-    if (result.success) {
-      setTimeout(() => {
-        setSendStatus((prev) => ({ ...prev, [email]: undefined }));
-      }, 4000);
+    setSendStatus((prev) => ({
+      ...prev,
+      [facultyId]: { status: result.success ? "sent" : "error", message: result.message },
+    }));
+  };
+
+  const handleDeleteFaculty = async (id) => {
+    if (!window.confirm("Delete this faculty account?")) return;
+    const result = await deleteFaculty(id);
+    if (!result.success) {
+      setFormMessage({ type: "error", text: result.message });
+      setTimeout(() => setFormMessage(null), 4000);
     }
   };
 
@@ -210,6 +218,7 @@ export function AddFaculty() {
               faculty={faculty}
               sendStatus={sendStatus[faculty._id]}
               onSendCredentials={handleSendCredentials}
+              onDelete={handleDeleteFaculty}
             />
           ))}
         </div>

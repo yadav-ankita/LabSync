@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { TopBar } from "./TopBar";
 import { ResourceRow } from "./ResourceRow";
 import { AddResourceForm } from "./AddResourceForm";
-import { useAppContext } from "../../context/AppContext";
+import { useAdminContext } from "../../context/AdminContext";
 
 export function ResourceManagement() {
-  const { labResorces, getLabResources,getLabs } = useAppContext();
+  const { labName, labResorces, getLabResources, getLabs, deleteLabResource } = useAdminContext();
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [labFilter, setLabFilter] = useState("All Labs");
@@ -26,13 +26,24 @@ export function ResourceManagement() {
     setResources((prev) => prev.map((r) => (r._id === id ? { ...r, status } : r)));
   };
 
-  const handleDelete = (id) => {
-    setResources((prev) => prev.filter((r) => r._id !== id));
+  const handleDelete = async (id) => {
+    const result = await deleteLabResource(id);
+    if (result.success) {
+      setResources((prev) => prev.filter((r) => r._id !== id));
+    }
   };
 
-  const labs = ["All Labs", ...new Set(resources.map((r) => r.labName))];
-  const visible =
-    labFilter === "All Labs" ? resources : resources.filter((r) => r.labName === labFilter);
+  const labs = [
+    "All Labs",
+    ...new Set((labName || []).map((lab) => lab.LabName.trim())),
+  ];
+  const visibleLabs = labFilter === "All Labs" ? labs.slice(1) : [labFilter];
+  const visible = visibleLabs.flatMap((lab) => {
+    const labResources = resources.filter((resource) => resource.labName === lab);
+    return labResources.length > 0
+      ? labResources
+      : [{ _id: `empty-${lab}`, labName: lab, empty: true }];
+  });
 
   return (
     <div>
@@ -79,7 +90,17 @@ export function ResourceManagement() {
           </div>
         ) : (
           visible.map((r) => (
-            <ResourceRow key={r._id} resource={r} onStatusChange={handleStatusChange} onDelete={handleDelete} />
+            r.empty ? (
+              <div key={r._id} className="grid grid-cols-12 items-center px-5 py-3.5 border-t first:border-t-0" style={{ borderColor: "#E3E6DF" }}>
+                <span className="col-span-2 text-xs" style={{ color: "#A0AAA2" }}>-</span>
+                <span className="col-span-3 text-sm" style={{ color: "#8A968D" }}>No resources allocated</span>
+                <span className="col-span-3 text-xs truncate" style={{ color: "#5B6A5F" }}>{r.labName}</span>
+                <span className="col-span-2 text-xs" style={{ color: "#A0AAA2" }}>-</span>
+                <span className="col-span-2 text-xs text-right" style={{ color: "#8A968D" }}>Resources are not yet allocated to this lab</span>
+              </div>
+            ) : (
+              <ResourceRow key={r._id} resource={r} onStatusChange={handleStatusChange} onDelete={handleDelete} />
+            )
           ))
         )}
       </div>
