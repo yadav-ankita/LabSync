@@ -2,8 +2,10 @@ require('dotenv').config()
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
 const LabResource = require('../models/LabResource')
+const Lab = require('../models/Lab')
 const Purchase=require('../models/Purchase_model')
 const Complaint = require('../models/complaint')
+const User = require('../models/User')
 const generateAssetId = require('../utils/generateAssetId')
 
 // POST /admin/LabResource
@@ -27,6 +29,11 @@ const AddResourcesToLab = async (req, res, next) => {
             throw new BadRequestError(
                 "resourceType must be 'Hardware' or 'Software'"
             )
+        }
+
+        const lab = await Lab.findOne({ LabName: labName.trim() })
+        if (!lab) {
+            throw new NotFoundError('Lab not found')
         }
 
         const qty = Number(quantity)
@@ -110,18 +117,13 @@ const remainingQuantity =
         }
 
         // Update total resource count of the lab
-        const lab = await require('../models/Lab')
-            .findOne({ LabName: labName.trim() })
+        const totalResources =
+            await LabResource.countDocuments({
+                labName: labName.trim()
+            })
 
-        if (lab) {
-            const totalResources =
-                await LabResource.countDocuments({
-                    labName: labName.trim()
-                })
-
-            lab.NumResources = totalResources
-            await lab.save()
-        }
+        lab.NumResources = totalResources
+        await lab.save()
 
         res.status(StatusCodes.CREATED).json({
             resources: createdResources,
@@ -146,8 +148,40 @@ const getAllLabResources = async (req, res, next) => {
         if (resourceType) filter.resourceType = resourceType
         if (status) filter.status = status
        
+        const labs = await Lab.find({}).select('LabName').lean()
+        const existingLabNames = labs.map((lab) => lab.LabName.trim())
+        filter.labName = filter.labName
+            ? { $eq: filter.labName, $in: existingLabNames }
+            : { $in: existingLabNames }
+
         const resources = await LabResource.find(filter).sort('createdAt')
         res.status(StatusCodes.OK).json({ resources, count: resources.length })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// DELETE /admin/LabResource/:id
+const deleteLabResource = async (req, res, next) => {
+    try {
+        const resource = await LabResource.findByIdAndDelete(req.params.id)
+
+        if (!resource) {
+            throw new NotFoundError('Resource not found')
+        }
+
+        const lab = await Lab.findOne({ LabName: resource.labName.trim() })
+        if (lab) {
+            lab.NumResources = await LabResource.countDocuments({
+                labName: lab.LabName.trim()
+            })
+            await lab.save()
+        }
+
+        res.status(StatusCodes.OK).json({
+            resource,
+            message: 'Resource deleted successfully'
+        })
     } catch (error) {
         next(error)
     }
@@ -212,10 +246,56 @@ const editComplaintStatus = async (req, res, next) => {
     }
 }
 
+// PATCH /admin/profile
+const editAdminProfile = async (req, res, next) => {
+    try {
+        const { name, email, phone, department, password } = req.body
+        const admin = await User.findById(req.user.userId)
+
+        if (!admin || !['admin', 'hod'].includes(admin.role)) {
+            throw new NotFoundError('Admin profile not found')
+        }
+
+        if (name !== undefined) {
+            if (!name.trim()) throw new BadRequestError('Name cannot be empty')
+            admin.name = name.trim()
+        }
+        if (email !== undefined) {
+            const normalizedEmail = email.toLowerCase().trim()
+            if (!normalizedEmail) throw new BadRequestError('Email cannot be empty')
+            const existing = await User.findOne({ email: normalizedEmail, _id: { $ne: admin._id } })
+            if (existing) throw new BadRequestError('A user with this email already exists')
+            admin.email = normalizedEmail
+        }
+        if (phone !== undefined) admin.phone = phone.trim()
+        if (department !== undefined) admin.department = department.trim()
+        if (password && password.trim()) admin.password = password.trim()
+
+        await admin.save()
+
+        res.status(StatusCodes.OK).json({
+            user: {
+                id: admin._id,
+                name: admin.name,
+                email: admin.email,
+                phone: admin.phone,
+                department: admin.department,
+                password: admin.password,
+                role: admin.role,
+            },
+            message: 'Profile updated successfully',
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     AddResourcesToLab,
     getAllLabResources,
+    deleteLabResource,
     getAllComplaints,
     getAllComplaintsByLab,
-    editComplaintStatus
+    editComplaintStatus,
+    editAdminProfile
 };

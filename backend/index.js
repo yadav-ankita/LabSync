@@ -1,3 +1,5 @@
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 require("dotenv").config();
 
 const express = require("express");
@@ -5,7 +7,6 @@ const cors = require("cors");
 const rateLimiter = require("express-rate-limit");
 
 const connectDb = require("./db/connect");
-
 const notFound = require("./middleware/notFound");
 const errorHandlerMiddleware = require("./middleware/errorHandler");
 

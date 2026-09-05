@@ -3,10 +3,12 @@ const router = express.Router();
 const {
     emailCredentials,
     getFaculties,
-    AddFaculties
+    AddFaculties,
+    deleteFaculty
 } = require('../controllers/AdminFacultyController')
 
 router.route("/").post(AddFaculties).get(getFaculties)
 router.route("/credentials").post(emailCredentials);
+router.route("/:id").delete(deleteFaculty);
 
 module.exports = router; 

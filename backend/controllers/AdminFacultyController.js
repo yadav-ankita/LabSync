@@ -167,8 +167,32 @@ const emailCredentials = async (req, res, next) => {
     }
 }
 
+// DELETE /faculty/:id -> removes a faculty account and releases its lab
+const deleteFaculty = async (req, res, next) => {
+    try {
+        const faculty = await Faculty.findByIdAndDelete(req.params.id)
+
+        if (!faculty) {
+            throw new NotFoundError('Faculty not found')
+        }
+
+        await Lab.updateMany(
+            { AssignFaculty: faculty._id },
+            { $set: { AssignFaculty: null } }
+        )
+
+        res.status(StatusCodes.OK).json({
+            faculty,
+            message: 'Faculty deleted successfully'
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     emailCredentials,
     getFaculties,
     AddFaculties,
+    deleteFaculty,
 }
