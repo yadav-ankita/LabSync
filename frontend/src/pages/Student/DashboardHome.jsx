@@ -1,15 +1,8 @@
 import {
-  LayoutGrid,
   BookOpen,
   MessageSquarePlus,
   ListChecks,
-  FlaskConical,
-  FileText,
-  Download,
-  Cpu,
-  Code2,
   ChevronRight,
-  Clock,
   CircleDot,
   CheckCircle2,
   Loader2,
@@ -19,15 +12,29 @@ import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
 import { useAppContext } from "../../context/AppContext";
-import { useEffect } from "react";
-const STUDENT = {
-  name: "Aarav Mehta",
-  rollNo: "21CS1042",
-  branch: "Computer Science Engineering",
-  semester: "5th Semester",
-};
+const DUMMY_COMPLAINTS = [
+  {
+    _id: "dummy-complaint-1",
+    resourceId: "RES-204",
+    description: "Lab PC is not starting",
+    status: "Pending",
+  },
+  {
+    _id: "dummy-complaint-2",
+    resourceId: "RES-118",
+    description: "Compiler installation issue",
+    status: "In Progress",
+  },
+  {
+    _id: "dummy-complaint-3",
+    resourceId: "RES-076",
+    description: "Keyboard replacement request",
+    status: "Resolved",
+  },
+];
 export  function DashboardHome({setActiveView }) {
-  const {currentUser,complaints,getComplaints}=useAppContext();
+  const { currentUser } = useAppContext();
+  const complaints = DUMMY_COMPLAINTS;
   const firstName = currentUser?.name?.split(" ")[0] || "Student";
   const pending = complaints.filter((c) => c.status === "Pending").length;
   const inProgress = complaints.filter((c) => c.status === "In Progress").length;
@@ -52,9 +59,6 @@ export  function DashboardHome({setActiveView }) {
       view: "complaints",
     },
   ];
-  useEffect(()=>{
-       getComplaints();
-  },[])
   return (
     <div>
       <TopBar title={`Welcome back, ${firstName}`} subtitle="Here's what's happening across your labs." />

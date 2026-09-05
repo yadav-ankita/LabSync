@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ComplaintRow } from "./ComplaintRow";
 import { TopBar } from "./TopBar";
-import { useComplaintContext } from "../../context/ComplaintContext";
- export function MyComplaints() {
-  const {complaints,getComplaints}=useComplaintContext()
-  useEffect(()=>{
-      getComplaints();
-  },[])
+//import { useComplaintContext } from "../../context/ComplaintContext";
+export function MyComplaints() {
+  //const {complaints,getComplaints}=useComplaintContext();
+  const [complaints,setComplaints]=useState([]);
+  // useEffect(()=>{
+  //     getComplaints();
+  // },[])
   return (
     <div>
       <TopBar title="My Complaints" subtitle="Track the status of issues you've reported." />
