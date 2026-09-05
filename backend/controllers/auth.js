@@ -66,7 +66,7 @@ const login = async (req, res, next) => {
             ? user.password === password
             : facultyRecord.password === password;
         if (!passwordMatches) {
-            throw new UnauthenticatedError('Invalid  Credentials of password')
+            throw new UnauthenticatedError('Invalid  Credentials')
         }
         const token = jwt.sign(
             {
