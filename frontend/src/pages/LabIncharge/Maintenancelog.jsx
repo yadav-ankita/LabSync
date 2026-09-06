@@ -1,13 +1,18 @@
 import { Wrench } from "lucide-react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
 import { MAINTENANCE_LOG } from "./dummyData";
+import { useAppContext } from "../../context/AppContext";
 
 export function MaintenanceLog() {
+  const {currentUser}=useAppContext();
   return (
     <div>
-      <TopBar title="Maintenance" subtitle="History and current status of resources under repair." />
+      <TopBar title="Maintenance" subtitle="History and current status of resources under repair."
+       rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
+       rightBottom=" Assigned laboratory"
+      />
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
         {MAINTENANCE_LOG.map((m, i) => (
           <div

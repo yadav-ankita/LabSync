@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { ComplaintRow } from "./ComplaintRow";
 import { INCHARGE_COMPLAINTS } from "./dummyData";
+import { useAppContext } from "../../context/AppContext";
 
 const FILTERS = ["All", "Pending", "In Progress", "Resolved"];
 
 export function ComplaintsPanel() {
+    const {currentUser } = useAppContext();
   const [complaints, setComplaints] = useState(INCHARGE_COMPLAINTS);
   const [filter, setFilter] = useState("All");
 
@@ -17,7 +19,10 @@ export function ComplaintsPanel() {
 
   return (
     <div>
-      <TopBar title="Complaints" subtitle="Review and update issues reported in your labs." />
+      <TopBar title="Complaints" subtitle="Review and update issues reported in your labs." 
+          rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
+          rightBottom=" Assigned laboratory"
+      />
 
       <div className="flex gap-2 mb-4">
         {FILTERS.map((f) => (

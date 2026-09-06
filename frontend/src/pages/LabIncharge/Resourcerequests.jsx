@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { RequestRow } from "./RequestRow";
 import { RESOURCE_REQUESTS } from "./dummyData";
+import { useAppContext } from "../../context/AppContext";
 
 export function ResourceRequests() {
+  const {currentUser}=useAppContext();
   const [requests, setRequests] = useState(RESOURCE_REQUESTS);
 
   const handleDecision = (id, status) => {
@@ -17,6 +19,8 @@ export function ResourceRequests() {
       <TopBar
         title="Resource Requests"
         subtitle={`${pendingCount} request${pendingCount === 1 ? "" : "s"} awaiting your decision.`}
+        rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
+         rightBottom=" Assigned laboratory"
       />
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
         {requests.length === 0 ? (

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
+
 import { ComplaintRow } from "./ComplaintRow";
 import { ALL_COMPLAINTS, LABS } from "./dummyData";
 
@@ -22,7 +23,9 @@ export function ComplaintsPanel() {
 
   return (
     <div>
-      <TopBar title="All Complaints" subtitle="Complaints reported across every laboratory in the department." />
+      <TopBar title="All Complaints" subtitle="Complaints reported across every laboratory in the department." 
+        rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      />
 
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex gap-2 flex-wrap">

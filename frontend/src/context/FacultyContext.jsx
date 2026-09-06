@@ -4,8 +4,9 @@ import "../axios";
 import { useAppContext } from "./AppContext";
 const FacultyContext = createContext();
 const FacultyProvider = ({ children }) => {
-    const {currentUser,setCurrentUser,setIsAuthenticated}=useAppContext();
-    const [facultyResources, setFacultyResources] = useState([]); 
+    const { currentUser, setCurrentUser, setIsAuthenticated } = useAppContext();
+    const [facultyResources, setFacultyResources] = useState([]);
+    const [facultyManuals, setFacultyManuals] = useState([]);
     const getAssignedLabResources = async () => {
         try {
             const { data } = await axios.get("/faculty/labResource");
@@ -22,6 +23,24 @@ const FacultyProvider = ({ children }) => {
                 success: false,
                 message: error.response?.data?.msg || "Could not fetch assigned lab resources."
             };
+        }
+    };
+    const getFacultyManuals = async () => {
+        try {
+            const { data } = await axios.get("/faculty/labManuals");
+            setFacultyManuals(data.manuals || []);
+            return { success: true, manuals: data.manuals || [] };
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || "Could not fetch lab manuals." };
+        }
+    };
+    const removeFacultyManual = async (id) => {
+        try {
+            await axios.delete(`/faculty/labManuals/${id}`);
+            setFacultyManuals((manuals) => manuals.filter((manual) => manual._id !== id));
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || "Could not delete manual." };
         }
     };
     const getFacultyProfile = useCallback(async () => {
@@ -57,13 +76,32 @@ const FacultyProvider = ({ children }) => {
             };
         }
     };
-     return (
+    const uploadLabManual = async (formData) => {
+        try {
+            const response = await axios.post('/faculty/labManuals', formData, {
+            });
+            const manual = response.data.manual;
+            setFacultyManuals((manuals) => [manual, ...manuals]);
+            return { success: true, manual, message: response.data.message };
+        } catch (error) {
+            const message = error.response?.data?.msg || error.response?.data?.message || "Could not upload manual.";
+            return {
+                success: false,
+                message
+            };
+        }
+    };
+    return (
         <FacultyContext.Provider
             value={{
                 facultyResources,
+                facultyManuals,
                 getAssignedLabResources,
                 getFacultyProfile,
-                editFacultyProfile
+                editFacultyProfile,
+                uploadLabManual,
+                getFacultyManuals,
+                removeFacultyManual
             }}
         >
             {children}

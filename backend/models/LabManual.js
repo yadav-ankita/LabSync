@@ -6,10 +6,6 @@ const LabManualSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Please provide the subject name'],
         },
-        // labName: {
-        //     type: String,
-        //     required: [true, 'Please provide the lab name'],
-        // },
         title: {
             type: String,
             required: [true, 'Please provide a manual title'],
@@ -23,9 +19,6 @@ const LabManualSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Please provide the file location'],
         },
-        // size: {
-        //     type: String,
-        // },
         // used to filter which manuals a student sees once they set their semester
         semester: {
             type: String,
@@ -33,7 +26,24 @@ const LabManualSchema = new mongoose.Schema(
         },
         branch: {
             type: String,
-            required: [true, 'Please provide the branch this manual belongs to'],
+            default: '',
+        },
+        faculty: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Faculty',
+            required: true,
+        },
+        labName: {
+            type: String,
+            default: '',
+        },
+        originalName: {
+            type: String,
+            required: true,
+        },
+        filename: {
+            type: String,
+            required: true,
         },
     },
     { timestamps: true }

@@ -7,7 +7,7 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
@@ -52,6 +52,8 @@ export function DashboardHome({ setActiveView }) {
         title={`Welcome , ${currentUser?.faculty_name?.split(" ,") || currentUser?.faculty_name || "Faculty"
           }`}
         subtitle="Here's what's happening across your assigned labs."
+        rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
+        rightBottom=" Assigned laboratory"
       />
 
       <div className="grid grid-cols-4 gap-4 mb-8">

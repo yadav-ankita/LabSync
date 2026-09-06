@@ -8,7 +8,8 @@ import {
   Wrench,
   FlaskConical,
 } from "lucide-react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
+
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
@@ -49,7 +50,9 @@ export function DashboardHome({ setActiveView }) {
 
   return (
     <div>
-      <TopBar title="Department Overview" subtitle="A cross-lab snapshot of resources, complaints, and requests." />
+      <TopBar title="Department Overview" subtitle="A cross-lab snapshot of resources, complaints, and requests." 
+         rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      />
 
       <div className="grid grid-cols-4 gap-4 mb-8">
         <StatCard label="Open Complaints" value={openComplaints} icon={CircleDot} accent="#C9782E" />

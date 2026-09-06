@@ -1,4 +1,4 @@
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { useState } from "react";
 import {
   LayoutGrid,
@@ -68,7 +68,10 @@ export function ComplaintForm() {
 
   return (
     <div>
-      <TopBar title="Raise a Complaint" subtitle="Report a hardware or software issue with a lab resource." />
+      <TopBar title="Raise a Complaint" subtitle="Report a hardware or software issue with a lab resource." 
+         rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`}  
+         rightBottom=" Assigned laboratory"
+      />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-6 max-w-xl" style={{ borderColor: "#E3E6DF" }}>
         {/*

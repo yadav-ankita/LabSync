@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { ResourceTag } from "../../components/ResourceTag";
 import { ResourceStatusPill } from "../../components/ResourceStatusPill";
 import { useAppContext } from "../../context/AppContext";
@@ -23,7 +23,10 @@ export function LabResources() {
 
   return (
     <div>
-      <TopBar title="Lab Resources" subtitle="Inventory for the laboratory assigned to you." />
+      <TopBar title="Lab Resources" subtitle="Inventory for the laboratory assigned to you." 
+       rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
+       rightBottom=" Assigned laboratory"
+      />
     { /*
       {labs.length > 1 && (
         <div className="flex gap-2 mb-4 flex-wrap">

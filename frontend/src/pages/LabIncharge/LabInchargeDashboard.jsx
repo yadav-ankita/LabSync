@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./ComplaintsPanel";
-import { ResourceRequests } from "./ResourceRequests";
 import { LabResources } from "./LabResources";
-import { MaintenanceLog } from "./MaintenanceLog";
 import { EditProfile } from "./EditProfile";
 import { LabManuals } from "./Labmanuals";
 import { ComplaintForm } from "./ComplaintForm";
+import { MaintenanceLog } from "./Maintenancelog";
+import { ResourceRequests } from "./Resourcerequests";
 
 export function LabInchargeDashboard() {
   const [activeView, setActiveView] = useState("home");

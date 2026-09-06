@@ -1,6 +1,4 @@
-import { LAB_ADMIN } from "./Sidebar";
-
-export function TopBar({ title, subtitle }) {
+export function TopBar({ title, subtitle , rightTop , rightBottom }) {
   return (
     <div className="flex items-center justify-between mb-7">
       <div>
@@ -13,8 +11,8 @@ export function TopBar({ title, subtitle }) {
         {subtitle && <p className="text-sm mt-1" style={{ color: "#5B6A5F" }}>{subtitle}</p>}
       </div>
       <div className="text-right hidden sm:block">
-        <p className="text-sm" style={{ color: "#1F2A24" }}>{LAB_ADMIN.role}</p>
-        <p className="text-xs" style={{ color: "#5B6A5F" }}>Computer Engineering Department</p>
+        <p className="text-sm" style={{ color: "#1F2A24" }}>{rightTop}</p>
+        <p className="text-xs" style={{ color: "#5B6A5F" }}>{rightBottom}</p>
       </div>
     </div>
   );

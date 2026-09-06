@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
+
 import { ResourceRow } from "./ResourceRow";
 import { AddResourceForm } from "./AddResourceForm";
 import { useAdminContext } from "../../context/AdminContext";
@@ -47,7 +48,9 @@ export function ResourceManagement() {
 
   return (
     <div>
-      <TopBar title="Resource Management" subtitle="Add, update, or remove equipment across all laboratories." />
+      <TopBar title="Resource Management" subtitle="Add, update, or remove equipment across all laboratories." 
+         rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      />
 
       <AddResourceForm />
 

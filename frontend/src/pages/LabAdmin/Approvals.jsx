@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
+
 import { RequestRow } from "./RequestRow";
 import { APPROVAL_REQUESTS } from "./dummyData";
 
@@ -17,6 +18,7 @@ export function Approvals() {
       <TopBar
         title="Approvals"
         subtitle={`${pendingCount} resource request${pendingCount === 1 ? "" : "s"} awaiting decision across all labs.`}
+         rightTop="Lab Administrator" rightBottom="Computer Engineering"
       />
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
         {requests.length === 0 ? (

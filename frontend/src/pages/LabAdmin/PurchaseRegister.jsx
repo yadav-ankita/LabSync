@@ -6,8 +6,8 @@ import {
     CheckCircle2,
     AlertCircle
 } from "lucide-react";
+import { TopBar } from '../../components/TopBar';
 
-import { TopBar } from "./TopBar";
 import { useAdminContext } from "../../context/AdminContext";
 
 const Detail = ({ label, value }) => {
@@ -208,6 +208,7 @@ export function PurchaseRegister() {
             <TopBar
                 title="Purchase Register"
                 subtitle="View and manage the complete history of department purchases."
+                 rightTop="Lab Administrator" rightBottom="Computer Engineering"
             />
 
 

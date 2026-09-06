@@ -3,7 +3,9 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
+const multer = require('multer');
+const cors = require('cors');
+const path = require('path');
 const rateLimiter = require("express-rate-limit");
 
 const connectDb = require("./db/connect");
@@ -36,6 +38,8 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+// Make 'uploads' folder publicly accessible to view/download PDFs later
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get("/", (req, res) => {
     res.send("LabSync Backend Running...");

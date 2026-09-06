@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useEffect } from "react";
 import { UserPlus, CheckCircle2, AlertCircle } from "lucide-react";
-import { TopBar } from "./TopBar";
 import { FacultyCard } from "./FacultyCard";
 import { useAdminContext } from "../../context/AdminContext";
+import { TopBar } from '../../components/TopBar';
 
 const LAB_OPTIONS = [1, 2, 3, 4, 5, 6];
 
@@ -124,7 +124,9 @@ export function AddFaculty() {
 
   return (
     <div>
-      <TopBar title="Faculty Accounts" subtitle="Add lab incharges and send them their login credentials." />
+      <TopBar title="Faculty Accounts" subtitle="Add lab incharges and send them their login credentials." 
+             rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      />
 
       <form
         onSubmit={handleSubmit}

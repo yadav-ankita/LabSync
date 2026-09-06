@@ -1,4 +1,4 @@
-import { FileText, Trash2 } from "lucide-react";
+import { FileText, Trash2, ExternalLink } from "lucide-react";
 
 export function ManualCard({ manual, onDelete }) {
   return (
@@ -12,16 +12,19 @@ export function ManualCard({ manual, onDelete }) {
           >
             {manual.fileType}
           </span>
-          <button onClick={() => onDelete(manual.id)} className="p-1 rounded hover:bg-gray-50" title="Remove manual">
+          <button onClick={() => onDelete(manual._id)} className="p-1 rounded hover:bg-gray-50" title="Remove manual">
             <Trash2 size={14} color="#B3261E" />
           </button>
         </div>
       </div>
       <p className="text-sm font-medium mt-3" style={{ color: "#1F2A24" }}>{manual.title}</p>
       <p className="text-xs mt-1" style={{ color: "#5B6A5F" }}>{manual.subject}</p>
+      <a href={manual.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs mt-3" style={{ color: "#9A5F1D" }}>
+        <ExternalLink size={13} /> Open file
+      </a>
       <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: "#E3E6DF" }}>
         <span className="text-xs" style={{ color: "#8A968D" }}>
-          Sem {manual.semester} · Updated {manual.updated}
+          Sem {manual.semester} · Updated {new Date(manual.updated || manual.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
         </span>
       </div>
     </div>

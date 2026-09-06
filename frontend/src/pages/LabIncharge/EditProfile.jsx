@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { CheckCircle2 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
@@ -53,7 +53,10 @@ export function EditProfile() {
 
   return (
     <div>
-      <TopBar title="Edit Profile" subtitle="Keep your details up to date." />
+      <TopBar title="Edit Profile" subtitle="Keep your details up to date." 
+       rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
+       rightBottom=" Assigned laboratory"
+      />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border p-6 max-w-xl" style={{ borderColor: "#E3E6DF" }}>
         <div className="mb-5">

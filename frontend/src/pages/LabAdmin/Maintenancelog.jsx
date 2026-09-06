@@ -1,5 +1,5 @@
 import { Wrench } from "lucide-react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
 import { MAINTENANCE_LOG } from "./dummyData";
@@ -7,7 +7,9 @@ import { MAINTENANCE_LOG } from "./dummyData";
 export function MaintenanceLog() {
   return (
     <div>
-      <TopBar title="Maintenance" subtitle="History and current status of resources under repair across all labs." />
+      <TopBar title="Maintenance" subtitle="History and current status of resources under repair across all labs."
+         rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      />
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
         {MAINTENANCE_LOG.map((m, i) => (
           <div

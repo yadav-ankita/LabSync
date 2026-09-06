@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { LabCard } from './LabCard';
 import { UserPlus, CheckCircle2, AlertCircle, Plus } from "lucide-react";
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
+
 import { FacultyCard } from "./FacultyCard";
 import { useAdminContext } from "../../context/AdminContext";
 const AddLabs = () => {
@@ -64,7 +65,7 @@ const handleSubmit = async (e) => {
 };
   return (
     <div>
-      <TopBar title="Lab Management" subtitle="Add labs" />
+      <TopBar title="Lab Management" subtitle="Add labs"  rightTop="Lab Administrator" rightBottom="Computer Engineering" />
 
       <form
         onSubmit={handleSubmit}

@@ -1,4 +1,5 @@
-import { TopBar } from "./TopBar";
+import { TopBar } from '../../components/TopBar';
+
 import { ALL_COMPLAINTS, ALL_RESOURCES, LABS } from "./dummyData";
 
 function BarRow({ label, value, max, color }) {
@@ -43,7 +44,9 @@ export function Reports() {
 
   return (
     <div>
-      <TopBar title="Reports" subtitle="Department-wide trends across complaints and resources." />
+      <TopBar title="Reports" subtitle="Department-wide trends across complaints and resources." 
+        rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      />
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="p-5 rounded-xl border bg-white" style={{ borderColor: "#E3E6DF" }}>
