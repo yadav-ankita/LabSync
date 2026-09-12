@@ -8,6 +8,7 @@ import { LabManuals } from "./Labmanuals";
 import { ComplaintForm } from "./ComplaintForm";
 import { MaintenanceLog } from "./Maintenancelog";
 import { ResourceRequests } from "./Resourcerequests";
+import { ResourceAssignmentApprovals } from "./ResourceAssignmentApprovals";
 
 export function LabInchargeDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -20,6 +21,9 @@ export function LabInchargeDashboard() {
       <Sidebar activeView={activeView} setActiveView={setActiveView} />
       <main className="flex-1 px-10 py-8 overflow-y-auto">
         {activeView === "home" && <DashboardHome setActiveView={setActiveView} />}
+        {activeView === "assignmentApprovals" && (
+        <ResourceAssignmentApprovals />
+        )}
         {activeView === "complaints" && <ComplaintsPanel />}
         {activeView === "raise" && <ComplaintForm/>}
         {activeView === "manuals" && <LabManuals/>}

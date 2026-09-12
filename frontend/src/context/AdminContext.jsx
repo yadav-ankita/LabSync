@@ -146,15 +146,82 @@ const AdminProvider = ({ children }) => {
             return [];
         }
     };
+    // const getAvailableResources = async () => {
+    //     try {
+    //         const { data } = await axios.get("/admin/purchases/resources");
+    //         return data.resources;
+    //     } catch (error) {
+    //         console.error("Error fetching available resources:", error);
+    //         return [];
+    //     }
+    // };
     const getAvailableResources = async () => {
-        try {
-            const { data } = await axios.get("/admin/purchases/resources");
-            return data.resources;
-        } catch (error) {
-            console.error("Error fetching available resources:", error);
-            return [];
-        }
+  console.log("🔥 getAvailableResources CALLED");
+
+  try {
+    const { data } = await axios.get("/admin/purchases/resources");
+    console.log("🔥 purchase resources response:", data);
+    return data.resources;
+  } catch (error) {
+    console.error("🔥 Error fetching available resources:", error);
+    return [];
+  }
+};
+const createResourceAssignmentRequest = async (requestData) => {
+  try {
+    console.log("🔥 Sending request to:", "/admin/resource-assignment-request");
+
+const { data } = await axios.post(
+  "/admin/resource-assignment-request",
+  requestData
+);
+
+    return {
+      success: true,
+      request: data.request,
+      remainingQuantity: data.remainingQuantity,
     };
+  } catch (err) {
+    
+console.error("🔥 Assignment request error:", err.response?.data || err);
+    const message =
+  err.response?.data?.msg ||
+  err.response?.data?.message ||
+  err.message ||
+  "Could not send resource assignment request.";
+
+    return {
+      success: false,
+      message,
+    };
+  }
+};
+const getResourceAssignmentRequests = async () => {
+  try {
+    const { data } = await axios.get(
+      "/admin/resource-assignment-requests"
+    );
+
+    return {
+      success: true,
+      requests: data.requests || [],
+    };
+  } catch (error) {
+    console.error(
+      "Error fetching resource assignment requests:",
+      error
+    );
+
+    return {
+      success: false,
+      requests: [],
+      message:
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        "Could not fetch resource assignment requests.",
+    };
+  }
+};
     const getPurchase = async (id) => {
         try {
             const { data } = await axios.get(`/admin/purchases/${id}`);
@@ -242,6 +309,8 @@ const AdminProvider = ({ children }) => {
                 addPurchase,
                 getPurchases,
                 getAvailableResources,
+                createResourceAssignmentRequest,
+                getResourceAssignmentRequests,
                 getPurchase,
                 labResorces,
                 addLabResource,

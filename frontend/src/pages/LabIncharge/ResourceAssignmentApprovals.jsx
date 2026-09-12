@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { TopBar } from "../../components/TopBar";
-import { RequestRow } from "./RequestRow";
-import { useAdminContext } from "../../context/AdminContext";
+import { useFacultyContext } from "../../context/FacultyContext";
+import { RequestRow } from "./Requestrow";
 
-export function Approvals() {
-  const { getResourceAssignmentRequests } = useAdminContext();
-
+export function ResourceAssignmentApprovals() {
+const {
+  getResourceAssignmentRequests,
+  respondToResourceAssignmentRequest,
+} = useFacultyContext();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +27,25 @@ export function Approvals() {
     fetchRequests();
   }, []);
 
+  const handleDecision = async (id, status) => {
+  const result = await respondToResourceAssignmentRequest(
+    id,
+    status
+  );
+
+  if (result.success) {
+    alert(
+      status === "Approved"
+        ? "Resource successfully assigned to the lab."
+        : "Resource assignment request rejected."
+    );
+
+    await fetchRequests();
+  } else {
+    alert(result.message);
+  }
+};
+
   const pendingCount = requests.filter(
     (request) => request.status === "Pending"
   ).length;
@@ -32,11 +53,11 @@ export function Approvals() {
   return (
     <div>
       <TopBar
-        title="Approvals"
+        title="Resource Assignment Approvals"
         subtitle={`${pendingCount} resource assignment ${
           pendingCount === 1 ? "request" : "requests"
-        } awaiting Lab Incharge decision.`}
-        rightTop="Lab Administrator"
+        } awaiting your decision.`}
+        rightTop="Lab Incharge"
         rightBottom="Computer Engineering"
       />
 
@@ -49,7 +70,7 @@ export function Approvals() {
             className="p-8 text-center text-sm"
             style={{ color: "#5B6A5F" }}
           >
-            Loading resource assignment requests...
+            Loading requests...
           </div>
         ) : requests.length === 0 ? (
           <div
@@ -63,6 +84,7 @@ export function Approvals() {
             <RequestRow
               key={request._id}
               request={request}
+              onDecision={handleDecision}
             />
           ))
         )}

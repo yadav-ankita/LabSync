@@ -3,7 +3,7 @@ import { Plus, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAdminContext } from "../../context/AdminContext";
 export function AddResourceForm() {
   const {
-    addLabResource,
+    createResourceAssignmentRequest,
     labName,
     getAvailableResources,
   } = useAdminContext();
@@ -19,6 +19,9 @@ export function AddResourceForm() {
 
   const selectedPurchase = (availableResources || []).find(
   (resource) => resource._id === selectedPurchaseId
+);
+const selectedLabData = (labName || []).find(
+  (lab) => lab.LabName === selectedLab
 );
 
   const inputStyle = {
@@ -36,66 +39,62 @@ export function AddResourceForm() {
 }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!selectedPurchaseId || !selectedLab) {
-      setFormMessage({
-        type: "error",
-        text: "Please select a purchase and a lab.",
-      });
-      return;
-    }
+  if (!selectedPurchaseId || !selectedLab) {
+    setFormMessage({
+      type: "error",
+      text: "Please select a purchase and a lab.",
+    });
+    return;
+  }
 
-    setSubmitting(true);
-    setFormMessage(null);
+  if (!selectedLabData?.AssignFaculty) {
+    setFormMessage({
+      type: "error",
+      text: "No Lab Incharge is assigned to this lab.",
+    });
+    return;
+  }
 
-    // const result = await addLabResource({
-    //   labName: selectedLab,
-    //   resourceName: resourceName.trim(),
-    //   resourceType,
-    //   quantity: Number(quantity) || 1,
-    // });
-    const result = await addLabResource({
-      purchaseId: selectedPurchaseId,
-      labName: selectedLab,
-      resourceType,
-      quantity: Number(quantity) || 1,
+  setSubmitting(true);
+  setFormMessage(null);
+
+  const result = await createResourceAssignmentRequest({
+    purchaseId: selectedPurchaseId,
+    labName: selectedLab,
+    resourceType,
+    quantity: Number(quantity) || 1,
+  });
+
+  setSubmitting(false);
+
+  if (result.success) {
+    const updatedResources = await getAvailableResources();
+    setAvailableResources(updatedResources);
+
+    setFormMessage({
+      type: "success",
+      text: "Resource assignment request sent for approval.",
     });
 
-    setSubmitting(false);
+    setSelectedPurchaseId("");
+    setSelectedLab("");
+    setQuantity(1);
+  } else {
+    setFormMessage({
+      type: "error",
+      text: result.message,
+    });
+  }
 
-    if (result.success) {
-
-      const added = result.resources || [];
-      const updatedResources = await getAvailableResources();
-setAvailableResources(updatedResources);
-      setFormMessage({
-        type: "success",
-        text:
-          added.length > 1
-            ? `Added ${added.length} units — IDs: ${added
-              .map((r) => r.assetId)
-              .join(", ")}`
-            : `Added — Asset ID: ${added[0]?.assetId}`,
-      });
-
-      setSelectedPurchaseId("");
-      setSelectedLab("");
-      setQuantity(1);
-    } else {
-      setFormMessage({
-        type: "error",
-        text: result.message,
-      });
-    }
-
-    setTimeout(() => setFormMessage(null), 5000);
-  };
+  setTimeout(() => setFormMessage(null), 5000);
+};
   return (
     <div className="mb-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl border p-5 flex flex-wrap items-end gap-3"
+        className="bg-white rounded-xl border p-5 flex flex-wrap items-start gap-3"
         style={{ borderColor: "#E3E6DF" }}
       >
         {/* Resource Name */}
@@ -141,31 +140,50 @@ setAvailableResources(updatedResources);
 ))}
   </select>
 </div>
-        {/* Lab Select */}
-        <div className="flex-1 min-w-40">
-          <label
-            className="block text-xs mb-1"
-            style={{ color: "#5B6A5F" }}
-          >
-            Lab
-          </label>
+{/* Lab Select */}
+<div className="flex-1 min-w-40">
+  <label
+    className="block text-xs mb-1"
+    style={{ color: "#5B6A5F" }}
+  >
+    Lab
+  </label>
 
-          <select
-            value={selectedLab}
-            onChange={(e) => setSelectedLab(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
-            style={inputStyle}
-          >
-            <option value="">Select a lab</option>
+  <select
+    value={selectedLab}
+    onChange={(e) => setSelectedLab(e.target.value)}
+    className="w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
+    style={inputStyle}
+  >
+    <option value="">Select a lab</option>
 
-            {(labName || []).map((lab) => (
-              <option key={lab._id} value={lab.LabName}>
-                {lab.LabName}
-              </option>
-            ))}
-          </select>
-        </div>
+    {(labName || []).map((lab) => (
+      <option key={lab._id} value={lab.LabName}>
+        {lab.LabName}
+      </option>
+    ))}
+  </select>
 
+  {/* Lab Incharge */}
+  {selectedLab && (
+    <div
+      className="mt-1.5 text-xs"
+      style={{ color: "#6B756E" }}
+    >
+      <span className="font-medium">Incharge: </span>
+      <span
+        style={{
+          color: selectedLabData?.AssignFaculty
+            ? "#1F2A24"
+            : "#B3261E",
+        }}
+      >
+        {selectedLabData?.AssignFaculty?.name ||
+          "No Lab Incharge assigned"}
+      </span>
+    </div>
+  )}
+</div>   
         {/* Resource Type */}
         <div>
           <label
@@ -206,16 +224,22 @@ setAvailableResources(updatedResources);
           />
         </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-60"
-          style={{ backgroundColor: "#1F2A24" }}
-        >
-          <Plus size={15} />
-          {submitting ? "Adding..." : "Add resource"}
-        </button>
+        <div>
+  {/* Invisible label spacer to keep horizontal alignment if other fields have labels */}
+  <label className="block text-xs mb-1 invisible select-none">
+    Submit
+  </label>
+
+  <button
+    type="submit"
+    disabled={submitting}
+    className="flex items-center justify-center gap-1.5 px-4 h-[38px] rounded-lg text-sm font-medium text-white disabled:opacity-60"
+    style={{ backgroundColor: "#1F2A24" }}
+  >
+    <Plus size={15} />
+    {submitting ? "Sending..." : "Send for Approval"}
+  </button>
+</div>
       </form>
 
       {/* Message */}

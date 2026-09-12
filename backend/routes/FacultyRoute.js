@@ -10,7 +10,9 @@ const {
     getLabManuals,
     deleteLabManual,
     raiseComplaints,
-    getComplaints
+    getComplaints,
+    getResourceAssignmentRequests,
+    respondToResourceAssignmentRequest
  } = require("../controllers/FacultyController");
 
 router.use(authUser);
@@ -19,5 +21,10 @@ router.route("/labResource").get(getAssignedLabResources);
 router.route("/labManuals").get(getLabManuals).post(upload.single('pdfFile'), uploadLabManuals);
 router.route("/labManuals/:id").delete(deleteLabManual);
 router.route("/complaints").get(getComplaints).post(raiseComplaints);
+router.route("/resourceAssignmentRequests")
+    .get(getResourceAssignmentRequests);
+
+router.route("/resourceAssignmentRequests/:id")
+    .patch(respondToResourceAssignmentRequest);
 
 module.exports = router; 

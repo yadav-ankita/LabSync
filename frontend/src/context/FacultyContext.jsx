@@ -25,6 +25,66 @@ const FacultyProvider = ({ children }) => {
             };
         }
     };
+    const getResourceAssignmentRequests = async () => {
+    try {
+        const { data } = await axios.get(
+            "/faculty/resourceAssignmentRequests"
+        );
+
+        return {
+            success: true,
+            requests: data.requests || [],
+        };
+    } catch (error) {
+        console.error(
+            "Error fetching resource assignment requests:",
+            error
+        );
+
+        return {
+            success: false,
+            requests: [],
+            message:
+                error.response?.data?.msg ||
+                error.response?.data?.message ||
+                "Could not fetch resource assignment requests.",
+        };
+    }
+};
+const respondToResourceAssignmentRequest = async (
+    requestId,
+    status,
+    rejectionReason = ""
+) => {
+    try {
+        const { data } = await axios.patch(
+            `/faculty/resourceAssignmentRequests/${requestId}`,
+            {
+                status,
+                rejectionReason,
+            }
+        );
+
+        return {
+            success: true,
+            request: data.request,
+            message: data.message,
+        };
+    } catch (error) {
+        console.error(
+            "Error responding to resource assignment request:",
+            error
+        );
+
+        return {
+            success: false,
+            message:
+                error.response?.data?.msg ||
+                error.response?.data?.message ||
+                "Could not process resource assignment request.",
+        };
+    }
+};
     const getFacultyManuals = async () => {
         try {
             const { data } = await axios.get("/faculty/labManuals");
@@ -97,6 +157,8 @@ const FacultyProvider = ({ children }) => {
                 facultyResources,
                 facultyManuals,
                 getAssignedLabResources,
+                getResourceAssignmentRequests,
+                respondToResourceAssignmentRequest,
                 getFacultyProfile,
                 editFacultyProfile,
                 uploadLabManual,

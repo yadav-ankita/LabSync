@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TopBar } from '../../components/TopBar';
-import { RequestRow } from "./RequestRow";
+import { RequestRow } from "./Requestrow";
 import { RESOURCE_REQUESTS } from "./dummyData";
 import { useAppContext } from "../../context/AppContext";
 
