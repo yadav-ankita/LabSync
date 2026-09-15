@@ -38,4 +38,6 @@ const ComplaintSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
-module.exports = mongoose.model('Complaint', ComplaintSchema)
+module.exports =
+  mongoose.models.Complaint ||
+  mongoose.model("Complaint", ComplaintSchema);

@@ -7,6 +7,7 @@ const Purchase=require('../models/Purchase_model')
 const Complaint = require('../models/complaint')
 const User = require('../models/User')
 const generateAssetId = require('../utils/generateAssetId')
+const Maintenance = require('../models/Maintenance')
 
 // POST /admin/LabResource
 // body: { labName, resourceName, resourceType, quantity }
@@ -230,6 +231,17 @@ const editComplaintStatus = async (req, res, next) => {
             throw new BadRequestError(`status must be one of: ${allowedStatuses.join(', ')}`)
         }
 
+        if (status === "Resolved") {
+    const maintenance = await Maintenance.findOne({
+        complaint: complaintId
+    })
+
+    if (maintenance) {
+        throw new BadRequestError(
+            "This complaint is under maintenance. It will be resolved when maintenance is completed."
+        )
+    }
+}
         const complaint = await Complaint.findByIdAndUpdate(
             complaintId,
             { status },

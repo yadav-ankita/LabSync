@@ -10,7 +10,7 @@ const {
     getLabManuals,
     deleteLabManual,
     raiseComplaints,
-    getComplaints,
+    getLabComplaints,
     getResourceAssignmentRequests,
     respondToResourceAssignmentRequest
  } = require("../controllers/FacultyController");
@@ -20,7 +20,7 @@ router.route("/myprofile").get(getProfileData).patch(editProfileData);
 router.route("/labResource").get(getAssignedLabResources);
 router.route("/labManuals").get(getLabManuals).post(upload.single('pdfFile'), uploadLabManuals);
 router.route("/labManuals/:id").delete(deleteLabManual);
-router.route("/complaints").get(getComplaints).post(raiseComplaints);
+router.route("/complaints").get(getLabComplaints).post(raiseComplaints);
 router.route("/resourceAssignmentRequests")
     .get(getResourceAssignmentRequests);
 

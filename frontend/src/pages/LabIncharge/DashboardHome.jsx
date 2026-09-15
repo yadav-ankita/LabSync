@@ -6,15 +6,13 @@ import {
   CircleDot,
   Loader2,
 } from "lucide-react";
+import axios from "../../axios";
 import { useEffect, useState } from "react";
 import { TopBar } from "../../components/TopBar";
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
-import {
-  INCHARGE_COMPLAINTS,
-  LAB_RESOURCES,
-} from "./dummyData";
+import { LAB_RESOURCES } from "./dummyData";
 import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
 import { Navigate } from "react-router-dom";
@@ -22,17 +20,30 @@ import { Navigate } from "react-router-dom";
 export function DashboardHome({ setActiveView }) {
   const { currentUser } = useAppContext();
   const { getResourceAssignmentRequests } = useFacultyContext();
-
-  const pending = INCHARGE_COMPLAINTS.filter(
-    (c) => c.status === "Pending"
-  ).length;
-
-  const inProgress = INCHARGE_COMPLAINTS.filter(
-    (c) => c.status === "In Progress"
-  ).length;
-
   const [pendingRequests, setPendingRequests] = useState(0);
+const [complaints, setComplaints] = useState([]);
+const pending = complaints.filter(
+  (c) => c.status === "Pending"
+).length;
 
+const inProgress = complaints.filter(
+  (c) => c.status === "In Progress"
+).length;
+
+
+useEffect(() => {
+  const fetchComplaints = async () => {
+    try {
+      const { data } = await axios.get("/faculty/complaints");
+      setComplaints(data.complaints || []);
+    } catch (error) {
+      console.error("Error fetching complaints:", error);
+      setComplaints([]);
+    }
+  };
+
+  fetchComplaints();
+}, []);
   const underMaintenance = LAB_RESOURCES.filter(
     (r) => r.status === "Under Maintenance"
   ).length;
@@ -197,31 +208,46 @@ export function DashboardHome({ setActiveView }) {
           className="bg-white rounded-xl border overflow-hidden"
           style={{ borderColor: "#E3E6DF" }}
         >
-          {INCHARGE_COMPLAINTS.slice(0, 4).map((c, i) => (
-            <div
-              key={c.id}
-              className="flex items-center justify-between px-5 py-3.5"
-              style={{
-                borderTop:
-                  i === 0
-                    ? "none"
-                    : "1px solid #E3E6DF",
-              }}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <ResourceTag id={c.resourceId} />
+         {complaints.length === 0 ? (
+  <div className="p-6 text-center text-sm" style={{ color: "#5B6A5F" }}>
+    No complaints found.
+  </div>
+) : (
+  complaints.slice(0, 4).map((c, i) => (
+    <div
+      key={c._id}
+      className="flex items-center justify-between px-5 py-3.5"
+      style={{
+        borderTop:
+          i === 0
+            ? "none"
+            : "1px solid #E3E6DF",
+      }}
+    >
+      <div className="flex items-center gap-3 min-w-0">
+        <ResourceTag id={c.resourceId} />
 
-                <p
-                  className="text-sm truncate"
-                  style={{ color: "#1F2A24" }}
-                >
-                  {c.description}
-                </p>
-              </div>
+        <div className="min-w-0">
+          <p
+            className="text-sm truncate"
+            style={{ color: "#1F2A24" }}
+          >
+            {c.description}
+          </p>
 
-              <StatusPill status={c.status} />
-            </div>
-          ))}
+          <p
+            className="text-xs mt-1"
+            style={{ color: "#8A968D" }}
+          >
+            {c.issueType} · {c.labName}
+          </p>
+        </div>
+      </div>
+
+      <StatusPill status={c.status} />
+    </div>
+  ))
+)}
         </div>
       </div>
     </>

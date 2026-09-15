@@ -1,5 +1,5 @@
 import { TopBar } from '../../components/TopBar';
-import { useState } from "react";
+
 import {
   LayoutGrid,
   BookOpen,
@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 import { useComplaintContext } from "../../context/ComplaintContext";
+import { useState, useEffect } from "react";
+import { useFacultyContext } from "../../context/FacultyContext";
+
 
 /* const LAB_OPTIONS = [
   "DS Lab - Block A",
@@ -31,6 +34,7 @@ export function ComplaintForm() {
   const {raiseComplaint}=useComplaintContext();
   const {currentUser } = useAppContext();
   // const [labName, setLabName] = useState(LAB_OPTIONS[0]);
+  const { facultyResources, getAssignedLabResources } = useFacultyContext();
   const [issueType, setIssueType] = useState("Hardware");
   const [resourceId, setResourceId] = useState("");
   const [description, setDescription] = useState("");
@@ -38,8 +42,30 @@ export function ComplaintForm() {
   // Use the currently assigned lab instead of allowing lab selection
   const labName = currentUser?.lab_name || "";
 
+   useEffect(() => {
+    getAssignedLabResources();
+  }, []);
+
+  // Only resources of the assigned lab
+const availableResources = facultyResources || [];
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+e.preventDefault();
+    if (!labName) {
+  console.log("No assigned lab found");
+  return;
+}
+
+if (!resourceId) {
+  console.log("Please select a resource");
+  return;
+}
+
+if (!description.trim()) {
+  console.log("Please enter a description");
+  return;
+}
+    
     if (!resourceId.trim() || !description.trim()) return;
     try {
       const result = await raiseComplaint({
@@ -50,10 +76,16 @@ export function ComplaintForm() {
         status: "Pending",
         date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
       });
-      setSubmitted(true);
+     if(result.success){
+       setSubmitted(true);
       setResourceId("");
       setDescription("");
+
       setTimeout(() => setSubmitted(false), 3000);
+     }else{
+       console.error(result.message);
+     }
+      
     } catch (error) {
       console.log("the error in complaint form occurse");
       console.log(error);
@@ -132,17 +164,32 @@ export function ComplaintForm() {
           </div>
         </div>
 
-        <div className="mb-5">
-          <label className="block text-sm mb-1.5" style={labelStyle}>Resource / PC ID</label>
-          <input
-            type="text"
-            value={resourceId}
-            onChange={(e) => setResourceId(e.target.value)}
-            placeholder="e.g. PC-014"
-            className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
-            style={{ ...inputStyle, fontFamily: "'IBM Plex Mono', monospace" }}
-          />
-        </div>
+      <div className="mb-5">
+  <label
+    className="block text-sm mb-1.5"
+    style={labelStyle}
+  >
+    Resource / PC ID
+  </label>
+
+  <select
+    value={resourceId}
+    onChange={(e) => setResourceId(e.target.value)}
+    className="w-full px-3 py-2.5 rounded-lg border text-sm bg-white focus:outline-none"
+    style={inputStyle}
+  >
+    <option value="">Select a resource</option>
+
+    {availableResources.map((resource) => (
+      <option
+        key={resource._id || resource.assetId}
+        value={resource.assetId}
+      >
+        {resource.assetId} - {resource.resourceName || resource.name}
+      </option>
+    ))}
+  </select>
+</div>
 
         <div className="mb-6">
           <label className="block text-sm mb-1.5" style={labelStyle}>Issue description</label>

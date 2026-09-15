@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
-import { ComplaintsPanel } from "./Complaintspanel";
+import { ComplaintsPanel } from "./ComplaintsPanel";
 import { ResourceManagement } from "./ResourceManagement";
 import { Approvals } from "./Approvals";
-import { MaintenanceLog } from "./MaintenanceLog";
+import { MaintenanceLog } from "./Maintenancelog";
 import { Reports } from "./Reports";
 import { EditProfile } from "./EditProfile";
 import { AddFaculty } from "./AddFaculty";

@@ -12,6 +12,12 @@ const {
 } = require("../controllers/AdminController");
 
 const {
+    getAllMaintenance,
+    createMaintenance,
+    updateMaintenance,
+} = require("../controllers/MaintenanceController");
+
+const {
     createResourceAssignmentRequest,
     getAllResourceAssignmentRequests,
 } = require("../controllers/ResourceAssignmentRequestController");
@@ -28,4 +34,7 @@ router.route("/resource-assignment-requests")
 router.route("/complaints").get(getAllComplaints).patch(editComplaintStatus)
 router.route("/complaints/lab/:labName").get(getAllComplaintsByLab);
 
+router.route("/maintenance").get(getAllMaintenance).post(createMaintenance);
+
+router.route("/maintenance/:id").patch(updateMaintenance);
 module.exports = router;

@@ -1,20 +1,37 @@
-import { useState } from "react";
+
 import { TopBar } from '../../components/TopBar';
 import { ComplaintRow } from "./ComplaintRow";
-import { INCHARGE_COMPLAINTS } from "./dummyData";
 import { useAppContext } from "../../context/AppContext";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import "../../axios";
+
 
 const FILTERS = ["All", "Pending", "In Progress", "Resolved"];
 
 export function ComplaintsPanel() {
     const {currentUser } = useAppContext();
-  const [complaints, setComplaints] = useState(INCHARGE_COMPLAINTS);
+const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
 
-  const handleStatusChange = (id, status) => {
-    setComplaints((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
-  };
 
+  useEffect(() => {
+    const fetchComplaints = async () => {
+        try {
+            const { data } = await axios.get("/faculty/complaints");
+
+            setComplaints(data.complaints || []);
+        } catch (error) {
+            console.error("Error fetching lab complaints:", error);
+            setComplaints([]);
+        }
+    };
+
+    fetchComplaints();
+}, []);
+  
+
+  
   const visible = filter === "All" ? complaints : complaints.filter((c) => c.status === filter);
 
   return (
@@ -49,7 +66,7 @@ export function ComplaintsPanel() {
           </div>
         ) : (
           visible.map((c) => (
-            <ComplaintRow key={c.id} complaint={c} onStatusChange={handleStatusChange} />
+            <ComplaintRow key={c.id} complaint={c}  />
           ))
         )}
       </div>

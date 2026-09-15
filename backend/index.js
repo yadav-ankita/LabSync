@@ -19,6 +19,7 @@ const FacultyRoute=require("./routes/FacultyRoute");
 const AdminRoute=require("./routes/AdminRoute");
 const PurchaseRoute = require("./routes/PurchaseRoute");
 const LabRoute = require("./routes/Lab");
+const HodRoute = require("./routes/HodRoute");
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use("/api/v1/faculty", FacultyRoute);
 app.use("/api/v1/admin",AdminRoute);
 app.use("/api/v1/admin/purchases", PurchaseRoute);
 app.use("/api/v1/lab", LabRoute);
+app.use("/api/v1/hod", HodRoute);
 
 app.use(notFound);
 app.use(errorHandlerMiddleware);

@@ -9,17 +9,110 @@ import {
   FlaskConical,
 } from "lucide-react";
 import { TopBar } from '../../components/TopBar';
-
+import { useEffect, useState } from "react";
+import axios from "../../axios";
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
-import { ALL_COMPLAINTS, ALL_RESOURCES, APPROVAL_REQUESTS, LABS } from "./dummyData";
 
 export function DashboardHome({ setActiveView }) {
-  const openComplaints = ALL_COMPLAINTS.filter((c) => c.status !== "Resolved").length;
-  const underMaintenance = ALL_RESOURCES.filter((r) => r.status === "Under Maintenance").length;
-  const pendingApprovals = APPROVAL_REQUESTS.filter((r) => r.status === "Pending").length;
-  const totalResources = ALL_RESOURCES.length;
+
+    const [complaints, setComplaints] = useState([]);
+
+
+const [maintenance, setMaintenance] = useState([]);
+const [resources, setResources] = useState([]);
+const [approvalRequests, setApprovalRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+const [labs, setLabs] = useState([]);
+
+  const getComplaints = async () => {
+    try {
+      const { data } = await axios.get("/admin/complaints");
+      setComplaints(data.complaints || []);
+    } catch (error) {
+      console.error(
+        "Error fetching dashboard complaints:",
+        error.response?.data || error
+      );
+      setComplaints([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getMaintenance = async () => {
+  try {
+    const { data } = await axios.get("/admin/maintenance");
+    setMaintenance(data.maintenance || []);
+  } catch (error) {
+    console.error(
+      "Error fetching dashboard maintenance:",
+      error.response?.data || error
+    );
+    setMaintenance([]);
+  }
+};
+
+const getResources = async () => {
+  try {
+    const { data } = await axios.get("/admin/LabResource");
+
+    console.log("Resources:", data);
+
+    setResources(data.resources || []);
+  } catch (error) {
+    console.error(
+      "Error fetching dashboard resources:",
+      error.response?.data || error
+    );
+    setResources([]);
+  }
+};
+
+const getApprovalRequests = async () => {
+  try {
+    const { data } = await axios.get("/admin/resource-assignment-requests");
+
+    console.log("Approval Requests:", data);
+
+    setApprovalRequests(data.requests || []);
+  } catch (error) {
+    console.error(
+      "Error fetching approval requests:",
+      error.response?.data || error
+    );
+    setApprovalRequests([]);
+  }
+};
+
+const getLabs = async () => {
+  try {
+    const { data } = await axios.get("/lab");
+
+    setLabs(data.labs || []);
+  } catch (error) {
+    console.error(
+      "Error fetching dashboard labs:",
+      error.response?.data || error
+    );
+    setLabs([]);
+  }
+};
+
+  useEffect(() => {
+    getComplaints();
+    getMaintenance();
+    getResources();
+    getApprovalRequests();
+    getLabs();
+  }, []);
+
+
+  const openComplaints = complaints.filter((c) => c.status !== "Resolved").length;
+  const underMaintenance = maintenance.filter((m) => m.maintenanceStatus !== "Completed").length;
+  const pendingApprovals = approvalRequests.filter((r) => r.status === "Pending").length;
+  const totalResources = resources.length;
 
   const quickActions = [
     {
@@ -42,11 +135,15 @@ export function DashboardHome({ setActiveView }) {
     // },
   ];
 
-  const labBreakdown = LABS.map((lab) => ({
-    lab,
-    resources: ALL_RESOURCES.filter((r) => r.labName === lab).length,
-    complaints: ALL_COMPLAINTS.filter((c) => c.labName === lab && c.status !== "Resolved").length,
-  }));
+  const labBreakdown = labs.map((lab) => ({
+  lab: lab.LabName,
+  resources: lab.NumResources || 0,
+  complaints: complaints.filter(
+    (c) =>
+      c.labName === lab.LabName &&
+      c.status !== "Resolved"
+  ).length,
+}));
 
   return (
     <div>
@@ -123,9 +220,9 @@ export function DashboardHome({ setActiveView }) {
             Recent complaints
           </h2>
           <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
-            {ALL_COMPLAINTS.slice(0, 4).map((c, i) => (
+            {complaints.slice(0, 4).map((c, i) => (
               <div
-                key={c.id}
+                key={c._id}
                 className="flex items-center justify-between px-5 py-3.5"
                 style={{ borderTop: i === 0 ? "none" : "1px solid #E3E6DF" }}
               >

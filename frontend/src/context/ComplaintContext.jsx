@@ -37,9 +37,15 @@ const ComplaintProvider = ({ children }) => {
             };
         } catch (error) {
             console.error("Error editing complaint status:", error);
+
+             const message =
+        error.response?.data?.message ||
+        error.response?.data?.msg ||
+        "Could not edit complaint status.";
+
             return {
                 success: false,
-                message: "Could not edit complaint status."
+                message
             };
         }
     };
@@ -64,26 +70,39 @@ const ComplaintProvider = ({ children }) => {
             console.error("Error fetching complaints:", error);
         }
     };
-    const raiseComplaint = async (complaintData) => {
-        try {
-            const { data } = await axios.post("/student/complaints", complaintData);
-            console.log("the data we get after raise complaints in app context is", data);
-            setComplaints((prev) => [
-                data.complaint,
-                ...prev
-            ]);
-            return {
-                success: true,
-                complaint: data.complaint
-            };
-        } catch (err) {
-            const message = err.response?.data?.msg || "Could not submit complaint.";
-            return {
-                success: false,
-                message
-            };
-        }
-    };
+   const raiseComplaint = async (complaintData) => {
+    try {
+        const { data } = await axios.post("/faculty/complaints", complaintData);
+
+        console.log(
+            "the data we get after raise complaints in app context is",
+            data
+        );
+
+        setComplaints((prev) => [
+            data.complaint,
+            ...prev
+        ]);
+
+        return {
+            success: true,
+            complaint: data.complaint
+        };
+
+    } catch (err) {
+        console.error("Error raising complaint:", err);
+
+        const message =
+            err.response?.data?.msg ||
+            err.response?.data?.message ||
+            "Could not submit complaint.";
+
+        return {
+            success: false,
+            message
+        };
+    }
+};
     return (
         <ComplaintContext.Provider 
          value={{

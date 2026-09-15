@@ -10,6 +10,7 @@ const fs = require("fs/promises")
 const path = require("path")
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
+ const Complaint = require("../models/complaint");
 
 const getProfileData = async (req, res, next) => {
     try {
@@ -312,20 +313,76 @@ const deleteLabManual = async (req, res, next) => {
         next(error);
     }
 }
+// const raiseComplaints = async (req, res, next) => {
+//     try {
+
+//     } catch (error) {
+
+//     }
+// }
+
 const raiseComplaints = async (req, res, next) => {
     try {
+        const {
+            labName,
+            issueType,
+            resourceId,
+            description,
+            status,
+            date
+        } = req.body;
+
+        if (!labName || !issueType || !resourceId || !description) {
+            throw new BadRequestError(
+                "Lab name, issue type, resource ID and description are required."
+            );
+        }
+
+        // Your complaint model should be imported here
+        // const Complaint = require("../models/Complaint");
+
+        const complaint = await Complaint.create({
+            labName,
+            issueType,
+            resourceId,
+            description,
+            status: status || "Pending",
+            date: date || new Date(),
+            faculty: req.user.userId
+        });
+
+        res.status(StatusCodes.CREATED).json({
+            message: "Complaint raised successfully",
+            complaint
+        });
 
     } catch (error) {
-
+        next(error);
     }
-}
-const getComplaints = async (req, res, next) => {
+};
+const getLabComplaints = async (req, res, next) => {
     try {
+        const faculty = await Faculty.findById(req.user.userId);
+
+        if (!faculty) {
+            throw new NotFoundError("Faculty not found");
+        }
+
+        const complaints = await Complaint.find({
+            labName: faculty.lab_name
+        })
+        .populate("faculty", "name email")
+        .sort({ createdAt: -1 });
+
+        res.status(StatusCodes.OK).json({
+            complaints,
+            count: complaints.length
+        });
 
     } catch (error) {
-
+        next(error);
     }
-}
+};
 module.exports = {
     getProfileData,
     editProfileData,
@@ -336,5 +393,5 @@ module.exports = {
     getLabManuals,
     deleteLabManual,
     raiseComplaints,
-    getComplaints
+    getLabComplaints
 };
