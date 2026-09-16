@@ -5,6 +5,7 @@ const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest")
 const generateAssetId = require("../utils/generateAssetId"); 
 const Faculty = require("../models/Faculty_model")
 const LabResource = require("../models/LabResource")
+const TransferRequest = require("../models/TransferRequest");
 const LabManual = require("../models/LabManual")
 const fs = require("fs/promises")
 const path = require("path")
@@ -253,6 +254,310 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
         next(error);
     }
 };
+const createTransferRequest = async (req, res, next) => {
+  try {
+    const { fromLabId, assetIds, reason } = req.body;
+
+    if (
+      !fromLabId ||
+      !Array.isArray(assetIds) ||
+      assetIds.length === 0 ||
+      !reason?.trim()
+    ) {
+      throw new BadRequestError(
+        "Source lab, at least one resource and reason are required"
+      );
+    }
+
+    // Remove duplicate asset IDs
+    const uniqueAssetIds = [...new Set(assetIds)];
+
+    // Logged-in Lab Incharge
+    const requester = await Faculty.findById(req.user.userId);
+
+    if (!requester) {
+      throw new NotFoundError("Faculty not found");
+    }
+
+    // Logged-in user's lab = DESTINATION
+    const toLab = await Lab.findOne({
+      AssignFaculty: requester._id,
+    });
+
+    if (!toLab) {
+      throw new BadRequestError(
+        "You are not assigned as Lab Incharge to any lab"
+      );
+    }
+
+    // Selected lab = SOURCE
+    const fromLab = await Lab.findById(fromLabId);
+
+    if (!fromLab) {
+      throw new NotFoundError("Source lab not found");
+    }
+
+    if (fromLab._id.toString() === toLab._id.toString()) {
+      throw new BadRequestError(
+        "Source lab must be different from your assigned lab"
+      );
+    }
+
+    if (!fromLab.AssignFaculty) {
+      throw new BadRequestError(
+        "Source lab does not have an assigned Lab Incharge"
+      );
+    }
+
+    // Find all requested resources
+    const assets = await LabResource.find({
+      _id: { $in: uniqueAssetIds },
+    });
+
+    if (assets.length !== uniqueAssetIds.length) {
+      throw new NotFoundError(
+        "One or more selected resources were not found"
+      );
+    }
+
+    // Make sure every resource belongs to the selected source lab
+    const invalidAsset = assets.find(
+      (asset) => asset.labName !== fromLab.LabName
+    );
+
+    if (invalidAsset) {
+      throw new BadRequestError(
+        "One or more selected resources do not belong to the selected source lab"
+      );
+    }
+
+    // Prevent transfer of resources already involved in an active request
+    const existingRequest = await TransferRequest.findOne({
+      assets: { $in: uniqueAssetIds },
+      status: {
+        $in: ["Pending", "In Progress"],
+      },
+    });
+
+    if (existingRequest) {
+      throw new BadRequestError(
+        "One or more selected resources already have a transfer request in progress"
+      );
+    }
+
+    const otherIncharge = fromLab.AssignFaculty;
+
+    const transferRequest = await TransferRequest.create({
+      assets: uniqueAssetIds,
+      fromLab: fromLab._id,
+      toLab: toLab._id,
+      requestedBy: requester._id,
+      otherIncharge,
+      reason: reason.trim(),
+
+      requesterApproval: {
+        status: "Pending",
+      },
+
+      otherInchargeApproval: {
+        status: "Pending",
+      },
+
+      hodApproval: {
+        status: "Pending",
+      },
+
+      status: "Pending",
+    });
+    const populatedRequest = await TransferRequest.findById(
+      transferRequest._id
+    )
+      .populate("assets")
+      .populate("fromLab")
+      .populate("toLab")
+      .populate("requestedBy", "name email")
+      .populate("otherIncharge", "name email");
+
+    res.status(StatusCodes.CREATED).json({
+      message: "Transfer request created successfully",
+      request: populatedRequest,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+    const deleteTransferRequest = async (req, res, next) => {
+  try {
+    const request = await TransferRequest.findById(req.params.id);
+
+    if (!request) {
+      throw new NotFoundError("Transfer request not found");
+    }
+
+    const userId = req.user.userId.toString();
+
+    const isRequester =
+      request.requestedBy.toString() === userId;
+
+    const isOtherIncharge =
+      request.otherIncharge.toString() === userId;
+
+    if (!isRequester && !isOtherIncharge) {
+      throw new UnauthenticatedError(
+        "You are not authorized to delete this transfer request"
+      );
+    }
+
+    await TransferRequest.findByIdAndDelete(req.params.id);
+
+    res.status(StatusCodes.OK).json({
+      message: "Transfer request deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const getTransferRequests = async (req, res, next) => {
+    try {
+        const requests = await TransferRequest.find({
+            $or: [
+                { requestedBy: req.user.userId },
+                { otherIncharge: req.user.userId }
+            ]
+        })
+            .populate("assets")
+            .populate("fromLab", "LabName AssignFaculty")
+            .populate("toLab", "LabName AssignFaculty")
+            .populate("requestedBy", "name email")
+            .populate("otherIncharge", "name email")
+            .sort({ createdAt: -1 });
+
+        res.status(StatusCodes.OK).json({
+            requests,
+            count: requests.length
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+const getTransferOptions = async (req, res, next) => {
+    try {
+        const labs = await Lab.find({
+            AssignFaculty: { $ne: null }
+        }).select("_id LabName AssignFaculty");
+
+        const resources = await LabResource.find({
+            status: { $ne: "Maintenance" }
+        }).select(
+            "_id assetId resourceName resourceCode resourceType labName labCode status"
+        );
+
+        res.status(StatusCodes.OK).json({
+            labs,
+            resources
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+const respondToTransferRequest = async (req, res, next) => {
+    try {
+        const { status, rejectionReason } = req.body;
+
+        if (!["Approved", "Rejected"].includes(status)) {
+            throw new BadRequestError(
+                "Status must be Approved or Rejected"
+            );
+        }
+
+        const request = await TransferRequest.findById(req.params.id);
+
+        if (!request) {
+            throw new NotFoundError("Transfer request not found");
+        }
+
+        const userId = req.user.userId.toString();
+
+        const isRequester =
+            request.requestedBy.toString() === userId;
+
+        const isOtherIncharge =
+            request.otherIncharge.toString() === userId;
+
+        if (!isRequester && !isOtherIncharge) {
+            throw new UnauthenticatedError(
+                "You are not authorized to respond to this transfer request"
+            );
+        }
+
+        if (request.status === "Rejected" || request.status === "Transferred") {
+            throw new BadRequestError(
+                "This transfer request has already been processed"
+            );
+        }
+
+        // Other Lab Incharge must respond first
+        if (isRequester && request.otherInchargeApproval.status !== "Approved") {
+            throw new BadRequestError(
+                "The other Lab Incharge must approve the request first"
+            );
+        }
+
+        if (isOtherIncharge) {
+            if (request.otherInchargeApproval.status !== "Pending") {
+                throw new BadRequestError(
+                    "You have already responded to this request"
+                );
+            }
+
+            request.otherInchargeApproval.status = status;
+            request.otherInchargeApproval.decidedAt = new Date();
+        }
+
+        if (isRequester) {
+            if (request.requesterApproval.status !== "Pending") {
+                throw new BadRequestError(
+                    "You have already responded to this request"
+                );
+            }
+
+            request.requesterApproval.status = status;
+            request.requesterApproval.decidedAt = new Date();
+        }
+
+        // If either Lab Incharge rejects, reject the complete request
+        if (status === "Rejected") {
+            request.status = "Rejected";
+            request.rejectionReason =
+                rejectionReason?.trim() || null;
+
+            await request.save();
+
+            return res.status(StatusCodes.OK).json({
+                message: "Transfer request rejected",
+                request
+            });
+        }
+
+        // Both Lab Incharges have approved
+        if (
+            request.requesterApproval.status === "Approved" &&
+            request.otherInchargeApproval.status === "Approved"
+        ) {
+            request.status = "In Progress";
+        }
+
+        await request.save();
+
+        res.status(StatusCodes.OK).json({
+            message: "Transfer request approval updated",
+            request
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 const uploadLabManuals = async (req, res, next) => {
     try {
         if (!req.file) {
@@ -389,6 +694,11 @@ module.exports = {
     getAssignedLabResources,
     getResourceAssignmentRequests,
     respondToResourceAssignmentRequest,
+    createTransferRequest,
+    deleteTransferRequest,
+    getTransferRequests,
+    getTransferOptions,
+    respondToTransferRequest,
     uploadLabManuals,
     getLabManuals,
     deleteLabManual,

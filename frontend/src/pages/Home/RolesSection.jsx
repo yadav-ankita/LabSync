@@ -1,5 +1,11 @@
 import { Link } from "react-router-dom";
-import { GraduationCap, FlaskConical, ShieldCheck, ArrowRight } from "lucide-react";
+import {
+  GraduationCap,
+  FlaskConical,
+  ShieldCheck,
+  Crown,
+  ArrowRight,
+} from "lucide-react";
 
 const ROLES = [
   {
@@ -23,6 +29,13 @@ const ROLES = [
     href: "/login",
     cta: "Admin sign in",
   },
+  {
+    icon: Crown,
+    title: "Head of the department",
+    desc: "Review and approve resource transfers, maintenance requests, and department-level approvals.",
+    href: "/login",
+    cta: "HOD sign in",
+  },
 ];
 
 export function RolesSection() {
@@ -35,7 +48,7 @@ export function RolesSection() {
         Built for every role in the department.
       </h2>
 
-      <div className="grid md:grid-cols-3 gap-4 mt-10">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
         {ROLES.map((r) => {
           const Icon = r.icon;
           return (

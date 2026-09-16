@@ -1,6 +1,7 @@
 import {
   LayoutGrid,
   ClipboardCheck,
+  ArrowLeftRight,
   User,
   LogOut,
   FlaskConical,
@@ -28,6 +29,11 @@ export function Sidebar({ activeView, setActiveView }) {
       label: "Maintenance Approval",
       icon: ClipboardCheck,
     },
+    {
+  key: "transferRequests",
+  label: "Transfer Requests",
+  icon: ArrowLeftRight,
+},
     {
       key: "profile",
       label: "Edit Profile",

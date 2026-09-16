@@ -17,6 +17,8 @@ export default function HodDashbaord() {
   const [activeView, setActiveView] = useState("home");
 
   const [maintenance, setMaintenance] = useState([]);
+  const [transferRequests, setTransferRequests] = useState([]);
+  const [transferLoading, setTransferLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const getPendingMaintenance = async () => {
@@ -37,10 +39,29 @@ export default function HodDashbaord() {
       setLoading(false);
     }
   };
+  const getPendingTransferRequests = async () => {
+  try {
+    const { data } = await axios.get("/hod/transferRequests");
 
-  useEffect(() => {
-    getPendingMaintenance();
-  }, []);
+    console.log("HOD TRANSFER REQUESTS:", data);
+
+    setTransferRequests(data.requests || []);
+  } catch (error) {
+    console.error(
+      "Error fetching HOD transfer requests:",
+      error.response?.data || error
+    );
+
+    setTransferRequests([]);
+  } finally {
+    setTransferLoading(false);
+  }
+};
+
+useEffect(() => {
+  getPendingMaintenance();
+  getPendingTransferRequests();
+}, []);
 
 const handleApprove = async (id) => {
   try {
@@ -62,7 +83,34 @@ const handleApprove = async (id) => {
     );
   }
 };
+const handleTransferApproval = async (id, approvalStatus, hodRemarks= "") => {
+  try {
+    const { data } = await axios.patch(
+      `/hod/transferRequests/${id}`,
+      {
+        approvalStatus,
+        hodRemarks,
+      }
+    );
 
+    console.log("HOD TRANSFER APPROVAL:", data);
+
+    // Remove the approved request from pending HOD requests
+    setTransferRequests((prev) =>
+      prev.filter((request) => request._id !== id)
+    );
+  } catch (error) {
+    console.error(
+      "Error updating transfer approval:",
+      error.response?.data || error
+    );
+
+    alert(
+      error.response?.data?.message ||
+        "Failed to update transfer request."
+    );
+  }
+};
 const handleReject = async (id) => {
   const hodRemarks = window.prompt(
     "Please enter the reason for rejecting this maintenance request:"
@@ -736,7 +784,206 @@ const handleReject = async (id) => {
             </div>
           </>
         )}
+        {/* ================= TRANSFER REQUESTS ================= */}
+{activeView === "transferRequests" && (
+  <>
+    <TopBar
+      title="Transfer Requests"
+      subtitle="Review resource transfer requests approved by both Lab Incharges."
+      rightTop={`${transferRequests.length} Pending`}
+      rightBottom="HOD Portal"
+    />
 
+    <div
+      className="bg-white rounded-xl border overflow-hidden"
+      style={{
+        borderColor: "#E3E6DF",
+      }}
+    >
+      <div
+        className="px-6 py-5 border-b"
+        style={{
+          borderColor: "#E3E6DF",
+        }}
+      >
+        <h2
+          className="text-lg font-semibold"
+          style={{ color: "#1F2A24" }}
+        >
+          Pending Transfer Requests
+        </h2>
+
+        <p
+          className="text-sm mt-1"
+          style={{ color: "#7B867E" }}
+        >
+          Both Lab Incharges have approved these requests and they are
+          awaiting HOD approval.
+        </p>
+      </div>
+
+      {transferLoading ? (
+        <div className="p-10 text-center">
+          <p
+            className="text-sm"
+            style={{ color: "#7B867E" }}
+          >
+            Loading transfer requests...
+          </p>
+        </div>
+      ) : transferRequests.length === 0 ? (
+        <div className="p-12 text-center">
+          <p
+            className="text-sm font-medium"
+            style={{ color: "#1F2A24" }}
+          >
+            No pending transfer requests
+          </p>
+
+          <p
+            className="text-xs mt-1"
+            style={{ color: "#8A968D" }}
+          >
+            There are no transfer requests waiting for HOD approval.
+          </p>
+        </div>
+      ) : (
+        transferRequests.map((request, index) => (
+          <div
+            key={request._id}
+            className="px-6 py-5"
+            style={{
+              borderTop:
+                index === 0
+                  ? "none"
+                  : "1px solid #E3E6DF",
+            }}
+          >
+            <div className="flex items-start justify-between gap-6">
+
+              {/* Request Details */}
+              <div className="min-w-0 flex-1">
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: "#1F2A24" }}
+                  >
+                    {request.asset?.assetId || "Resource Transfer"}
+                  </span>
+
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full"
+                    style={{
+                      backgroundColor: "#FFF4E5",
+                      color: "#A66A20",
+                    }}
+                  >
+                    Pending HOD Approval
+                  </span>
+                </div>
+
+                <div
+                  className="text-sm mt-2 font-medium"
+                  style={{ color: "#1F2A24" }}
+                >
+                {request.assets?.map((asset) => (
+  <div key={asset._id}>
+    {asset.resourceName} — {asset.assetId}
+  </div>
+))}
+                </div>
+
+                <div className="flex items-center gap-2 mt-3">
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full"
+                    style={{
+                      backgroundColor: "#EEF1EC",
+                      color: "#3E4A41",
+                    }}
+                  >
+                    {request.fromLab?.LabName || "Unknown Lab"}
+                  </span>
+
+                  <span style={{ color: "#5B6A5F" }}>→</span>
+
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full"
+                    style={{
+                      backgroundColor: "#EEF1EC",
+                      color: "#3E4A41",
+                    }}
+                  >
+                    {request.toLab?.LabName || "Unknown Lab"}
+                  </span>
+                </div>
+
+                <p
+                  className="text-sm mt-3"
+                  style={{ color: "#1F2A24" }}
+                >
+                  <span className="font-medium">Reason:</span>{" "}
+                  {request.reason}
+                </p>
+
+                <p
+                  className="text-xs mt-3"
+                  style={{ color: "#8A968D" }}
+                >
+                  Requested by:{" "}
+                  {request.requestedBy?.name || "Lab Incharge"}
+                </p>
+
+              </div>
+
+              {/* HOD Actions */}
+              <div className="flex items-center gap-2 shrink-0">
+
+                <button
+                  type="button"
+                  onClick={() => handleTransferApproval(request._id, "Approved")}
+                  className="px-4 py-2 rounded-lg text-sm font-medium"
+                  style={{
+                    backgroundColor: "#E8F3EA",
+                    color: "#35663D",
+                  }}
+                >
+                  Approve
+                </button>
+
+                <button
+  type="button"
+  onClick={() => {
+    const hodRemarks = window.prompt(
+      "Enter reason for rejecting this transfer request:"
+    );
+
+    if (hodRemarks?.trim()) {
+      handleTransferApproval(
+        request._id,
+        "Rejected",
+        hodRemarks.trim()
+      );
+    }
+  }}
+  className="px-4 py-2 rounded-lg text-sm font-medium"
+  style={{
+    backgroundColor: "#FCECEC",
+    color: "#9A3D3D",
+  }}
+>
+  Reject
+</button>
+
+              </div>
+
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </>
+)}
         {/* ================= PROFILE ================= */}
         {activeView === "profile" && (
           <>

@@ -7,12 +7,17 @@ const {
     editProfileData,
     getAssignedLabResources,
     uploadLabManuals,
+    createTransferRequest,
+    getTransferRequests,
+    deleteTransferRequest,
+    getTransferOptions,
+    respondToTransferRequest,
     getLabManuals,
     deleteLabManual,
     raiseComplaints,
     getLabComplaints,
     getResourceAssignmentRequests,
-    respondToResourceAssignmentRequest
+    respondToResourceAssignmentRequest,
  } = require("../controllers/FacultyController");
 
 router.use(authUser);
@@ -26,5 +31,12 @@ router.route("/resourceAssignmentRequests")
 
 router.route("/resourceAssignmentRequests/:id")
     .patch(respondToResourceAssignmentRequest);
-
+router.route("/transferRequests")
+    .get(getTransferRequests)
+    .post(createTransferRequest);
+router.route("/transferOptions")
+    .get(getTransferOptions);
+router.route("/transferRequests/:id")
+    .patch(respondToTransferRequest)
+    .delete(deleteTransferRequest);
 module.exports = router; 
