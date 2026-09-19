@@ -1,6 +1,6 @@
 
 import { TopBar } from '../../components/TopBar';
-import { RequestRow } from "./Requestrow";
+import { RequestRow } from "./TransferRequestRow";
 import { useState, useEffect } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { CreateTransferRequest } from "./CreateTransferRequest";
