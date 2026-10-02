@@ -5,7 +5,7 @@ import { FacultyCard } from "./FacultyCard";
 import { useAdminContext } from "../../context/AdminContext";
 import { TopBar } from '../../components/TopBar';
 
-const LAB_OPTIONS = [1, 2, 3, 4, 5, 6];
+const UNASSIGNED_FACULTY = "unassigned";
 
 export function AddFaculty() {
   const {
@@ -45,17 +45,10 @@ export function AddFaculty() {
  const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // if (!form.name.trim() || !form.email.trim() || !form.lab_id) {
-  //   setFormMessage({
-  //     type: "error",
-  //     text: "Please provide name, email and select an available lab.",
-  //   });
-  //   return;
-  // }
-  if (!form.name.trim() || !form.email.trim()) {
+  if (!form.name.trim() || !form.email.trim() || !form.lab_id) {
   setFormMessage({
     type: "error",
-    text: "Please provide name and email.",
+    text: "Please provide name, email, and select a faculty type or lab.",
   });
   return;
 }
@@ -74,7 +67,7 @@ export function AddFaculty() {
   const result = await addFaculty({
   name: form.name.trim(),
   email: form.email.trim(),
-  lab_id: form.lab_id || null,
+  lab_id: form.lab_id === UNASSIGNED_FACULTY ? null : form.lab_id,
   lab_name: selectedLab?.LabName || null,
 });
 
@@ -104,9 +97,9 @@ export function AddFaculty() {
   setTimeout(() => setFormMessage(null), 4000);
 };
 
-  const handleSendCredentials = async (password, email, facultyId) => {
+  const handleSendCredentials = async (email, facultyId) => {
     setSendStatus((prev) => ({ ...prev, [facultyId]: { status: "sending" } }));
-    const result = await emailCredentialsToFaculty({ password, email });
+    const result = await emailCredentialsToFaculty({ email });
     setSendStatus((prev) => ({
       ...prev,
       [facultyId]: { status: result.success ? "sent" : "error", message: result.message },
@@ -124,7 +117,7 @@ export function AddFaculty() {
 
   return (
     <div>
-      <TopBar title="Faculty Accounts" subtitle="Add lab incharges and send them their login credentials." 
+      <TopBar title="Faculty Accounts" subtitle="Add faculty or assign a lab to make them a lab incharge." 
              rightTop="Lab Administrator" rightBottom="Computer Engineering"
       />
 
@@ -170,7 +163,8 @@ export function AddFaculty() {
             className="w-full px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none"
             style={inputStyle}
           >
-            <option value="">Select a lab</option>
+            <option value="">Select a faculty type or lab</option>
+            <option value={UNASSIGNED_FACULTY}>Faculty (no assigned lab)</option>
 
             {(labName || [])
               .filter((lab) => !lab.AssignFaculty)

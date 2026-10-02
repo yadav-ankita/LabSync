@@ -6,6 +6,7 @@ import StudentLogin from "./components/StudentLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LabInchargeDashboard } from "./pages/LabIncharge/LabInchargeDashboard";
 import { LabAdminDashboard } from "./pages/LabAdmin/LabAdminDashboard";
+import { FacultyDashboard } from "./pages/Faculty/FacultyDashboard";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import HodDashbaord from "./pages/HOD/HodDashbaord";
@@ -43,6 +44,14 @@ export default function App() {
                     element={
                         <ProtectedRoute allowedRoles={["faculty"]}>
                             <LabInchargeDashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/faculty-dashboard"
+                    element={
+                        <ProtectedRoute allowedRoles={["faculty"]}>
+                            <FacultyDashboard />
                         </ProtectedRoute>
                     }
                 />

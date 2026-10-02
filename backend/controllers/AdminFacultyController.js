@@ -16,8 +16,8 @@ const generateRandomPassword = (length = 10) => {
     return password
 }
 // module.exports = generateRandomPassword
-// POST /faculty/  -> Lab Admin adds a new faculty (lab incharge)
-// body: { name, email, lab_no }
+// POST /faculty/ -> Lab Admin creates a faculty account, optionally assigning a lab.
+// A faculty account with an assigned lab is a Lab Incharge.
 // A random password is generated on the backend and stored against the
 // faculty record so it can be emailed to them (immediately or later) via
 // the /faculty/credentials endpoint.
@@ -134,12 +134,12 @@ const getFaculties = async (req, res, next) => {
 }
 
 // POST /faculty/credentials  -> emails the faculty their login credentials
-// body: { password, email }
+// body: { email }
 const emailCredentials = async (req, res, next) => {
     try {
-        const { password, email } = req.body
-        if (!password || !email) {
-            throw new BadRequestError('Please provide both password and email')
+        const { email } = req.body
+        if (!email) {
+            throw new BadRequestError('Please provide an email')
         }
 
         const faculty = await Faculty.findOne({ email: email.toLowerCase().trim() })
@@ -147,12 +147,16 @@ const emailCredentials = async (req, res, next) => {
             throw new NotFoundError('Faculty not found')
         }
 
+        const accountDescription = faculty.lab_name
+            ? `a Lab Incharge account for <b>${faculty.lab_name}</b>`
+            : 'a Faculty account with no assigned lab';
+
         await sendEmail({
             to: faculty.email,
-            subject: 'Your LabSync Lab Incharge Account Credentials',
+            subject: 'Your LabSync Faculty Account Credentials',
             html: `
                 <p>Hello ${faculty.name},</p>
-                <p>Your LabSync Lab Incharge account has been created for <b>${faculty.lab_name}</b>.</p>
+                <p>Your LabSync account has been created as ${accountDescription}.</p>
                 <p>
                     <b>Login email:</b> ${faculty.email}<br/>
                     <b>Password:</b> ${faculty.password}

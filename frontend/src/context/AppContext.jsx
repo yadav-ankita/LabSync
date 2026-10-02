@@ -112,7 +112,9 @@ const AppProvider = ({ children }) => {
         <AppContext.Provider
             value={{
                 currentUser,
+                setCurrentUser,
                 isAuthenticated,
+                setIsAuthenticated,
                 authLoading,
                 error,
                 login,

@@ -8,7 +8,7 @@ function ProtectedRoute({ children, allowedRoles }) {
     if (authLoading) return null;
     if (!currentUser) return <Navigate to="/login" replace />;
     if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
-        return <Navigate to={getDashboardPath(currentUser.role)} replace />;
+        return <Navigate to={getDashboardPath(currentUser.role, currentUser)} replace />;
     }
     return children;
 }

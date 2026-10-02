@@ -1,4 +1,4 @@
-export function getDashboardPath(role) {
+export function getDashboardPath(role, user) {
     switch (role) {
         case "student":
             return "/student-dashboard";
@@ -7,7 +7,9 @@ export function getDashboardPath(role) {
         case "hod":
              return "/HOD-dashboard"
         case "faculty":
-            return "/labIncharge-dashboard";
+            return user && !user.lab_name
+                ? "/faculty-dashboard"
+                : "/labIncharge-dashboard";
         default:
             return "/login";
     }

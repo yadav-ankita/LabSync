@@ -1,7 +1,6 @@
 
 import { TopBar } from '../../components/TopBar';
 import { ComplaintRow } from "./ComplaintRow";
-import { useAppContext } from "../../context/AppContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../axios";
@@ -10,7 +9,6 @@ import "../../axios";
 const FILTERS = ["All", "Pending", "In Progress", "Resolved"];
 
 export function ComplaintsPanel() {
-    const {currentUser } = useAppContext();
 const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
 
@@ -36,10 +34,7 @@ const [complaints, setComplaints] = useState([]);
 
   return (
     <div>
-      <TopBar title="Complaints" subtitle="Review and update issues reported in your labs." 
-          rightTop={`${currentUser?.lab_name || currentUser?.name || "No assigned lab"}`} 
-          rightBottom=" Assigned laboratory"
-      />
+        <TopBar title="Complaints" subtitle="Review and update issues reported in your labs." />
 
       <div className="flex gap-2 mb-4">
         {FILTERS.map((f) => (

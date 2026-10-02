@@ -673,9 +673,11 @@ const getLabComplaints = async (req, res, next) => {
             throw new NotFoundError("Faculty not found");
         }
 
-        const complaints = await Complaint.find({
-            labName: faculty.lab_name
-        })
+        const complaintFilter = faculty.lab_name
+            ? { $or: [{ labName: faculty.lab_name }, { faculty: faculty._id }] }
+            : { faculty: faculty._id };
+
+        const complaints = await Complaint.find(complaintFilter)
         .populate("faculty", "name email")
         .sort({ createdAt: -1 });
 

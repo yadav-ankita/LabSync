@@ -30,7 +30,7 @@ export default function Login() {
     };
     return (
         <>
-            {currentUser && <Navigate to={getDashboardPath(currentUser.role)} replace />}
+            {currentUser && <Navigate to={getDashboardPath(currentUser.role, currentUser)} replace />}
             <div className="min-h-screen w-full flex bg-stone-100">
                 {/* Brand panel */}
                 <div

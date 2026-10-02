@@ -32,7 +32,7 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials, onDelete }
             <div className="flex items-center gap-1.5 mt-3">
                 <FlaskConical size={13} color="#D89A4E" />
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F2F4F1", color: "#5B6A5F" }}>
-                    Lab {faculty.lab_name}
+                    {faculty.lab_name ? `Lab Incharge · ${faculty.lab_name}` : "Faculty"}
                 </span>
             </div>
 
@@ -44,7 +44,7 @@ export function FacultyCard({ faculty, sendStatus, onSendCredentials, onDelete }
                 </div> */}
                 <div className="flex items-center gap-2">
                 <button
-                    onClick={() => onSendCredentials(faculty.password, faculty.email, faculty._id)}
+                    onClick={() => onSendCredentials(faculty.email, faculty._id)}
                     disabled={isSending}
                     className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors"
                     style={{
