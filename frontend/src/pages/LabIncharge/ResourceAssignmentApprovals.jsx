@@ -27,10 +27,11 @@ const {
     fetchRequests();
   }, []);
 
-  const handleDecision = async (id, status) => {
+  const handleDecision = async (id, status, rejectionReason="") => {
   const result = await respondToResourceAssignmentRequest(
     id,
-    status
+    status,
+    rejectionReason
   );
 
   if (result.success) {
