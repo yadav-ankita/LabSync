@@ -6,7 +6,7 @@ const {
 
 const Maintenance = require("../models/Maintenance");
 const Complaint = require("../models/complaint");
-
+const LabResource = require("../models/Labresource");
 
 // GET /admin/maintenance
 const getAllMaintenance = async (req, res, next) => {
@@ -34,6 +34,7 @@ const getAllMaintenance = async (req, res, next) => {
 // POST /admin/maintenance
 // Create maintenance record from a complaint
 const createMaintenance = async (req, res, next) => {
+
   try {
     const { complaintId } = req.body;
 
@@ -47,6 +48,15 @@ const createMaintenance = async (req, res, next) => {
     if (!complaint) {
       throw new NotFoundError("Complaint not found");
     }
+    const resource = await LabResource.findOne({
+  assetId: complaint.resourceId,
+});
+
+if (!resource) {
+  throw new NotFoundError(
+    "Lab resource associated with this complaint was not found."
+  );
+}
 
     // Prevent duplicate maintenance record
     const existingMaintenance = await Maintenance.findOne({
@@ -70,6 +80,8 @@ const createMaintenance = async (req, res, next) => {
     { new: true }
 );
 
+resource.status = "Maintenance";
+await resource.save();
     const populatedMaintenance = await Maintenance.findById(
       maintenance._id
     ).populate({
@@ -95,14 +107,8 @@ const updateMaintenance = async (req, res, next) => {
   try {
     const maintenanceId = req.params.id;
 
-    const maintenance = await Maintenance.findByIdAndUpdate(
-      maintenanceId,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    ).populate({
+    // First find the maintenance record
+    const maintenance = await Maintenance.findById(maintenanceId).populate({
       path: "complaint",
       populate: {
         path: "faculty",
@@ -113,18 +119,99 @@ const updateMaintenance = async (req, res, next) => {
     if (!maintenance) {
       throw new NotFoundError("Maintenance record not found");
     }
+
+    // If trying to complete maintenance,
+    // asset condition MUST be selected
+    if (
+      req.body.maintenanceStatus === "Completed" &&
+      !req.body.assetConditionAfterRepair
+    ) {
+      throw new BadRequestError(
+        "Please specify the asset condition after repair."
+      );
+    }
+
+    // Update maintenance fields
+   // Prepare update data
+const updateData = { ...req.body };
+
+// Don't save empty asset condition
+if (updateData.assetConditionAfterRepair === "") {
+  delete updateData.assetConditionAfterRepair;
+}
+
+// Update maintenance fields
+Object.assign(maintenance, updateData);
+
+    // Only check asset AFTER repair is completed
     if (maintenance.maintenanceStatus === "Completed") {
-    await Complaint.findByIdAndUpdate(
+
+      if (!maintenance.assetConditionAfterRepair) {
+        throw new BadRequestError(
+          "Please specify the asset condition after repair."
+        );
+      }
+
+      const resource = await LabResource.findOne({
+        assetId: maintenance.complaint.resourceId,
+      });
+
+      if (!resource) {
+        throw new NotFoundError(
+          "Lab resource associated with this complaint was not found."
+        );
+      }
+let resourceUpdate = {};
+
+if (maintenance.assetConditionAfterRepair === "Usable") {
+  resourceUpdate = {
+    status: "Available",
+  };
+}
+
+if (maintenance.assetConditionAfterRepair === "Beyond Repair") {
+  resourceUpdate = {
+    status: "Scrapped",
+    previousLabName: maintenance.complaint.labName,
+    labName: "Not Assigned",
+      originalAssetId: maintenance.complaint.resourceId,
+  assetId: `SCRAP-${maintenance.complaint.resourceId}`,
+  };
+}
+
+const updatedResource = await LabResource.findOneAndUpdate(
+  { assetId: maintenance.complaint.resourceId },
+  resourceUpdate,
+  { new: true, runValidators: true }
+);
+
+console.log("RESOURCE AFTER UPDATE:", {
+  assetId: updatedResource?.assetId,
+  status: updatedResource?.status,
+  labName: updatedResource?.labName,
+  previousLabName: updatedResource?.previousLabName,
+});
+
+      // Maintenance completed → complaint resolved
+      await Complaint.findByIdAndUpdate(
         maintenance.complaint._id,
         { status: "Resolved" },
         { new: true }
-    );
-}
+      );
+
+      // Set resolution date if not already provided
+      if (!maintenance.resolutionDate) {
+        maintenance.resolutionDate = new Date();
+      }
+    }
+
+    await maintenance.save();
 
     res.status(StatusCodes.OK).json({
       message: "Maintenance updated successfully",
       maintenance,
     });
+
   } catch (error) {
     next(error);
   }

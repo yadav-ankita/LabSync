@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { TopBar } from '../../components/TopBar';
 
-import { ResourceRow } from "./ResourceRow";
-import { AddResourceForm } from "./AddResourceForm";
+import { ResourceRow } from "./Resourcerow";
+import { AddResourceForm } from "./Addresourceform";
 import { useAdminContext } from "../../context/AdminContext";
 
 export function ResourceManagement() {

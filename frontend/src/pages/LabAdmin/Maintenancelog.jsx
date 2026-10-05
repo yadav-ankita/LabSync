@@ -98,15 +98,7 @@ export function MaintenanceLog() {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className="text-xs"
-                          style={{
-                            fontFamily: "'IBM Plex Mono', monospace",
-                            color: "#8A968D",
-                          }}
-                        >
-                          {m._id}
-                        </span>
+                     
 
                         <ResourceTag id={complaint?.resourceId} />
 
@@ -287,6 +279,8 @@ function MaintenanceUpdateForm({ maintenance, onClose, onUpdated }) {
 
   const [formData, setFormData] = useState({
     maintenanceStatus: maintenance.maintenanceStatus || "Not Started",
+    assetConditionAfterRepair:
+  maintenance.assetConditionAfterRepair || "",
     forwardingType: maintenance.forwardingType || "None",
     forwardedTo: maintenance.forwardedTo || "",
     dateOfForwarding: maintenance.dateOfForwarding
@@ -318,6 +312,11 @@ function MaintenanceUpdateForm({ maintenance, onClose, onUpdated }) {
     e.preventDefault();
 
       if (formData.maintenanceStatus === "Completed") {
+        
+        if (!formData.assetConditionAfterRepair) {
+  alert("Please select the asset condition after repair.");
+  return;
+}
     if (!formData.resolvedBy.trim()) {
       alert("Please enter who resolved the maintenance.");
       return;
@@ -335,7 +334,7 @@ function MaintenanceUpdateForm({ maintenance, onClose, onUpdated }) {
   }
     try {
       setSaving(true);
-
+        console.log("Sending maintenance data:", formData);
       const { data } = await axios.patch(
         `/admin/maintenance/${maintenance._id}`,
         formData
@@ -348,8 +347,12 @@ function MaintenanceUpdateForm({ maintenance, onClose, onUpdated }) {
     } catch (error) {
       console.error(
         "Error updating maintenance:",
+       
         error.response?.data || error
+
       );
+       console.error("Response:", error.response?.data);
+console.error("Status:", error.response?.status);
     } finally {
       setSaving(false);
     }
@@ -420,6 +423,30 @@ function MaintenanceUpdateForm({ maintenance, onClose, onUpdated }) {
               <option value="Completed">Completed</option>
             </select>
           </div>
+
+          {formData.maintenanceStatus === "Completed" && (
+ 
+  <div className="mt-4">
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Asset Condition After Repair
+  </label>
+
+  <select
+    value={formData.assetConditionAfterRepair}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        assetConditionAfterRepair: e.target.value,
+      })
+    }
+    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+  >
+    <option value="">Select condition</option>
+    <option value="Usable">✓ Usable</option>
+    <option value="Beyond Repair">⚠ Beyond Repair</option>
+  </select>
+</div>
+)}
 
           {/* FORWARDING TYPE */}
           <div>

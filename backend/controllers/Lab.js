@@ -2,7 +2,7 @@ require('dotenv').config()
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
 const Lab=require("../models/Lab")
-const LabResource = require('../models/LabResource')
+const LabResource = require('../models/Labresource')
 
 const AddLab = async (req, res, next) => {
     try {

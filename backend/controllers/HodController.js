@@ -6,8 +6,9 @@ const {
 
 const Maintenance = require("../models/Maintenance");
 const TransferRequest = require("../models/TransferRequest");
-const LabResource = require("../models/LabResource");
+const LabResource = require("../models/Labresource");
 const Lab = require("../models/Lab");
+const generateAssetId = require("../utils/Generateassetid");
 
 // Get maintenance requests waiting for HOD approval
 const getPendingMaintenance = async (req, res, next) => {
@@ -23,7 +24,7 @@ const getPendingMaintenance = async (req, res, next) => {
         },
       })
       .sort("-createdAt");
-      console.log(maintenance)
+    console.log(maintenance)
     res.status(StatusCodes.OK).json({
       maintenance,
       count: maintenance.length,
@@ -187,8 +188,9 @@ const updateTransferApproval = async (req, res, next) => {
 
     // Move ALL requested assets
     for (const asset of assets) {
+      asset.previousLabName = fromLab.LabName;
       asset.labName = toLab.LabName;
-      asset.labCode = toLab.LabName;
+      asset.labCode = generateAssetId.deriveLabCode(toLab.LabName);
 
       await asset.save();
     }

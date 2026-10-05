@@ -8,7 +8,8 @@ const {
     getAllComplaints,
     getAllComplaintsByLab,
     editComplaintStatus,
-    editAdminProfile
+    editAdminProfile,
+    getScrappedResources,
 } = require("../controllers/AdminController");
 
 const {
@@ -27,6 +28,7 @@ router.route("/profile").patch(editAdminProfile)
 
 router.route("/LabResource").get(getAllLabResources).post(AddResourcesToLab)
 router.route("/LabResource/:id").delete(deleteLabResource)
+router.route("/LabResource/scrapped").get(getScrappedResources);
 router.route("/resource-assignment-request")
     .post(createResourceAssignmentRequest);
 router.route("/resource-assignment-requests")

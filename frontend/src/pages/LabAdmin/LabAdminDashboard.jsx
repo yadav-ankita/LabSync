@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./ComplaintsPanel";
-import { ResourceManagement } from "./ResourceManagement";
+import { ResourceManagement } from "./Resourcemanagement";
 import { Approvals } from "./Approvals";
 import { MaintenanceLog } from "./Maintenancelog";
 import { Reports } from "./Reports";
@@ -10,6 +10,7 @@ import { EditProfile } from "./EditProfile";
 import { AddFaculty } from "./AddFaculty";
 import { PurchaseRegister } from "./PurchaseRegister";
 import {AddLabs} from "./AddLabs";
+import { ScrapCupboard } from "./ScrapCupboard";
 
 export function LabAdminDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -25,7 +26,7 @@ export function LabAdminDashboard() {
         {activeView === "complaints" && <ComplaintsPanel />}
         {activeView === "resources" && <ResourceManagement />}
         {activeView === "approvals" && <Approvals />}
-        
+        {activeView === "scrap" && <ScrapCupboard />}
         {activeView === "maintenance" && <MaintenanceLog />}
         {activeView === "reports" && <Reports />}
         {activeView === "profile" && <EditProfile />}

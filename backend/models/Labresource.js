@@ -8,11 +8,22 @@ const LabResourceSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    originalAssetId: {
+  type: String,
+  default: null,
+  trim: true,
+},
     labName: {
       type: String,
       required: true,
       trim: true,
     },
+    
+    previousLabName: {
+  type: String,
+  trim: true,
+  default: null,
+},
     labCode: {
       type: String,
       required: true,
@@ -43,12 +54,14 @@ const LabResourceSchema = new mongoose.Schema(
       default: 1,
     },
     status: {
-      type: String,
-      enum: ['Available', 'In Use', 'Maintenance', 'Faulty'],
-      default: 'Available',
+    type: String,
+    enum: ['Available', 'In Use', 'Maintenance', 'Faulty', 'Scrapped'],
+    default: 'Available',
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('LabResource', LabResourceSchema);
+module.exports =
+  mongoose.models.LabResource ||
+  mongoose.model('LabResource', LabResourceSchema);

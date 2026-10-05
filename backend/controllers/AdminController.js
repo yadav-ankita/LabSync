@@ -1,12 +1,12 @@
 require('dotenv').config()
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
-const LabResource = require('../models/LabResource')
+const LabResource = require('../models/Labresource')
 const Lab = require('../models/Lab')
-const Purchase=require('../models/Purchase_model')
+const Purchase = require('../models/Purchase_model')
 const Complaint = require('../models/complaint')
 const User = require('../models/User')
-const generateAssetId = require('../utils/generateAssetId')
+const generateAssetId = require('../utils/Generateassetid')
 const Maintenance = require('../models/Maintenance')
 
 // POST /admin/LabResource
@@ -51,38 +51,38 @@ const AddResourcesToLab = async (req, res, next) => {
         if (!purchase) {
             throw new NotFoundError('Purchase not found')
         }
-        
+
         // Find total quantity purchased for this resource
-const totalPurchased = await Purchase.aggregate([
-    {
-        $match: {
-            particulars: purchase.particulars
-        }
-    },
-    {
-        $group: {
-            _id: null,
-            totalQuantity: { $sum: "$quantity" }
-        }
-    }
-])
+        const totalPurchased = await Purchase.aggregate([
+            {
+                $match: {
+                    particulars: purchase.particulars
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalQuantity: { $sum: "$quantity" }
+                }
+            }
+        ])
 
-const totalQuantity =
-    totalPurchased.length > 0
-        ? totalPurchased[0].totalQuantity
-        : 0
-
-
-// Count all units of this resource already assigned
-const assignedQuantity =
-    await LabResource.countDocuments({
-        resourceName: purchase.particulars
-    })
+        const totalQuantity =
+            totalPurchased.length > 0
+                ? totalPurchased[0].totalQuantity
+                : 0
 
 
-// Calculate common remaining quantity
-const remainingQuantity =
-    totalQuantity - assignedQuantity
+        // Count all units of this resource already assigned
+        const assignedQuantity =
+            await LabResource.countDocuments({
+                resourceName: purchase.particulars
+            })
+
+
+        // Calculate common remaining quantity
+        const remainingQuantity =
+            totalQuantity - assignedQuantity
 
         // Prevent assigning more than purchased quantity
         if (qty > remainingQuantity) {
@@ -131,7 +131,7 @@ const remainingQuantity =
             count: createdResources.length,
             purchaseId: purchase._id,
             remainingQuantity:
-            remainingQuantity - createdResources.length,
+                remainingQuantity - createdResources.length,
         })
 
     } catch (error) {
@@ -148,7 +148,7 @@ const getAllLabResources = async (req, res, next) => {
         if (labName) filter.labName = labName
         if (resourceType) filter.resourceType = resourceType
         if (status) filter.status = status
-       
+
         const labs = await Lab.find({}).select('LabName').lean()
         const existingLabNames = labs.map((lab) => lab.LabName.trim())
         filter.labName = filter.labName
@@ -232,16 +232,16 @@ const editComplaintStatus = async (req, res, next) => {
         }
 
         if (status === "Resolved") {
-    const maintenance = await Maintenance.findOne({
-        complaint: complaintId
-    })
+            const maintenance = await Maintenance.findOne({
+                complaint: complaintId
+            })
 
-    if (maintenance) {
-        throw new BadRequestError(
-            "This complaint is under maintenance. It will be resolved when maintenance is completed."
-        )
-    }
-}
+            if (maintenance) {
+                throw new BadRequestError(
+                    "This complaint is under maintenance. It will be resolved when maintenance is completed."
+                )
+            }
+        }
         const complaint = await Complaint.findByIdAndUpdate(
             complaintId,
             { status },
@@ -302,10 +302,28 @@ const editAdminProfile = async (req, res, next) => {
     }
 }
 
+const getScrappedResources = async (req, res, next) => {
+  try {
+    const resources = await LabResource.find({
+      status: "Scrapped",
+    })
+      .populate("purchase")
+      .sort("-updatedAt");
+
+    res.status(StatusCodes.OK).json({
+      resources,
+      count: resources.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
     AddResourcesToLab,
     getAllLabResources,
     deleteLabResource,
+    getScrappedResources,
     getAllComplaints,
     getAllComplaintsByLab,
     editComplaintStatus,

@@ -25,6 +25,12 @@ const MaintenanceSchema = new mongoose.Schema(
   default: "Not Started",
 },
 
+     assetConditionAfterRepair: {
+      type: String,
+      enum: ["Usable", "Beyond Repair"],
+      default: null,
+    },
+
     hodApprovalDate: {
       type: Date,
     },

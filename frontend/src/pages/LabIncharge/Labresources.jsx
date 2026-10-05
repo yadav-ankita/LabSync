@@ -19,7 +19,9 @@ export function LabResources() {
     labFilter === "All Labs"
       ? facultyResources
       : facultyResources.filter((r) => (r.labName || currentUser?.lab_name) === labFilter); */
-  const visible=facultyResources || [];
+const visible = (facultyResources || []).filter(
+  (resource) => resource.status !== "Scrapped"
+);
 
   return (
     <div>

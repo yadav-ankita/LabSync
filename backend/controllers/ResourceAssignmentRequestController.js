@@ -6,7 +6,7 @@ const {
 
 const Purchase = require("../models/Purchase_model");
 const Lab = require("../models/Lab");
-const LabResource = require("../models/LabResource");
+const LabResource = require("../models/Labresource");
 const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest");
 
 

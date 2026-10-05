@@ -118,3 +118,4 @@ const generateAssetId = async ({ labName, resourceName, resourceType }) => {
 }
 
 module.exports = generateAssetId
+module.exports.deriveLabCode = deriveLabCode

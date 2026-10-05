@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const Purchase = require("../models/Purchase_model");
-const LabResource=require("../models/LabResource");
+const LabResource = require("../models/Labresource");
 const { BadRequestError, NotFoundError } = require("../error");
 
 
@@ -91,7 +91,7 @@ const getAvailableResources = async (req, res, next) => {
     try {
         const purchases = await Purchase.find({});
 
-        const LabResource = require("../models/LabResource");
+        const LabResource = require("../models/Labresource");
 
         // Group purchases by resource name
         const resourceMap = {};

@@ -8,6 +8,7 @@ import {
   FileText,
   FlaskConical,
   LogOut,
+  Archive,
   PlusCircleIcon,
   ShoppingCart,
   PlusCircle
@@ -37,6 +38,7 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "purchases", label: "Purchase Register", icon: ShoppingCart },
     { key: "approvals", label: "Approvals", icon: ClipboardCheck },
     { key: "maintenance", label: "Maintenance", icon: Wrench },
+    { key: "scrap", label: "Scrap Cupboard", icon: Archive },
     { key: "reports", label: "Reports", icon: BarChart3 },
     { key: "profile", label: "Edit Profile", icon: FileText },
     { key: "faculty", label: "Add Faculty", icon: PlusCircleIcon },
