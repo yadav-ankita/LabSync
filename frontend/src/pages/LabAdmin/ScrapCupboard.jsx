@@ -96,7 +96,11 @@ export function ScrapCupboard() {
                     <p className="text-gray-500">Scrapped On</p>
                     <p className="font-medium text-gray-800">
                       {resource.updatedAt
-                        ? new Date(resource.updatedAt).toLocaleDateString()
+                        ? new Date(resource.updatedAt).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+})
                         : "N/A"}
                     </p>
                   </div>
