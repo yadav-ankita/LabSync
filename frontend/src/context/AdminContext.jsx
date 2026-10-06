@@ -134,6 +134,49 @@ const AdminProvider = ({ children }) => {
             };
         }
     };
+    const updatePurchase = async (id, purchaseData) => {
+    try {
+        const { data } = await axios.patch(
+            `/admin/purchases/${id}`,
+            purchaseData
+        );
+
+        console.log(
+            "the data after updating purchase in appcontext is",
+            data
+        );
+
+        // Update the purchase in local state
+        setPurchases((prev) =>
+            prev.map((purchase) =>
+                purchase._id === id
+                    ? data.purchase
+                    : purchase
+            )
+        );
+
+        return {
+            success: true,
+            purchase: data.purchase
+        };
+
+    } catch (error) {
+        console.error(
+            "Error updating purchase:",
+            error
+        );
+
+        const message =
+            error.response?.data?.msg ||
+            error.response?.data?.message ||
+            "Could not update purchase.";
+
+        return {
+            success: false,
+            message
+        };
+    }
+};
     const getPurchases = async () => {
         try {
             const { data } = await axios.get("/admin/purchases");
@@ -307,6 +350,7 @@ const getResourceAssignmentRequests = async () => {
                 emailCredentialsToFaculty,
                 purchases,
                 addPurchase,
+                updatePurchase,
                 getPurchases,
                 getAvailableResources,
                 createResourceAssignmentRequest,

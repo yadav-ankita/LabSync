@@ -4,7 +4,8 @@ const {
     createPurchase,
     getPurchases,
     getAvailableResources,
-    getPurchase
+    getPurchase,
+    updatePurchase
 } = require("../controllers/PurchaseController");
 
 const router = express.Router();
@@ -19,6 +20,10 @@ router.get("/resources", getAvailableResources);
 
 // View a particular purchase
 router.get("/:id", getPurchase);
-
+//edit a particular purchase
+router.patch(
+    "/:id",
+    updatePurchase
+);
 
 module.exports = router;

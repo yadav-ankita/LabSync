@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
     Plus,
     Eye,
+    Pencil,
     X,
     CheckCircle2,
     AlertCircle
@@ -38,18 +39,28 @@ export function PurchaseRegister() {
         purchases,
         getPurchases,
         getPurchase,
-        addPurchase
+        addPurchase,
+        updatePurchase
     } = useAdminContext();
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [formMessage, setFormMessage] = useState(null);
+    const [editingPurchase, setEditingPurchase] = useState(null);
+    const [filters, setFilters] = useState({
+    search: "",
+    supplier: "",
+    fundType: "",
+    fromDate: "",
+    toDate: ""
+});
     const [form, setForm] = useState({
         date: "",
         particulars: "",
         supplierName: "",
         billNumber: "",
         billDate: "",
+        fundType: "",
         quantity: "",
         unitCost: "",
         totalCost: "",
@@ -87,102 +98,117 @@ export function PurchaseRegister() {
     // Handle form input
     // --------------------------------------------------
 
-    const handleChange = (e) => {
+   const handleChange = (e) => {
 
-        const { name, value } = e.target;
+    const { name, value } = e.target;
 
-        setForm((prev) => ({
+    setForm((prev) => {
+
+        const updated = {
             ...prev,
             [name]: value
-        }));
-    };
+        };
+
+        const quantity = Number(updated.quantity) || 0;
+        const unitCost = Number(updated.unitCost) || 0;
+        const salesTax = Number(updated.salesTax) || 0;
+        const freight = Number(updated.freight) || 0;
+
+        const totalCost = quantity * unitCost;
+        const grandTotal = totalCost + salesTax + freight;
+
+        return {
+            ...updated,
+            totalCost: totalCost || "",
+            grandTotal: grandTotal || ""
+        };
+    });
+};
 
 
     // --------------------------------------------------
     // Record Purchase
     // --------------------------------------------------
 
-    const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        e.preventDefault();
+    setSubmitting(true);
+    setFormMessage(null);
 
-        setSubmitting(true);
-        setFormMessage(null);
+    const purchaseData = {
+        date: form.date,
+        particulars: form.particulars.trim(),
+        supplierName: form.supplierName.trim(),
+        billNumber: form.billNumber.trim(),
+        billDate: form.billDate,
 
-        const result = await addPurchase({
+        fundType: form.fundType,
 
-            date: form.date,
+        quantity: Number(form.quantity),
+        unitCost: Number(form.unitCost),
+        totalCost: Number(form.totalCost),
 
-            particulars: form.particulars.trim(),
+        salesTax: Number(form.salesTax || 0),
+        freight: Number(form.freight || 0),
 
-            supplierName: form.supplierName.trim(),
+        grandTotal: Number(form.grandTotal),
 
-            billNumber: form.billNumber.trim(),
+        signature: form.signature.trim(),
+        remarks: form.remarks.trim()
+    };
 
-            billDate: form.billDate,
+    // If editing an existing purchase, update it
+    // Otherwise, create a new purchase
+    const result = editingPurchase
+        ? await updatePurchase(editingPurchase._id, purchaseData)
+        : await addPurchase(purchaseData);
 
-            quantity: Number(form.quantity),
+    setSubmitting(false);
 
-            unitCost: Number(form.unitCost),
+    if (result.success) {
 
-            totalCost: Number(form.totalCost),
-
-            salesTax: Number(form.salesTax || 0),
-
-            freight: Number(form.freight || 0),
-
-            grandTotal: Number(form.grandTotal),
-
-            signature: form.signature.trim(),
-
-            remarks: form.remarks.trim()
+        // Clear form
+        setForm({
+            date: "",
+            particulars: "",
+            supplierName: "",
+            billNumber: "",
+            billDate: "",
+            fundType: "",
+            quantity: "",
+            unitCost: "",
+            totalCost: "",
+            salesTax: "",
+            freight: "",
+            grandTotal: "",
+            signature: "",
+            remarks: ""
         });
 
+        // Exit edit mode
+        setEditingPurchase(null);
 
-        setSubmitting(false);
+        setFormMessage({
+            type: "success",
+            text: editingPurchase
+                ? "Purchase updated successfully."
+                : "Purchase recorded successfully."
+        });
 
+        setTimeout(() => {
+            setShowForm(false);
+            setFormMessage(null);
+        }, 1500);
 
-        if (result.success) {
+    } else {
 
-            setForm({
-
-                date: "",
-                particulars: "",
-                supplierName: "",
-                billNumber: "",
-                billDate: "",
-                quantity: "",
-                unitCost: "",
-                totalCost: "",
-                salesTax: "",
-                freight: "",
-                grandTotal: "",
-                signature: "",
-                remarks: ""
-            });
-
-
-            setFormMessage({
-                type: "success",
-                text: "Purchase recorded successfully."
-            });
-
-
-            setTimeout(() => {
-
-                setShowForm(false);
-                setFormMessage(null);
-
-            }, 1500);
-
-        } else {
-
-            setFormMessage({
-                type: "error",
-                text: result.message
-            });
-        }
-    };
+        setFormMessage({
+            type: "error",
+            text: result.message
+        });
+    }
+};
     // view each purchase
     const handleViewPurchase = async (id) => {
     setLoadingPurchase(true);
@@ -196,6 +222,74 @@ export function PurchaseRegister() {
         setShowPurchaseDetails(true);
     }
 };
+const handleEditPurchase = (purchase) => {
+
+    setEditingPurchase(purchase);
+
+    setForm({
+        date: purchase.date
+            ? new Date(purchase.date).toISOString().split("T")[0]
+            : "",
+
+        particulars: purchase.particulars || "",
+        supplierName: purchase.supplierName || "",
+        billNumber: purchase.billNumber || "",
+
+        billDate: purchase.billDate
+            ? new Date(purchase.billDate).toISOString().split("T")[0]
+            : "",
+
+        fundType: purchase.fundType || "",
+
+        quantity: purchase.quantity || "",
+        unitCost: purchase.unitCost || "",
+        totalCost: purchase.totalCost || "",
+
+        salesTax: purchase.salesTax || "",
+        freight: purchase.freight || "",
+        grandTotal: purchase.grandTotal || "",
+
+        signature: purchase.signature || "",
+        remarks: purchase.remarks || ""
+    });
+
+    setShowForm(true);
+};
+const filteredPurchases = purchases.filter((purchase) => {
+    const matchesSearch =
+        !filters.search ||
+        purchase.particulars
+            ?.toLowerCase()
+            .includes(filters.search.toLowerCase());
+
+    const matchesSupplier =
+        !filters.supplier ||
+        purchase.supplierName === filters.supplier;
+
+    const matchesFundType =
+        !filters.fundType ||
+        purchase.fundType === filters.fundType;
+
+    const purchaseDate = purchase.date
+        ? new Date(purchase.date).toISOString().split("T")[0]
+        : "";
+
+    const matchesFromDate =
+        !filters.fromDate ||
+        purchaseDate >= filters.fromDate;
+
+    const matchesToDate =
+        !filters.toDate ||
+        purchaseDate <= filters.toDate;
+
+    return (
+        matchesSearch &&
+        matchesSupplier &&
+        matchesFundType &&
+        matchesFromDate &&
+        matchesToDate
+    );
+});
 
     return (
 
@@ -221,7 +315,9 @@ export function PurchaseRegister() {
                 <div className="flex justify-end mb-4">
 
                     <button
-                        onClick={() => setShowForm(true)}
+                        onClick={() => {setEditingPurchase(null);
+                            setShowForm(true);
+                        }}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white"
                         style={{
                             backgroundColor: "#1F2A24"
@@ -263,7 +359,7 @@ export function PurchaseRegister() {
                                     color: "#1F2A24"
                                 }}
                             >
-                                Record Purchase
+                                {editingPurchase ? "Edit Purchase" : "Record Purchase"}
                             </h2>
 
                             <p
@@ -282,6 +378,7 @@ export function PurchaseRegister() {
                             type="button"
                             onClick={() => {
                                 setShowForm(false);
+                                setEditingPurchase(null);
                                 setFormMessage(null);
                             }}
                             className="p-1.5 rounded-lg"
@@ -414,7 +511,29 @@ export function PurchaseRegister() {
 
                             </div>
 
+                            {/* Type of Fund */}
 
+<div>
+
+    <label className="block text-xs mb-1">
+        Type of Fund *
+    </label>
+
+    <select
+        name="fundType"
+        required
+        value={form.fundType}
+        onChange={handleChange}
+        className="w-full px-3 py-2 rounded-lg border text-sm"
+    >
+        <option value="">Select Fund</option>
+        <option value="GIA">GIA</option>
+        <option value="SF">SF</option>
+        <option value="EF">EF</option>
+        <option value="TEQIP">TEQIP</option>
+    </select>
+
+</div>
                             {/* Quantity */}
 
                             <div>
@@ -474,10 +593,8 @@ export function PurchaseRegister() {
                                 <input
                                     type="number"
                                     name="totalCost"
-                                    min="0"
-                                    required
                                     value={form.totalCost}
-                                    onChange={handleChange}
+                                    readOnly
                                     className="w-full px-3 py-2 rounded-lg border text-sm"
                                 />
 
@@ -541,10 +658,8 @@ export function PurchaseRegister() {
                                 <input
                                     type="number"
                                     name="grandTotal"
-                                    min="0"
-                                    required
                                     value={form.grandTotal}
-                                    onChange={handleChange}
+                                    readOnly
                                     className="w-full px-3 py-2 rounded-lg border text-sm"
                                 />
 
@@ -647,8 +762,8 @@ export function PurchaseRegister() {
                                 <Plus size={15} />
 
                                 {submitting
-                                    ? "Recording..."
-                                    : "Record Purchase"}
+    ? (editingPurchase ? "Updating..." : "Recording...")
+    : (editingPurchase ? "Update Purchase" : "Record Purchase")}
 
                             </button>
 
@@ -663,7 +778,144 @@ export function PurchaseRegister() {
             {/* --------------------------------------------- */}
             {/* PURCHASE REGISTER */}
             {/* --------------------------------------------- */}
+            {/* FILTERS */}
+<div className="bg-white rounded-xl border p-4 mb-4"
+    style={{ borderColor: "#E3E6DF" }}
+>
+    <div className="grid grid-cols-3 gap-4">
 
+        {/* Search */}
+        <div>
+            <label className="block text-xs mb-1">
+                Search Particulars
+            </label>
+
+            <input
+                type="text"
+                value={filters.search}
+                onChange={(e) =>
+                    setFilters({
+                        ...filters,
+                        search: e.target.value
+                    })
+                }
+                placeholder="Search purchase..."
+                className="w-full px-3 py-2 rounded-lg border text-sm"
+            />
+        </div>
+
+        {/* Supplier */}
+        <div>
+            <label className="block text-xs mb-1">
+                Supplier
+            </label>
+
+            <select
+                value={filters.supplier}
+                onChange={(e) =>
+                    setFilters({
+                        ...filters,
+                        supplier: e.target.value
+                    })
+                }
+                className="w-full px-3 py-2 rounded-lg border text-sm"
+            >
+                <option value="">All Suppliers</option>
+
+                {[...new Set(
+                    purchases.map((purchase) => purchase.supplierName)
+                )].map((supplier) => (
+                    <option key={supplier} value={supplier}>
+                        {supplier}
+                    </option>
+                ))}
+            </select>
+        </div>
+
+        {/* Fund Type */}
+        <div>
+            <label className="block text-xs mb-1">
+                Fund Type
+            </label>
+
+            <select
+                value={filters.fundType}
+                onChange={(e) =>
+                    setFilters({
+                        ...filters,
+                        fundType: e.target.value
+                    })
+                }
+                className="w-full px-3 py-2 rounded-lg border text-sm"
+            >
+                <option value="">All Funds</option>
+                <option value="GIA">GIA</option>
+                <option value="SF">SF</option>
+                <option value="EF">EF</option>
+                <option value="TEQIP">TEQIP</option>
+            </select>
+        </div>
+        {/* From Date */}
+<div>
+    <label className="block text-xs mb-1">
+        From Date
+    </label>
+
+    <input
+        type="date"
+        value={filters.fromDate}
+        onChange={(e) =>
+            setFilters({
+                ...filters,
+                fromDate: e.target.value
+            })
+        }
+        className="w-full px-3 py-2 rounded-lg border text-sm"
+    />
+</div>
+
+{/* To Date */}
+<div>
+    <label className="block text-xs mb-1">
+        To Date
+    </label>
+
+    <input
+    type="date"
+    value={filters.toDate}
+    min={filters.fromDate || undefined}
+    max={new Date().toISOString().split("T")[0]}
+    onChange={(e) =>
+        setFilters({
+            ...filters,
+            toDate: e.target.value
+        })
+    }
+    className="w-full px-3 py-2 rounded-lg border text-sm"
+/>
+</div>
+
+{/* Clear Filters */}
+<div className="flex items-end">
+    <button
+        type="button"
+        onClick={() =>
+            setFilters({
+                search: "",
+                supplier: "",
+                fundType: "",
+                fromDate: "",
+                toDate: ""
+            })
+        }
+        className="w-full px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 transition"
+    >
+        Clear Filters
+    </button>
+</div>
+
+    </div>
+</div>
             {loading ? (
 
                 <div
@@ -749,7 +1001,7 @@ export function PurchaseRegister() {
 
                             <tbody>
 
-                                {purchases.map((purchase) => (
+                                {filteredPurchases.map((purchase) => (
 
                                     <tr
                                         key={purchase._id}
@@ -804,7 +1056,13 @@ export function PurchaseRegister() {
 
 
                                         <td className="px-4 py-3 text-center">
-
+                                            <button
+    onClick={() => handleEditPurchase(purchase)}
+    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+    title="Edit Purchase"
+>
+    <Pencil size={18} />
+</button>
                                             <button
                                                 onClick={() => handleViewPurchase(purchase._id)}
                                                 disabled={loadingPurchase}

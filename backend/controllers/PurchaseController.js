@@ -5,8 +5,8 @@ const { BadRequestError, NotFoundError } = require("../error");
 
 
 
-//POST /api/v1/admin/purchases
-//Record a new purchase
+// POST /api/v1/admin/purchases
+// Record a new purchase
 const createPurchase = async (req, res, next) => {
     try {
         const {
@@ -15,12 +15,11 @@ const createPurchase = async (req, res, next) => {
             supplierName,
             billNumber,
             billDate,
+            fundType,
             quantity,
             unitCost,
-            totalCost,
             salesTax,
             freight,
-            grandTotal,
             signature,
             remarks
         } = req.body;
@@ -31,15 +30,24 @@ const createPurchase = async (req, res, next) => {
             !supplierName ||
             !billNumber ||
             !billDate ||
+            !fundType ||
             !quantity ||
-            unitCost === undefined ||
-            totalCost === undefined ||
-            grandTotal === undefined
+            unitCost === undefined
         ) {
             throw new BadRequestError(
                 "Please provide all required purchase details"
             );
         }
+
+        // Automatically calculate Total Cost
+        const calculatedTotalCost =
+            Number(quantity) * Number(unitCost);
+
+        // Automatically calculate Grand Total
+        const calculatedGrandTotal =
+            calculatedTotalCost +
+            Number(salesTax || 0) +
+            Number(freight || 0);
 
         const purchase = await Purchase.create({
             date,
@@ -47,12 +55,17 @@ const createPurchase = async (req, res, next) => {
             supplierName,
             billNumber,
             billDate,
+            fundType,
             quantity,
             unitCost,
-            totalCost,
+
+            totalCost: calculatedTotalCost,
+
             salesTax,
             freight,
-            grandTotal,
+
+            grandTotal: calculatedGrandTotal,
+
             signature,
             remarks
         });
@@ -67,6 +80,90 @@ const createPurchase = async (req, res, next) => {
     }
 };
 
+// PATCH /api/v1/admin/purchases/:id
+// Update an existing purchase
+const updatePurchase = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const {
+            date,
+            particulars,
+            supplierName,
+            billNumber,
+            billDate,
+            fundType,
+            quantity,
+            unitCost,
+            salesTax,
+            freight,
+            signature,
+            remarks
+        } = req.body;
+
+        if (
+            !date ||
+            !particulars ||
+            !supplierName ||
+            !billNumber ||
+            !billDate ||
+            !fundType ||
+            !quantity ||
+            unitCost === undefined
+        ) {
+            throw new BadRequestError(
+                "Please provide all required purchase details"
+            );
+        }
+
+        const purchase = await Purchase.findById(id);
+
+        if (!purchase) {
+            throw new NotFoundError("Purchase not found");
+        }
+
+        // Automatically calculate Total Cost
+        const calculatedTotalCost =
+            Number(quantity) * Number(unitCost);
+
+        // Automatically calculate Grand Total
+        const calculatedGrandTotal =
+            calculatedTotalCost +
+            Number(salesTax || 0) +
+            Number(freight || 0);
+
+        // Update purchase details
+        purchase.date = date;
+        purchase.particulars = particulars.trim();
+        purchase.supplierName = supplierName.trim();
+        purchase.billNumber = billNumber.trim();
+        purchase.billDate = billDate;
+        purchase.fundType = fundType;
+
+        purchase.quantity = Number(quantity);
+        purchase.unitCost = Number(unitCost);
+
+        purchase.totalCost = calculatedTotalCost;
+
+        purchase.salesTax = Number(salesTax || 0);
+        purchase.freight = Number(freight || 0);
+
+        purchase.grandTotal = calculatedGrandTotal;
+
+        purchase.signature = signature?.trim() || "";
+        purchase.remarks = remarks?.trim() || "";
+
+        await purchase.save();
+
+        res.status(StatusCodes.OK).json({
+            message: "Purchase updated successfully",
+            purchase
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 // GET /api/v1/admin/purchases
 // View complete purchase register
@@ -85,6 +182,9 @@ const getPurchases = async (req, res, next) => {
         next(error);
     }
 };
+
+
+
 // GET /api/v1/admin/purchases/resources
 // Get combined resource availability for Resource Management
 const getAvailableResources = async (req, res, next) => {
@@ -140,6 +240,9 @@ const getAvailableResources = async (req, res, next) => {
         next(error);
     }
 };
+
+
+
 // GET /api/v1/admin/purchases/:id
 // View a particular purchase
 const getPurchase = async (req, res, next) => {
@@ -162,9 +265,11 @@ const getPurchase = async (req, res, next) => {
 };
 
 
+
 module.exports = {
     createPurchase,
     getPurchases,
     getAvailableResources,
-    getPurchase
+    getPurchase,
+    updatePurchase
 };
