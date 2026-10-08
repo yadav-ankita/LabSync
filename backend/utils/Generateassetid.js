@@ -1,18 +1,22 @@
 const Counter = require('../models/Counter')
 
-// e.g. "BVM/HW/F206/RCH/01"
-//        |   |   |    |   |
-//        |   |   |    |   +-- serial number within this lab, per item type
-//        |   |   |    +------ resource code (abbreviation of resource name)
-//        |   |   +----------- lab code (derived from lab name)
-//        |   +--------------- type code: HW (Hardware) or SW (Software)
-//        +------------------- institute code
+// e.g. "BVM/GIA/HW/F206/RCH/01"
+//        |   |   |  |    |   |
+//        |   |   |  |    |   +-- serial number within this fund/lab/resource
+//        |   |   |  |    |       combination
+//        |   |   |  |    +------ resource code (abbreviation of resource name)
+//        |   |   |  +----------- lab code (derived from lab name)
+//        |   |   +-------------- type code: HW (Hardware) or SW (Software)
+//        |   +------------------ fund type
+//        +---------------------- institute code
 const INSTITUTE_CODE = process.env.INSTITUTE_CODE || 'BVM'
 
 const TYPE_CODES = {
     Hardware: 'HW',
     Software: 'SW',
 }
+
+const FUND_TYPES = new Set(['GIA', 'SF', 'EF', 'TEQIP'])
 
 // Curated abbreviations for common lab items, based on the department's
 // existing deadstock register conventions. Extend this as new resource
@@ -87,11 +91,11 @@ const deriveResourceCode = (resourceName) => {
     return slugCode(words[0] || resourceName).slice(0, 3) || 'RES'
 }
 
-// Atomically bumps the counter for this (labCode, resourceCode) pair and
+// Atomically bumps the counter for this (fundType, labCode, resourceCode) combination and
 // returns the new value — safe even if two "add resource" requests land
 // at the same time.
-const nextSerialNumber = async (labCode, resourceCode) => {
-    const key = `${labCode}_${resourceCode}`
+const nextSerialNumber = async (fundType, labCode, resourceCode) => {
+    const key = `${fundType}_${labCode}_${resourceCode}`
     const counter = await Counter.findOneAndUpdate(
         { key },
         { $inc: { seq: 1 } },
@@ -100,19 +104,22 @@ const nextSerialNumber = async (labCode, resourceCode) => {
     return counter.seq
 }
 
-// { labName, resourceName, resourceType } -> { assetId, labCode, resourceCode, serialNumber, typeCode }
-const generateAssetId = async ({ labName, resourceName, resourceType }) => {
+// { labName, resourceName, resourceType, fundType } -> { assetId, labCode, resourceCode, serialNumber, typeCode }
+const generateAssetId = async ({ labName, resourceName, resourceType, fundType }) => {
     const typeCode = TYPE_CODES[resourceType]
     if (!typeCode) {
         throw new Error("resourceType must be 'Hardware' or 'Software'")
     }
+    if (!FUND_TYPES.has(fundType)) {
+        throw new Error('fundType must be GIA, SF, EF, or TEQIP')
+    }
 
     const labCode = deriveLabCode(labName)
     const resourceCode = deriveResourceCode(resourceName)
-    const serialNumber = await nextSerialNumber(labCode, resourceCode)
+    const serialNumber = await nextSerialNumber(fundType, labCode, resourceCode)
     const serialStr = String(serialNumber).padStart(2, '0')
 
-    const assetId = `${INSTITUTE_CODE}/${typeCode}/${labCode}/${resourceCode}/${serialStr}`
+    const assetId = `${INSTITUTE_CODE}/${fundType}/${typeCode}/${labCode}/${resourceCode}/${serialStr}`
 
     return { assetId, labCode, resourceCode, serialNumber, typeCode }
 }

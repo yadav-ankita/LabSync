@@ -30,10 +30,10 @@ const purchaseSchema = new mongoose.Schema(
             required: true
         },
         fundType: {
-    type: String,
-    enum: ["GIA", "SF", "EF", "TEQIP"],
-    required: true
-},
+            type: String,
+            enum: ["GIA", "SF", "EF", "TEQIP"],
+            required: true
+        },
         quantity: {
             type: Number,
             required: true,

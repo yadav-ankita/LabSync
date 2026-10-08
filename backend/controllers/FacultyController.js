@@ -226,6 +226,7 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
                 labName: lab.LabName,
                 resourceName: purchase.particulars,
                 resourceType: request.resourceType,
+                fundType: purchase.fundType,
             });
 
             const resource = await LabResource.create({

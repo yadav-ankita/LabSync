@@ -10,11 +10,11 @@ const generateAssetId = require('../utils/Generateassetid')
 const Maintenance = require('../models/Maintenance')
 
 // POST /admin/LabResource
-// body: { labName, resourceName, resourceType, quantity }
+// body: { purchaseId, labName, resourceType, quantity }
 // quantity is optional (default 1) — lets the admin add several units of
 // the same resource to the same lab in one request. Each unit gets its own
 // sequential, system-generated assetId, e.g. adding 3 "Revolving Chair"
-// units to "F206 Lab" produces BVM/HW/F206/RCH/01, .../02, .../03.
+// units funded by GIA to "F206 Lab" produces BVM/GIA/HW/F206/RCH/01, .../02, .../03.
 const AddResourcesToLab = async (req, res, next) => {
     try {
         const { purchaseId, labName, resourceType, quantity = 1 } = req.body
@@ -101,6 +101,7 @@ const AddResourcesToLab = async (req, res, next) => {
                     labName,
                     resourceName: purchase.particulars,
                     resourceType,
+                    fundType: purchase.fundType,
                 })
 
             const resource = await LabResource.create({

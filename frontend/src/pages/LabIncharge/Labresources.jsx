@@ -51,15 +51,15 @@ const visible = (facultyResources || []).filter(
       )} 
       */}
 
-      <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
+      <div className="bg-white rounded-xl border overflow-x-auto" style={{ borderColor: "#E3E6DF" }}>
         <div
-          className="grid grid-cols-12 px-5 py-3 text-xs uppercase tracking-wide"
+          className="grid min-w-190 grid-cols-12 px-5 py-3 text-xs uppercase tracking-wide"
           style={{ color: "#8A968D", borderBottom: "1px solid #E3E6DF", backgroundColor: "#F8F9F7" }}
         >
-          <span className="col-span-2">Asset ID</span>
-          <span className="col-span-4">Name</span>
-          <span className="col-span-3">Lab</span>
-          <span className="col-span-3 text-right">Status</span>
+          <span className="col-span-3">Asset ID</span>
+          <span className="col-span-3">Name</span>
+          <span className="col-span-2">Lab</span>
+          <span className="col-span-4 text-right">Status</span>
         </div>
         {visible.length === 0 ? (
           <div className="px-5 py-6 text-sm" style={{ color: "#5B6A5F" }}>
@@ -68,15 +68,15 @@ const visible = (facultyResources || []).filter(
         ) : visible.map((r, i) => (
           <div
             key={r._id || r.assetId || `${r.resourceName}-${i}`}
-            className="grid grid-cols-12 items-center px-5 py-3.5"
+            className="grid min-w-190 grid-cols-12 items-center px-5 py-3.5"
             style={{ borderTop: i === 0 ? "none" : "1px solid #E3E6DF" }}
           >
-            <span className="col-span-2">
+            <span className="col-span-3">
               <ResourceTag id={r.assetId || r.id || "N/A"} />
             </span>
-            <span className="col-span-4 text-sm" style={{ color: "#1F2A24" }}>{r.resourceName || r.name}</span>
-            <span className="col-span-3 text-xs" style={{ color: "#5B6A5F" }}>{r.labName || currentUser?.lab_name}</span>
-            <span className="col-span-3 flex justify-end">
+            <span className="col-span-3 text-sm" style={{ color: "#1F2A24" }}>{r.resourceName || r.name}</span>
+            <span className="col-span-2 text-xs" style={{ color: "#5B6A5F" }}>{r.labName || currentUser?.lab_name}</span>
+            <span className="col-span-4 flex justify-end">
               <ResourceStatusPill status={r.status || "Available"} />
             </span>
           </div>
