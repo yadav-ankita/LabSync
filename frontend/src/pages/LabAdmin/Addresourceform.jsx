@@ -233,7 +233,7 @@ const selectedLabData = (labName || []).find(
   <button
     type="submit"
     disabled={submitting}
-    className="flex items-center justify-center gap-1.5 px-4 h-[38px] rounded-lg text-sm font-medium text-white disabled:opacity-60"
+    className="flex items-center justify-center gap-1.5 px-4 h-9.5 rounded-lg text-sm font-medium text-white disabled:opacity-60"
     style={{ backgroundColor: "#1F2A24" }}
   >
     <Plus size={15} />

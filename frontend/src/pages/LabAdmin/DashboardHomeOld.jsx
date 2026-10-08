@@ -7,7 +7,6 @@ import {
   CircleDot,
   Wrench,
   FlaskConical,
-  Trash2,
 } from "lucide-react";
 import { TopBar } from '../../components/TopBar';
 import { useEffect, useState } from "react";
@@ -15,20 +14,17 @@ import axios from "../../axios";
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
-import { ResourcesByCategory } from "./ResourcesByCategory";
-import { ResourcesByLab } from "./ResourcesByLab";
-import { ResourceStatusChart } from "./ResourceStatusChart";
-import { RecentTransfers } from "./RecentTransfers";
 
 export function DashboardHome({ setActiveView }) {
 
-  const [complaints, setComplaints] = useState([]);
+    const [complaints, setComplaints] = useState([]);
 
-  const [maintenance, setMaintenance] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [approvalRequests, setApprovalRequests] = useState([]);
+
+const [maintenance, setMaintenance] = useState([]);
+const [resources, setResources] = useState([]);
+const [approvalRequests, setApprovalRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [labs, setLabs] = useState([]);
+const [labs, setLabs] = useState([]);
 
   const getComplaints = async () => {
     try {
@@ -46,63 +42,63 @@ export function DashboardHome({ setActiveView }) {
   };
 
   const getMaintenance = async () => {
-    try {
-      const { data } = await axios.get("/admin/maintenance");
-      setMaintenance(data.maintenance || []);
-    } catch (error) {
-      console.error(
-        "Error fetching dashboard maintenance:",
-        error.response?.data || error
-      );
-      setMaintenance([]);
-    }
-  };
+  try {
+    const { data } = await axios.get("/admin/maintenance");
+    setMaintenance(data.maintenance || []);
+  } catch (error) {
+    console.error(
+      "Error fetching dashboard maintenance:",
+      error.response?.data || error
+    );
+    setMaintenance([]);
+  }
+};
 
-  const getResources = async () => {
-    try {
-      const { data } = await axios.get("/admin/LabResource");
+const getResources = async () => {
+  try {
+    const { data } = await axios.get("/admin/LabResource");
 
-      console.log("Resources:", data);
+    console.log("Resources:", data);
 
-      setResources(data.resources || []);
-    } catch (error) {
-      console.error(
-        "Error fetching dashboard resources:",
-        error.response?.data || error
-      );
-      setResources([]);
-    }
-  };
+    setResources(data.resources || []);
+  } catch (error) {
+    console.error(
+      "Error fetching dashboard resources:",
+      error.response?.data || error
+    );
+    setResources([]);
+  }
+};
 
-  const getApprovalRequests = async () => {
-    try {
-      const { data } = await axios.get("/admin/resource-assignment-requests");
+const getApprovalRequests = async () => {
+  try {
+    const { data } = await axios.get("/admin/resource-assignment-requests");
 
-      console.log("Approval Requests:", data);
+    console.log("Approval Requests:", data);
 
-      setApprovalRequests(data.requests || []);
-    } catch (error) {
-      console.error(
-        "Error fetching approval requests:",
-        error.response?.data || error
-      );
-      setApprovalRequests([]);
-    }
-  };
+    setApprovalRequests(data.requests || []);
+  } catch (error) {
+    console.error(
+      "Error fetching approval requests:",
+      error.response?.data || error
+    );
+    setApprovalRequests([]);
+  }
+};
 
-  const getLabs = async () => {
-    try {
-      const { data } = await axios.get("/lab");
+const getLabs = async () => {
+  try {
+    const { data } = await axios.get("/lab");
 
-      setLabs(data.labs || []);
-    } catch (error) {
-      console.error(
-        "Error fetching dashboard labs:",
-        error.response?.data || error
-      );
-      setLabs([]);
-    }
-  };
+    setLabs(data.labs || []);
+  } catch (error) {
+    console.error(
+      "Error fetching dashboard labs:",
+      error.response?.data || error
+    );
+    setLabs([]);
+  }
+};
 
   useEffect(() => {
     getComplaints();
@@ -116,9 +112,6 @@ export function DashboardHome({ setActiveView }) {
   const openComplaints = complaints.filter((c) => c.status !== "Resolved").length;
   const underMaintenance = maintenance.filter((m) => m.maintenanceStatus !== "Completed").length;
   const pendingApprovals = approvalRequests.filter((r) => r.status === "Pending").length;
-  const scrappedCount = resources.filter(
-    (r) => (r.status || "").toLowerCase() === "scrapped"
-  ).length;
   const totalResources = resources.length;
 
   const quickActions = [
@@ -143,33 +136,26 @@ export function DashboardHome({ setActiveView }) {
   ];
 
   const labBreakdown = labs.map((lab) => ({
-    lab: lab.LabName,
-    resources: lab.NumResources || 0,
-    complaints: complaints.filter(
-      (c) =>
-        c.labName === lab.LabName &&
-        c.status !== "Resolved"
-    ).length,
-  }));
+  lab: lab.LabName,
+  resources: lab.NumResources || 0,
+  complaints: complaints.filter(
+    (c) =>
+      c.labName === lab.LabName &&
+      c.status !== "Resolved"
+  ).length,
+}));
 
   return (
     <div>
-      <TopBar title="Department Overview" subtitle="A cross-lab snapshot of resources, complaints, and requests."
-        rightTop="Lab Administrator" rightBottom="Computer Engineering"
+      <TopBar title="Department Overview" subtitle="A cross-lab snapshot of resources, complaints, and requests." 
+         rightTop="Lab Administrator" rightBottom="Computer Engineering"
       />
 
-      <div className="grid grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-4 mb-8">
         <StatCard label="Open Complaints" value={openComplaints} icon={CircleDot} accent="#C9782E" />
         <StatCard label="Total Resources" value={totalResources} icon={Boxes} accent="#2F6F52" />
         <StatCard label="Under Maintenance" value={underMaintenance} icon={Wrench} accent="#9A4A1B" />
-        <StatCard label="Scrapped" value={scrappedCount} icon={Trash2} accent="#B3261E" />
         <StatCard label="Pending Approvals" value={pendingApprovals} icon={ClipboardCheck} accent="#B08A1E" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 mb-8 lg:grid-cols-2 2xl:grid-cols-3">
-        <ResourcesByCategory resources={resources} />
-        <ResourcesByLab resources={resources} />
-        <ResourceStatusChart resources={resources} />
       </div>
 
       <h2 className="text-sm uppercase tracking-wide mb-3" style={{ color: "#5B6A5F" }}>
@@ -196,7 +182,7 @@ export function DashboardHome({ setActiveView }) {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <h2 className="text-sm uppercase tracking-wide mb-3" style={{ color: "#5B6A5F" }}>
             Labs at a glance
@@ -250,11 +236,6 @@ export function DashboardHome({ setActiveView }) {
           </div>
         </div>
       </div>
-
-      <RecentTransfers
-        requests={approvalRequests}
-        onViewAll={() => setActiveView("approvals")}
-      />
     </div>
   );
 }
