@@ -24,8 +24,8 @@ export function DashboardHome({ setActiveView }) {
 
   const [complaints, setComplaints] = useState([]);
 
-  const [maintenance, setMaintenance] = useState([]);
   const [resources, setResources] = useState([]);
+  const [scrappedCount, setScrappedCount] = useState(0);
   const [approvalRequests, setApprovalRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [labs, setLabs] = useState([]);
@@ -45,19 +45,6 @@ export function DashboardHome({ setActiveView }) {
     }
   };
 
-  const getMaintenance = async () => {
-    try {
-      const { data } = await axios.get("/admin/maintenance");
-      setMaintenance(data.maintenance || []);
-    } catch (error) {
-      console.error(
-        "Error fetching dashboard maintenance:",
-        error.response?.data || error
-      );
-      setMaintenance([]);
-    }
-  };
-
   const getResources = async () => {
     try {
       const { data } = await axios.get("/admin/LabResource");
@@ -71,6 +58,19 @@ export function DashboardHome({ setActiveView }) {
         error.response?.data || error
       );
       setResources([]);
+    }
+  };
+
+  const getScrappedResourceCount = async () => {
+    try {
+      const { data } = await axios.get("/admin/LabResource/scrapped");
+      setScrappedCount(data.count ?? data.resources?.length ?? 0);
+    } catch (error) {
+      console.error(
+        "Error fetching dashboard scrapped resources:",
+        error.response?.data || error
+      );
+      setScrappedCount(0);
     }
   };
 
@@ -106,19 +106,20 @@ export function DashboardHome({ setActiveView }) {
 
   useEffect(() => {
     getComplaints();
-    getMaintenance();
     getResources();
+    getScrappedResourceCount();
     getApprovalRequests();
     getLabs();
   }, []);
 
 
   const openComplaints = complaints.filter((c) => c.status !== "Resolved").length;
-  const underMaintenance = maintenance.filter((m) => m.maintenanceStatus !== "Completed").length;
-  const pendingApprovals = approvalRequests.filter((r) => r.status === "Pending").length;
-  const scrappedCount = resources.filter(
-    (r) => (r.status || "").toLowerCase() === "scrapped"
+  const underMaintenance = resources.filter((resource) =>
+    ["maintenance", "under maintenance"].includes(
+      (resource.status || "").trim().toLowerCase()
+    )
   ).length;
+  const pendingApprovals = approvalRequests.filter((r) => r.status === "Pending").length;
   const totalResources = resources.length;
 
   const quickActions = [
@@ -169,7 +170,11 @@ export function DashboardHome({ setActiveView }) {
       <div className="grid grid-cols-1 gap-4 mb-8 lg:grid-cols-2 2xl:grid-cols-3">
         <ResourcesByCategory resources={resources} />
         <ResourcesByLab resources={resources} />
-        <ResourceStatusChart resources={resources} />
+        <ResourceStatusChart
+          resources={resources}
+          scrappedCount={scrappedCount}
+          openComplaints={openComplaints}
+        />
       </div>
 
       <h2 className="text-sm uppercase tracking-wide mb-3" style={{ color: "#5B6A5F" }}>
@@ -251,10 +256,10 @@ export function DashboardHome({ setActiveView }) {
         </div>
       </div>
 
-      <RecentTransfers
+      {/* <RecentTransfers
         requests={approvalRequests}
         onViewAll={() => setActiveView("approvals")}
-      />
+      /> */}
     </div>
   );
 }
