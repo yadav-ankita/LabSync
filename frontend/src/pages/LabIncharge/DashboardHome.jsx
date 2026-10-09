@@ -12,7 +12,6 @@ import { TopBar } from "../../components/TopBar";
 import { StatCard } from "./StatCard";
 import { ResourceTag } from "../../components/ResourceTag";
 import { StatusPill } from "../../components/StatusPill";
-import { LAB_RESOURCES } from "./dummyData";
 import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
 import { Navigate } from "react-router-dom";
@@ -21,6 +20,7 @@ export function DashboardHome({ setActiveView }) {
   const { currentUser } = useAppContext();
   const { getResourceAssignmentRequests } = useFacultyContext();
   const [pendingRequests, setPendingRequests] = useState(0);
+  const [maintenance, setMaintenance] = useState([]);
 const [complaints, setComplaints] = useState([]);
 const pending = complaints.filter(
   (c) => c.status === "Pending"
@@ -41,11 +41,29 @@ useEffect(() => {
       setComplaints([]);
     }
   };
+  const fetchMaintenance = async () => {
+try {
+const { data } = await axios.get("/faculty/maintenance");
 
+  const labRecords = (data.maintenance || []).filter(
+    (m) => m.complaint?.labName === currentUser?.lab_name
+  );
+
+  setMaintenance(labRecords);
+} catch (error) {
+  console.error("Error fetching maintenance:", error);
+  setMaintenance([]);
+}
+
+};
+
+if (currentUser?.lab_name) {
+fetchMaintenance();
+}
   fetchComplaints();
-}, []);
-  const underMaintenance = LAB_RESOURCES.filter(
-    (r) => r.status === "Under Maintenance"
+}, [currentUser?.lab_name]);
+  const underMaintenance = maintenance.filter(
+    (m) => m.maintenanceStatus !== "Completed"
   ).length;
 
   useEffect(() => {
