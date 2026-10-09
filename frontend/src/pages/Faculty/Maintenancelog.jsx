@@ -19,40 +19,44 @@ export function MaintenanceLog() {
   const [maintenance, setMaintenance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
-  const getMaintenance = async () => {
-    try {
-      const { data } = await axios.get("/admin/maintenance");
+const getMaintenance = async () => {
+  try {
+    const { data } = await axios.get("/faculty/maintenance");
+    setMaintenance(data.maintenance || []);
+  } catch (error) {
+    console.error(
+      "Error fetching maintenance:",
+      error.response?.data || error
+    );
+    setMaintenance([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const records = data.maintenance || [];
-
-      // Only show maintenance records belonging to this lab
-      const labRecords = records.filter(
-        (item) =>
-          item.complaint?.labName === currentUser?.lab_name
-      );
-
-      setMaintenance(labRecords);
-    } catch (error) {
-      console.error(
-        "Error fetching maintenance:",
-        error.response?.data || error
-      );
-      setMaintenance([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser?.lab_name) {
-      getMaintenance();
-    }
-  }, [currentUser?.lab_name]);
+useEffect(() => {
+  if (currentUser?._id || currentUser?.userId) {
+    getMaintenance();
+  } else {
+    setLoading(false);
+  }
+}, [currentUser]);
   return (
     <div>
       <TopBar title="Maintenance" subtitle="History and current status of resources under repair." />
       <div className="bg-white rounded-xl border overflow-hidden" style={{ borderColor: "#E3E6DF" }}>
-        {maintenance.map((m, i) => (
+      
+      {loading ? (
+  <p className="p-5 text-sm text-gray-500">
+    Loading maintenance records...
+  </p>
+) : maintenance.length === 0 ? (
+  <p className="p-5 text-sm text-gray-500">
+    No maintenance records found for your complaints.
+  </p>
+) : (
+      
+        maintenance.map((m, i) => (
           <div
             key={m._id}
             className=" cursor-pointer px-5 py-4"
@@ -324,7 +328,8 @@ export function MaintenanceLog() {
 </div>
             )}
           </div>
-        ))}
+        ))
+      )}
       </div>
     </div>
   );

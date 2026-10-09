@@ -18,7 +18,10 @@ const {
     getLabComplaints,
     getResourceAssignmentRequests,
     respondToResourceAssignmentRequest,
+    
  } = require("../controllers/FacultyController");
+
+const { getFacultyMaintenance } = require("../controllers/MaintenanceController");
 
 router.use(authUser);
 router.route("/myprofile").get(getProfileData).patch(editProfileData);
@@ -28,7 +31,7 @@ router.route("/labManuals/:id").delete(deleteLabManual);
 router.route("/complaints").get(getLabComplaints).post(raiseComplaints);
 router.route("/resourceAssignmentRequests")
     .get(getResourceAssignmentRequests);
-
+router.get("/maintenance", getFacultyMaintenance);
 router.route("/resourceAssignmentRequests/:id")
     .patch(respondToResourceAssignmentRequest);
 router.route("/transferRequests")

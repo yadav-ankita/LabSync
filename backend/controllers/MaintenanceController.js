@@ -217,9 +217,34 @@ console.log("RESOURCE AFTER UPDATE:", {
   }
 };
 
+const getFacultyMaintenance = async (req, res, next) => {
+  try {
+    const facultyId = req.user.userId;
+
+    const complaints = await Complaint.find({
+      faculty: facultyId,
+    }).select("_id");
+
+    const complaintIds = complaints.map((c) => c._id);
+
+    const maintenance = await Maintenance.find({
+      complaint: { $in: complaintIds },
+    })
+      .populate("complaint")
+      .sort("-createdAt");
+
+    res.status(200).json({
+      maintenance,
+      count: maintenance.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   getAllMaintenance,
   createMaintenance,
   updateMaintenance,
+  getFacultyMaintenance,
 };

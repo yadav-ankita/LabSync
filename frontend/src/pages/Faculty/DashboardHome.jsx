@@ -17,6 +17,7 @@ import { useAppContext } from "../../context/AppContext";
 export function DashboardHome({ setActiveView }) {
   const { currentUser } = useAppContext();
 const [complaints, setComplaints] = useState([]);
+const [maintenance, setMaintenance] = useState([]);
 const pending = complaints.filter(
   (c) => c.status === "Pending"
 ).length;
@@ -36,12 +37,23 @@ useEffect(() => {
       setComplaints([]);
     }
   };
+    const fetchMaintenance = async () => {
+    try {
+      const { data } = await axios.get("/faculty/maintenance");
+      setMaintenance(data.maintenance || []);
+    } catch (error) {
+      console.error("Error fetching maintenance:", error);
+      setMaintenance([]);
+    }
+  };
+
+  fetchMaintenance();
 
   fetchComplaints();
 }, []);
-  const underMaintenance = LAB_RESOURCES.filter(
-    (r) => r.status === "Under Maintenance"
-  ).length;
+  const underMaintenance = maintenance.filter(
+  (m) => m.maintenanceStatus !== "Completed"
+).length;
 
   const quickActions = [
     {
