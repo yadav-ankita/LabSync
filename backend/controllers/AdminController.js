@@ -10,25 +10,19 @@ const generateAssetId = require('../utils/Generateassetid')
 const Maintenance = require('../models/Maintenance')
 
 // POST /admin/LabResource
-// body: { purchaseId, labName, resourceType, quantity }
+// body: { purchaseId, labName, quantity }
 // quantity is optional (default 1) — lets the admin add several units of
 // the same resource to the same lab in one request. Each unit gets its own
 // sequential, system-generated assetId, e.g. adding 3 "Revolving Chair"
-// units funded by GIA to "F206 Lab" produces BVM/GIA/HW/F206/RCH/01, .../02, .../03.
+// units funded by GIA to "F206 Lab" produces BVM/GIA/F206/RCH/01, .../02, .../03.
 const AddResourcesToLab = async (req, res, next) => {
     try {
-        const { purchaseId, labName, resourceType, quantity = 1 } = req.body
+        const { purchaseId, labName, quantity = 1 } = req.body
 
         // Validate required fields
-        if (!purchaseId || !labName || !resourceType) {
+        if (!purchaseId || !labName) {
             throw new BadRequestError(
-                'Please provide purchaseId, labName and resourceType'
-            )
-        }
-
-        if (!['Hardware', 'Software'].includes(resourceType)) {
-            throw new BadRequestError(
-                "resourceType must be 'Hardware' or 'Software'"
+                'Please provide purchaseId and labName'
             )
         }
 
@@ -100,7 +94,6 @@ const AddResourcesToLab = async (req, res, next) => {
                 await generateAssetId({
                     labName,
                     resourceName: purchase.particulars,
-                    resourceType,
                     fundType: purchase.fundType,
                 })
 
@@ -110,7 +103,7 @@ const AddResourcesToLab = async (req, res, next) => {
                 labCode,
                 resourceName: purchase.particulars,
                 resourceCode,
-                resourceType,
+                
                 serialNumber,
                 purchase: purchaseId,
             })
@@ -141,13 +134,12 @@ const AddResourcesToLab = async (req, res, next) => {
 }
 
 // GET /admin/LabResource
-// optional query: ?labName=F206 Lab&resourceType=Hardware&status=Available
+// optional query: ?labName=F206 Lab&status=Available
 const getAllLabResources = async (req, res, next) => {
     try {
-        const { labName, resourceType, status } = req.query
+        const { labName, status } = req.query
         const filter = {}
         if (labName) filter.labName = labName
-        if (resourceType) filter.resourceType = resourceType
         if (status) filter.status = status
 
         const labs = await Lab.find({}).select('LabName').lean()

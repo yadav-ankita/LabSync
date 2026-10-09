@@ -1,7 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
 const Purchase = require("../models/Purchase_model");
 const LabResource = require("../models/Labresource");
+const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest");
 const { BadRequestError, NotFoundError } = require("../error");
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 
 
@@ -203,11 +206,13 @@ const getAvailableResources = async (req, res, next) => {
                 resourceMap[key] = {
                     _id: purchase._id,
                     particulars: purchase.particulars,
-                    totalQuantity: 0
+                    totalQuantity: 0,
+                    purchaseIds: []
                 };
             }
 
             resourceMap[key].totalQuantity += purchase.quantity;
+            resourceMap[key].purchaseIds.push(purchase._id);
         }
 
         // Calculate assigned and remaining quantity
@@ -217,16 +222,35 @@ const getAvailableResources = async (req, res, next) => {
                 const assignedQuantity =
                     await LabResource.countDocuments({
                         resourceName: {
-                            $regex: `^${resource.particulars}$`,
+                            $regex: `^${escapeRegex(resource.particulars.trim())}$`,
                             $options: "i"
                         }
                     });
 
+                const pendingRequests = await ResourceAssignmentRequest.aggregate([
+                    {
+                        $match: {
+                            purchase: { $in: resource.purchaseIds },
+                            status: "Pending"
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            quantity: { $sum: "$quantity" }
+                        }
+                    }
+                ]);
+                const pendingQuantity = pendingRequests[0]?.quantity || 0;
+
                 return {
                     ...resource,
                     assignedQuantity,
-                    remainingQuantity:
-                        resource.totalQuantity - assignedQuantity
+                    pendingQuantity,
+                    remainingQuantity: Math.max(
+                        0,
+                        resource.totalQuantity - assignedQuantity - pendingQuantity
+                    )
                 };
             })
         );

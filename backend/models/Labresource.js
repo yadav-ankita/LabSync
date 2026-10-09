@@ -44,11 +44,6 @@ const LabResourceSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    resourceType: {
-      type: String,
-      enum: ['Hardware', 'Software'],
-      required: true,
-    },
     serialNumber: {
       type: Number,
       default: 1,

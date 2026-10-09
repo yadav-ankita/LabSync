@@ -20,12 +20,6 @@ const ResourceAssignmentRequestSchema = new mongoose.Schema(
       required: true,
     },
 
-    resourceType: {
-      type: String,
-      enum: ["Hardware", "Software"],
-      required: true,
-    },
-
     quantity: {
       type: Number,
       required: true,

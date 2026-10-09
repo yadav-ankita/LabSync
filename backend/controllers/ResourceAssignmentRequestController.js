@@ -9,6 +9,8 @@ const Lab = require("../models/Lab");
 const LabResource = require("../models/Labresource");
 const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest");
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 
 // POST /admin/resource-assignment-request
 // Send a resource assignment request to the Lab Incharge
@@ -17,19 +19,12 @@ const createResourceAssignmentRequest = async (req, res, next) => {
         const {
             purchaseId,
             labName,
-            resourceType,
             quantity = 1,
         } = req.body;
 
-        if (!purchaseId || !labName || !resourceType) {
+        if (!purchaseId || !labName) {
             throw new BadRequestError(
-                "Please provide purchaseId, labName and resourceType"
-            );
-        }
-
-        if (!["Hardware", "Software"].includes(resourceType)) {
-            throw new BadRequestError(
-                "resourceType must be 'Hardware' or 'Software'"
+                "Please provide purchaseId and labName"
             );
         }
 
@@ -65,10 +60,16 @@ const createResourceAssignmentRequest = async (req, res, next) => {
         }
 
         // Calculate total purchased quantity for this resource
+        const particularsPattern = `^${escapeRegex(purchase.particulars.trim())}$`;
+        const matchingPurchases = await Purchase.find({
+            particulars: { $regex: particularsPattern, $options: "i" },
+        }).select("_id").lean();
+        const matchingPurchaseIds = matchingPurchases.map(({ _id }) => _id);
+
         const totalPurchased = await Purchase.aggregate([
             {
                 $match: {
-                    particulars: purchase.particulars,
+                    particulars: { $regex: particularsPattern, $options: "i" },
                 },
             },
             {
@@ -86,14 +87,17 @@ const createResourceAssignmentRequest = async (req, res, next) => {
 
         // Count resources that are already physically assigned
         const assignedQuantity = await LabResource.countDocuments({
-            resourceName: purchase.particulars,
+            resourceName: {
+                $regex: particularsPattern,
+                $options: "i",
+            },
         });
 
         // Count quantities already requested and still pending
         const pendingRequests = await ResourceAssignmentRequest.aggregate([
             {
                 $match: {
-                    purchase: purchase._id,
+                    purchase: { $in: matchingPurchaseIds },
                     status: "Pending",
                 },
             },
@@ -125,7 +129,6 @@ const createResourceAssignmentRequest = async (req, res, next) => {
             purchase: purchase._id,
             lab: lab._id,
             labIncharge: lab.AssignFaculty,
-            resourceType,
             quantity: qty,
             status: "Pending",
         });

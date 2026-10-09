@@ -225,7 +225,6 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
             } = await generateAssetId({
                 labName: lab.LabName,
                 resourceName: purchase.particulars,
-                resourceType: request.resourceType,
                 fundType: purchase.fundType,
             });
 
@@ -235,7 +234,6 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
                 labCode,
                 resourceName: purchase.particulars,
                 resourceCode,
-                resourceType: request.resourceType,
                 serialNumber,
                 purchase: purchase._id,
             });
@@ -461,7 +459,7 @@ const getTransferOptions = async (req, res, next) => {
         const resources = await LabResource.find({
             status: { $ne: "Maintenance" }
         }).select(
-            "_id assetId resourceName resourceCode resourceType labName labCode status"
+            "_id assetId resourceName resourceCode labName labCode status"
         );
 
         res.status(StatusCodes.OK).json({

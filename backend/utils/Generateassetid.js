@@ -11,11 +11,6 @@ const Counter = require('../models/Counter')
 //        +---------------------- institute code
 const INSTITUTE_CODE = process.env.INSTITUTE_CODE || 'BVM'
 
-const TYPE_CODES = {
-    Hardware: 'HW',
-    Software: 'SW',
-}
-
 const FUND_TYPES = new Set(['GIA', 'SF', 'EF', 'TEQIP'])
 
 // Curated abbreviations for common lab items, based on the department's
@@ -104,12 +99,8 @@ const nextSerialNumber = async (fundType, labCode, resourceCode) => {
     return counter.seq
 }
 
-// { labName, resourceName, resourceType, fundType } -> { assetId, labCode, resourceCode, serialNumber, typeCode }
-const generateAssetId = async ({ labName, resourceName, resourceType, fundType }) => {
-    const typeCode = TYPE_CODES[resourceType]
-    if (!typeCode) {
-        throw new Error("resourceType must be 'Hardware' or 'Software'")
-    }
+// { labName, resourceName, fundType } -> { assetId, labCode, resourceCode, serialNumber }
+const generateAssetId = async ({ labName, resourceName, fundType }) => {
     if (!FUND_TYPES.has(fundType)) {
         throw new Error('fundType must be GIA, SF, EF, or TEQIP')
     }
@@ -119,9 +110,9 @@ const generateAssetId = async ({ labName, resourceName, resourceType, fundType }
     const serialNumber = await nextSerialNumber(fundType, labCode, resourceCode)
     const serialStr = String(serialNumber).padStart(2, '0')
 
-    const assetId = `${INSTITUTE_CODE}/${fundType}/${typeCode}/${labCode}/${resourceCode}/${serialStr}`
+    const assetId = `${INSTITUTE_CODE}/${fundType}/${labCode}/${resourceCode}/${serialStr}`
 
-    return { assetId, labCode, resourceCode, serialNumber, typeCode }
+    return { assetId, labCode, resourceCode, serialNumber }
 }
 
 module.exports = generateAssetId
