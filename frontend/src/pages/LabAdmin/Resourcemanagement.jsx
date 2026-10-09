@@ -78,10 +78,9 @@ export function ResourceManagement() {
           style={{ color: "#8A968D", borderBottom: "1px solid #E3E6DF", backgroundColor: "#F8F9F7" }}
         >
           <span className="col-span-2">Asset ID</span>
-          <span className="col-span-3">Name</span>
+          <span className="col-span-4">Name</span>
           <span className="col-span-3">Lab</span>
-          <span className="col-span-2">Type</span>
-          <span className="col-span-2 text-right">Status</span>
+          <span className="col-span-3 text-right">Status</span>
         </div>
         {loading ? (
           <div className="p-8 text-center text-sm" style={{ color: "#5B6A5F" }}>
@@ -96,10 +95,9 @@ export function ResourceManagement() {
             r.empty ? (
               <div key={r._id} className="grid grid-cols-12 items-center px-5 py-3.5 border-t first:border-t-0" style={{ borderColor: "#E3E6DF" }}>
                 <span className="col-span-2 text-xs" style={{ color: "#A0AAA2" }}>-</span>
-                <span className="col-span-3 text-sm" style={{ color: "#8A968D" }}>No resources allocated</span>
+                <span className="col-span-4 text-sm" style={{ color: "#8A968D" }}>No resources allocated</span>
                 <span className="col-span-3 text-xs truncate" style={{ color: "#5B6A5F" }}>{r.labName}</span>
-                <span className="col-span-2 text-xs" style={{ color: "#A0AAA2" }}>-</span>
-                <span className="col-span-2 text-xs text-right" style={{ color: "#8A968D" }}>Resources are not yet allocated to this lab</span>
+                <span className="col-span-3 text-xs text-right" style={{ color: "#8A968D" }}>Resources are not yet allocated to this lab</span>
               </div>
             ) : (
               <ResourceRow key={r._id} resource={r} onStatusChange={handleStatusChange} onDelete={handleDelete} />

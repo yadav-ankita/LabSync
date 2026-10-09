@@ -9,10 +9,9 @@ export function ResourceRow({ resource, onStatusChange, onDelete }) {
       <span className="col-span-2">
         <ResourceTag id={resource.assetId} />
       </span>
-      <span className="col-span-3 text-sm truncate" style={{ color: "#1F2A24" }}>{resource.resourceName}</span>
+      <span className="col-span-4 text-sm truncate" style={{ color: "#1F2A24" }}>{resource.resourceName}</span>
       <span className="col-span-3 text-xs truncate" style={{ color: "#5B6A5F" }}>{resource.labName}</span>
-      <span className="col-span-2 text-xs" style={{ color: "#8A968D" }}>{resource.resourceType}</span>
-      <span className="col-span-2 flex items-center justify-end gap-2">
+      <span className="col-span-3 flex items-center justify-end gap-2">
         <select
           value={resource.status}
           onChange={(e) => onStatusChange(resource._id, e.target.value)}

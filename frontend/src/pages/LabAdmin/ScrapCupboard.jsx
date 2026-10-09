@@ -72,13 +72,6 @@ export function ScrapCupboard() {
                   </div>
 
                   <div>
-                    <p className="text-gray-500">Resource Type</p>
-                    <p className="font-medium text-gray-800">
-                      {resource.resourceType || "N/A"}
-                    </p>
-                  </div>
-
-                  <div>
                     <p className="text-gray-500">Original Lab</p>
                     <p className="font-medium text-gray-800">
                       {resource.previousLabName || "N/A"}
