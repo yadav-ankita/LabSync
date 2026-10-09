@@ -54,16 +54,13 @@ export function RequestRow({ request, onDecision }) {
 
           </div>
 
-          {/* Quantity + Type */}
+          {/* Quantity */}
           <p
             className="text-sm mt-3"
             style={{ color: "#1F2A24" }}
           >
             <span className="font-medium">Quantity:</span>{" "}
             {request.quantity}
-            {" · "}
-            <span className="font-medium">Type:</span>{" "}
-            {request.resourceType}
           </p>
 
           {/* Incharge + Date */}

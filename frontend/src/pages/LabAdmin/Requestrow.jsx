@@ -59,9 +59,6 @@ export function RequestRow({ request }) {
           >
             <span className="font-medium">Quantity:</span>{" "}
             {request.quantity}
-            {" · "}
-            <span className="font-medium">Type:</span>{" "}
-            {request.resourceType}
           </p>
 
           <div
