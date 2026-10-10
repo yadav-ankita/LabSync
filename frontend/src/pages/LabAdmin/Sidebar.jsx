@@ -11,7 +11,8 @@ import {
   Archive,
   PlusCircleIcon,
   ShoppingCart,
-  PlusCircle
+  PlusCircle,
+  Badge
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
@@ -35,6 +36,7 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "home", label: "Overview", icon: LayoutGrid },
     { key: "complaints", label: "All Complaints", icon: MessageSquareWarning },
     { key: "resources", label: "Resource Management", icon: Boxes },
+    {key: "LabResources", label: "Lab Resources", icon: FlaskConical },
     { key: "purchases", label: "Purchase Register", icon: ShoppingCart },
     { key: "approvals", label: "Approvals", icon: ClipboardCheck },
     { key: "maintenance", label: "Maintenance", icon: Wrench },

@@ -4,10 +4,6 @@ const LabResource = require("../models/Labresource");
 const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest");
 const { BadRequestError, NotFoundError } = require("../error");
 
-const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-
-
 // POST /api/v1/admin/purchases
 // Record a new purchase
 const createPurchase = async (req, res, next) => {
@@ -192,68 +188,42 @@ const getPurchases = async (req, res, next) => {
 // Get combined resource availability for Resource Management
 const getAvailableResources = async (req, res, next) => {
     try {
-        const purchases = await Purchase.find({});
-
         const LabResource = require("../models/Labresource");
+        const purchases = await Purchase.find({}).sort({ date: -1, createdAt: -1 }).lean();
 
-        // Group purchases by resource name
-        const resourceMap = {};
+        // Keep each purchase distinct: its fund type determines generated asset IDs.
+        const resources = await Promise.all(purchases.map(async (purchase) => {
+            const assignedQuantity = await LabResource.countDocuments({
+                purchase: purchase._id
+            });
 
-        for (const purchase of purchases) {
-            const key = purchase.particulars.trim().toLowerCase();
-
-            if (!resourceMap[key]) {
-                resourceMap[key] = {
-                    _id: purchase._id,
-                    particulars: purchase.particulars,
-                    totalQuantity: 0,
-                    purchaseIds: []
-                };
-            }
-
-            resourceMap[key].totalQuantity += purchase.quantity;
-            resourceMap[key].purchaseIds.push(purchase._id);
-        }
-
-        // Calculate assigned and remaining quantity
-        const resources = await Promise.all(
-            Object.values(resourceMap).map(async (resource) => {
-
-                const assignedQuantity =
-                    await LabResource.countDocuments({
-                        resourceName: {
-                            $regex: `^${escapeRegex(resource.particulars.trim())}$`,
-                            $options: "i"
-                        }
-                    });
-
-                const pendingRequests = await ResourceAssignmentRequest.aggregate([
-                    {
-                        $match: {
-                            purchase: { $in: resource.purchaseIds },
-                            status: "Pending"
-                        }
-                    },
-                    {
-                        $group: {
-                            _id: null,
-                            quantity: { $sum: "$quantity" }
-                        }
+            const pendingRequests = await ResourceAssignmentRequest.aggregate([
+                {
+                    $match: {
+                        purchase: purchase._id,
+                        status: "Pending"
                     }
-                ]);
-                const pendingQuantity = pendingRequests[0]?.quantity || 0;
+                },
+                {
+                    $group: {
+                        _id: null,
+                        quantity: { $sum: "$quantity" }
+                    }
+                }
+            ]);
+            const pendingQuantity = pendingRequests[0]?.quantity || 0;
 
-                return {
-                    ...resource,
-                    assignedQuantity,
-                    pendingQuantity,
-                    remainingQuantity: Math.max(
-                        0,
-                        resource.totalQuantity - assignedQuantity - pendingQuantity
-                    )
-                };
-            })
-        );
+            return {
+                ...purchase,
+                totalQuantity: purchase.quantity,
+                assignedQuantity,
+                pendingQuantity,
+                remainingQuantity: Math.max(
+                    0,
+                    purchase.quantity - assignedQuantity - pendingQuantity
+                )
+            };
+        }));
 
         res.status(StatusCodes.OK).json({
             resources,

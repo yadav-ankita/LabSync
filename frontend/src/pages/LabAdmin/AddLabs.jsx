@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from "react-router-dom";
 import { LabCard } from './LabCard';
-import { UserPlus, CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import { CheckCircle2, AlertCircle, Plus } from "lucide-react";
 import { TopBar } from '../../components/TopBar';
-
-import { FacultyCard } from "./FacultyCard";
 import { useAdminContext } from "../../context/AdminContext";
 const AddLabs = () => {
   const { getLabs, AddLabs, labName } = useAdminContext();
+  const navigate = useNavigate();
 
   const [LabName, setLabName] = useState("")
   const [submitting, setSubmitting] = useState(false);
@@ -120,6 +120,7 @@ const handleSubmit = async (e) => {
               labName={lab.LabName}
               faculty={lab.AssignFaculty?.name || lab.facultyName || "Not Yet Assigned"}
               numberOfResources={lab.NumResources || 0}
+              onClick={() => navigate(`/labs/${encodeURIComponent(lab.LabName)}/resource`, { state: { returnView: "labs" } })}
             />
           ))}
         </div>

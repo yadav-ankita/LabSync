@@ -56,6 +56,14 @@ export function AddResourceForm() {
       return;
     }
 
+    if (!selectedPurchase || Number(quantity) < 1 || Number(quantity) > selectedPurchase.remainingQuantity) {
+      setFormMessage({
+        type: "error",
+        text: `Quantity must be between 1 and ${selectedPurchase?.remainingQuantity || 0} for this purchase.`,
+      });
+      return;
+    }
+
     setSubmitting(true);
     setFormMessage(null);
 
@@ -132,8 +140,8 @@ export function AddResourceForm() {
             <option value="">Select a purchased resource</option>
 
             {(availableResources || []).map((resource) => (
-              <option key={resource._id} value={resource._id}>
-                {resource.particulars} — Remaining: {resource.remainingQuantity} 
+              <option key={resource._id} value={resource._id} disabled={resource.remainingQuantity < 1}>
+                {resource.particulars} · {resource.fundType} · {resource.supplierName} — Remaining: {resource.remainingQuantity}
                 {/* (Pending: {resource.pendingQuantity || 0}) */}
               </option>
             ))}
@@ -196,7 +204,7 @@ export function AddResourceForm() {
           <input
             type="number"
             min={1}
-            max={100}
+            max={selectedPurchase?.remainingQuantity || 100}
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             className="px-3 py-2 rounded-lg border text-sm focus:outline-none w-20"

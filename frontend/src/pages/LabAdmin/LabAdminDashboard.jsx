@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./ComplaintsPanel";
@@ -11,9 +12,11 @@ import { AddFaculty } from "./AddFaculty";
 import { PurchaseRegister } from "./PurchaseRegister";
 import {AddLabs} from "./AddLabs";
 import { ScrapCupboard } from "./ScrapCupboard";
+import { LabResources } from "./LabResources";
 
 export function LabAdminDashboard() {
-  const [activeView, setActiveView] = useState("home");
+  const location = useLocation();
+  const [activeView, setActiveView] = useState(location.state?.activeView || "home");
   return (
     <div className="flex overflow-hidden h-screen" style={{ backgroundColor: "#F2F4F1", fontFamily: "'IBM Plex Sans', sans-serif" }}>
       <link
@@ -29,6 +32,7 @@ export function LabAdminDashboard() {
         {activeView === "home" && <DashboardHome setActiveView={setActiveView} />}
         {activeView === "complaints" && <ComplaintsPanel />}
         {activeView === "resources" && <ResourceManagement />}
+        {activeView === "LabResources" && <LabResources />}
         {activeView === "approvals" && <Approvals />}
         {activeView === "scrap" && <ScrapCupboard />}
         {activeView === "maintenance" && <MaintenanceLog />}

@@ -46,32 +46,11 @@ const AddResourcesToLab = async (req, res, next) => {
             throw new NotFoundError('Purchase not found')
         }
 
-        // Find total quantity purchased for this resource
-        const totalPurchased = await Purchase.aggregate([
-            {
-                $match: {
-                    particulars: purchase.particulars
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalQuantity: { $sum: "$quantity" }
-                }
-            }
-        ])
-
-        const totalQuantity =
-            totalPurchased.length > 0
-                ? totalPurchased[0].totalQuantity
-                : 0
-
-
-        // Count all units of this resource already assigned
-        const assignedQuantity =
-            await LabResource.countDocuments({
-                resourceName: purchase.particulars
-            })
+        // Each purchase retains its own fund type and assignment balance.
+        const totalQuantity = purchase.quantity
+        const assignedQuantity = await LabResource.countDocuments({
+            purchase: purchase._id
+        })
 
 
         // Calculate common remaining quantity

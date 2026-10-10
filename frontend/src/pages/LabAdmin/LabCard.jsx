@@ -4,6 +4,8 @@ export function LabCard({
     labName,
     faculty = "Not Yet Assigned",
     numberOfResources = 0,
+    onClick,
+    selected = false,
 }) {
     const initials = labName
         ?.trim()
@@ -14,9 +16,12 @@ export function LabCard({
         .slice(0, 2);
 
     return (
-        <div
-            className="bg-white rounded-xl border p-5 hover:shadow-md transition-shadow duration-200"
-            style={{ borderColor: "#E3E6DF" }}
+        <button
+            type="button"
+            onClick={onClick}
+            aria-pressed={selected}
+            className="w-full text-left bg-white rounded-xl border p-5 hover:shadow-md transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            style={{ borderColor: selected ? "#D89A4E" : "#E3E6DF" }}
         >
             {/* Header */}
             <div className="flex items-center gap-3">
@@ -94,6 +99,6 @@ export function LabCard({
                     Laboratory
                 </span>
             </div>
-        </div>
+        </button>
     );
 }
