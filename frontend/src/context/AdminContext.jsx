@@ -117,6 +117,31 @@ const AdminProvider = ({ children }) => {
     };
     // ---------- purchases ----------
     const [purchases, setPurchases] = useState([]);
+    const [fundTypes, setFundTypes] = useState([]);
+    const getFundTypes = async () => {
+        try {
+            const { data } = await axios.get("/admin/fund-types");
+            setFundTypes(data.fundTypes || []);
+            return { success: true, fundTypes: data.fundTypes || [] };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.msg || error.response?.data?.message || "Could not load fund types.",
+            };
+        }
+    };
+    const addFundType = async (fundTypeData) => {
+        try {
+            const { data } = await axios.post("/admin/fund-types", fundTypeData);
+            setFundTypes((current) => [...current, data.fundType].sort((a, b) => a.code.localeCompare(b.code)));
+            return { success: true, fundType: data.fundType, message: data.message };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.msg || error.response?.data?.message || "Could not add fund type.",
+            };
+        }
+    };
     const addPurchase = async (purchaseData) => {
         try {
             const { data } = await axios.post("/admin/purchases", purchaseData);
@@ -349,6 +374,9 @@ const getResourceAssignmentRequests = async () => {
                 deleteFaculty,
                 emailCredentialsToFaculty,
                 purchases,
+                fundTypes,
+                getFundTypes,
+                addFundType,
                 addPurchase,
                 updatePurchase,
                 getPurchases,

@@ -40,7 +40,9 @@ export function PurchaseRegister() {
         getPurchases,
         getPurchase,
         addPurchase,
-        updatePurchase
+        updatePurchase,
+        fundTypes,
+        getFundTypes
     } = useAdminContext();
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -84,7 +86,7 @@ export function PurchaseRegister() {
 
             setLoading(true);
 
-            await getPurchases();
+            await Promise.all([getPurchases(), getFundTypes()]);
 
             setLoading(false);
         };
@@ -527,10 +529,9 @@ const filteredPurchases = purchases.filter((purchase) => {
         className="w-full px-3 py-2 rounded-lg border text-sm"
     >
         <option value="">Select Fund</option>
-        <option value="GIA">GIA</option>
-        <option value="SF">SF</option>
-        <option value="EF">EF</option>
-        <option value="TEQIP">TEQIP</option>
+        {fundTypes.map((fundType) => (
+            <option key={fundType._id || fundType.code} value={fundType.code}>{fundType.code}</option>
+        ))}
     </select>
 
 </div>
@@ -849,10 +850,9 @@ const filteredPurchases = purchases.filter((purchase) => {
                 className="w-full px-3 py-2 rounded-lg border text-sm"
             >
                 <option value="">All Funds</option>
-                <option value="GIA">GIA</option>
-                <option value="SF">SF</option>
-                <option value="EF">EF</option>
-                <option value="TEQIP">TEQIP</option>
+                {fundTypes.map((fundType) => (
+                    <option key={fundType._id || fundType.code} value={fundType.code}>{fundType.code}</option>
+                ))}
             </select>
         </div>
         {/* From Date */}

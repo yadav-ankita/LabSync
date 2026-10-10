@@ -1,4 +1,6 @@
 const Counter = require('../models/Counter')
+const FundType = require('../models/FundType')
+const { DEFAULT_FUND_TYPES } = require('./fundTypes')
 
 // e.g. "BVM/GIA/HW/F206/RCH/01"
 //        |   |   |  |    |   |
@@ -11,7 +13,7 @@ const Counter = require('../models/Counter')
 //        +---------------------- institute code
 const INSTITUTE_CODE = process.env.INSTITUTE_CODE || 'BVM'
 
-const FUND_TYPES = new Set(['GIA', 'SF', 'EF', 'TEQIP'])
+const FUND_TYPES = new Set(DEFAULT_FUND_TYPES)
 
 // Curated abbreviations for common lab items, based on the department's
 // existing deadstock register conventions. Extend this as new resource
@@ -101,16 +103,19 @@ const nextSerialNumber = async (fundType, labCode, resourceCode) => {
 
 // { labName, resourceName, fundType } -> { assetId, labCode, resourceCode, serialNumber }
 const generateAssetId = async ({ labName, resourceName, fundType }) => {
-    if (!FUND_TYPES.has(fundType)) {
-        throw new Error('fundType must be GIA, SF, EF, or TEQIP')
+    const normalizedFundType = String(fundType || '').trim().toUpperCase()
+    const isDefaultFundType = FUND_TYPES.has(normalizedFundType)
+    const isAddedFundType = !isDefaultFundType && await FundType.exists({ code: normalizedFundType })
+    if (!isDefaultFundType && !isAddedFundType) {
+        throw new Error('fundType must be an existing fund type')
     }
 
     const labCode = deriveLabCode(labName)
     const resourceCode = deriveResourceCode(resourceName)
-    const serialNumber = await nextSerialNumber(fundType, labCode, resourceCode)
+    const serialNumber = await nextSerialNumber(normalizedFundType, labCode, resourceCode)
     const serialStr = String(serialNumber).padStart(2, '0')
 
-    const assetId = `${INSTITUTE_CODE}/${fundType}/${labCode}/${resourceCode}/${serialStr}`
+    const assetId = `${INSTITUTE_CODE}/${normalizedFundType}/${labCode}/${resourceCode}/${serialStr}`
 
     return { assetId, labCode, resourceCode, serialNumber }
 }

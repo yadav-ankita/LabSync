@@ -22,9 +22,11 @@ const {
     createResourceAssignmentRequest,
     getAllResourceAssignmentRequests,
 } = require("../controllers/ResourceAssignmentRequestController");
+const { getFundTypes, addFundType } = require("../controllers/FundTypeController");
 
 router.use(authUser)
 router.route("/profile").patch(editAdminProfile)
+router.route("/fund-types").get(getFundTypes).post(addFundType)
 
 router.route("/LabResource").get(getAllLabResources).post(AddResourcesToLab)
 router.route("/LabResource/:id").delete(deleteLabResource)

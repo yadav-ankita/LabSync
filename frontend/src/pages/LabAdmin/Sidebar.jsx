@@ -45,6 +45,7 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "profile", label: "Edit Profile", icon: FileText },
     { key: "faculty", label: "Add Faculty", icon: PlusCircleIcon },
     { key: "labs", label: "Add Labs", icon:PlusCircle  },
+    { key: "funds", label: "Add Funds", icon: PlusCircle  },
   ];
 
   return (

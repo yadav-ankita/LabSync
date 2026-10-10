@@ -3,6 +3,18 @@ const Purchase = require("../models/Purchase_model");
 const LabResource = require("../models/Labresource");
 const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest");
 const { BadRequestError, NotFoundError } = require("../error");
+const FundType = require("../models/FundType");
+const { DEFAULT_FUND_TYPES } = require("../utils/fundTypes");
+
+const validateFundType = async (value) => {
+    const code = String(value || "").trim().toUpperCase();
+    const isDefault = DEFAULT_FUND_TYPES.includes(code);
+    const isAddedFund = !isDefault && await FundType.exists({ code });
+    if (!isDefault && !isAddedFund) {
+        throw new BadRequestError("Please select an existing fund type.");
+    }
+    return code;
+};
 
 // POST /api/v1/admin/purchases
 // Record a new purchase
@@ -38,6 +50,8 @@ const createPurchase = async (req, res, next) => {
             );
         }
 
+        const normalizedFundType = await validateFundType(fundType);
+
         // Automatically calculate Total Cost
         const calculatedTotalCost =
             Number(quantity) * Number(unitCost);
@@ -54,7 +68,7 @@ const createPurchase = async (req, res, next) => {
             supplierName,
             billNumber,
             billDate,
-            fundType,
+            fundType: normalizedFundType,
             quantity,
             unitCost,
 
@@ -115,6 +129,8 @@ const updatePurchase = async (req, res, next) => {
             );
         }
 
+        const normalizedFundType = await validateFundType(fundType);
+
         const purchase = await Purchase.findById(id);
 
         if (!purchase) {
@@ -137,7 +153,7 @@ const updatePurchase = async (req, res, next) => {
         purchase.supplierName = supplierName.trim();
         purchase.billNumber = billNumber.trim();
         purchase.billDate = billDate;
-        purchase.fundType = fundType;
+        purchase.fundType = normalizedFundType;
 
         purchase.quantity = Number(quantity);
         purchase.unitCost = Number(unitCost);

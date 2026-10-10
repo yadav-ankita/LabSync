@@ -1,6 +1,7 @@
 import {
   MessageSquareWarning,
   ClipboardCheck,
+  Boxes,
   Wrench,
   ChevronRight,
   CircleDot,
@@ -15,10 +16,11 @@ import { StatusPill } from "../../components/StatusPill";
 import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
 import { Navigate } from "react-router-dom";
+import { ResourcesByCategory } from "../LabAdmin/ResourcesByCategory";
 
 export function DashboardHome({ setActiveView }) {
   const { currentUser } = useAppContext();
-  const { getResourceAssignmentRequests } = useFacultyContext();
+  const { facultyResources, getAssignedLabResources, getResourceAssignmentRequests } = useFacultyContext();
   const [pendingRequests, setPendingRequests] = useState(0);
   const [maintenance, setMaintenance] = useState([]);
 const [complaints, setComplaints] = useState([]);
@@ -30,6 +32,10 @@ const inProgress = complaints.filter(
   (c) => c.status === "In Progress"
 ).length;
 
+
+useEffect(() => {
+  getAssignedLabResources();
+}, []);
 
 useEffect(() => {
   const fetchComplaints = async () => {
@@ -65,6 +71,7 @@ fetchMaintenance();
   const underMaintenance = maintenance.filter(
     (m) => m.maintenanceStatus !== "Completed"
   ).length;
+  const totalResources = facultyResources.length;
 
   useEffect(() => {
     const fetchPendingRequests = async () => {
@@ -134,7 +141,7 @@ fetchMaintenance();
         />
 
         {/* Statistics */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-5 gap-4 mb-8">
           <StatCard
             label="Pending Complaints"
             value={pending}
@@ -150,6 +157,13 @@ fetchMaintenance();
           />
 
           <StatCard
+            label="Total Resources"
+            value={totalResources}
+            icon={Boxes}
+            accent="#2F6F52"
+          />
+
+          <StatCard
   label="Resource Assignments"
   value={pendingRequests}
   icon={ClipboardCheck}
@@ -162,6 +176,10 @@ fetchMaintenance();
             icon={Wrench}
             accent="#9A4A1B"
           />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 mb-8 lg:grid-cols-2 2xl:grid-cols-3">
+          <ResourcesByCategory resources={facultyResources} />
         </div>
 
         {/* Quick Actions */}
