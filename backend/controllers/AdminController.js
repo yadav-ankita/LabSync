@@ -127,7 +127,9 @@ const getAllLabResources = async (req, res, next) => {
             ? { $eq: filter.labName, $in: existingLabNames }
             : { $in: existingLabNames }
 
-        const resources = await LabResource.find(filter).sort('createdAt')
+        const resources = await LabResource.find(filter)
+  .populate("purchase", "category particulars")
+  .sort("createdAt")
         res.status(StatusCodes.OK).json({ resources, count: resources.length })
     } catch (error) {
         next(error)

@@ -20,7 +20,7 @@ import { ResourcesByLab } from "./ResourcesByLab";
 import { ResourceStatusChart } from "./ResourceStatusChart";
 import { RecentTransfers } from "./RecentTransfers";
 
-export function DashboardHome({ setActiveView }) {
+export function DashboardHome({ setActiveView, animationKey=0 }) {
 
   const [complaints, setComplaints] = useState([]);
 
@@ -168,13 +168,22 @@ export function DashboardHome({ setActiveView }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 mb-8 lg:grid-cols-2 2xl:grid-cols-3">
-        <ResourcesByCategory resources={resources} />
-        <ResourcesByLab resources={resources} />
-        <ResourceStatusChart
-          resources={resources}
-          scrappedCount={scrappedCount}
-          openComplaints={openComplaints}
-        />
+        <ResourcesByCategory
+  resources={resources}
+  animationKey={animationKey}
+/>
+
+<ResourcesByLab
+  resources={resources}
+  animationKey={animationKey}
+/>
+
+<ResourceStatusChart
+  resources={resources}
+  scrappedCount={scrappedCount}
+  openComplaints={openComplaints}
+  animationKey={animationKey}
+/>
       </div>
 
       <h2 className="text-sm uppercase tracking-wide mb-3" style={{ color: "#5B6A5F" }}>
