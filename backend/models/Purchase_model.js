@@ -12,6 +12,28 @@ const purchaseSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
+        category: {
+    type: String,
+    required: true,
+    enum: [
+        "Computers",
+        "Monitors",
+        "CPUs",
+        "Keyboards",
+        "Mouse",
+        "Printers",
+        "Projectors",
+        "Networking Equipment",
+        "Power Backup",
+        "Servers",
+        "Raspberry Pi Kits",
+        "Furniture",
+        "Electrical Equipment",
+        "Cameras",
+        "Software Licenses",
+        "Other Laboratory Equipment"
+    ]
+},
 
         supplierName: {
             type: String,

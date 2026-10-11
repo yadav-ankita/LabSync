@@ -15,7 +15,32 @@ const validateFundType = async (value) => {
     }
     return code;
 };
+const VALID_CATEGORIES = [
+    "Computers",
+    "Monitors",
+    "CPUs",
+    "Keyboards",
+    "Mouse",
+    "Printers",
+    "Projectors",
+    "Networking Equipment",
+    "Power Backup",
+    "Servers",
+    "Raspberry Pi Kits",
+    "Furniture",
+    "Electrical Equipment",
+    "Cameras",
+    "Software Licenses",
+    "Other Laboratory Equipment"
+];
 
+const validateCategory = (category) => {
+    if (!VALID_CATEGORIES.includes(category)) {
+        throw new BadRequestError("Please select a valid resource category.");
+    }
+
+    return category;
+};
 // POST /api/v1/admin/purchases
 // Record a new purchase
 const createPurchase = async (req, res, next) => {
@@ -23,6 +48,7 @@ const createPurchase = async (req, res, next) => {
         const {
             date,
             particulars,
+            category,
             supplierName,
             billNumber,
             billDate,
@@ -38,6 +64,7 @@ const createPurchase = async (req, res, next) => {
         if (
             !date ||
             !particulars ||
+            !category ||
             !supplierName ||
             !billNumber ||
             !billDate ||
@@ -51,6 +78,7 @@ const createPurchase = async (req, res, next) => {
         }
 
         const normalizedFundType = await validateFundType(fundType);
+        const normalizedCategory = validateCategory(category);
 
         // Automatically calculate Total Cost
         const calculatedTotalCost =
@@ -65,6 +93,7 @@ const createPurchase = async (req, res, next) => {
         const purchase = await Purchase.create({
             date,
             particulars,
+            category: normalizedCategory,
             supplierName,
             billNumber,
             billDate,
@@ -102,6 +131,7 @@ const updatePurchase = async (req, res, next) => {
         const {
             date,
             particulars,
+            category,
             supplierName,
             billNumber,
             billDate,
@@ -117,6 +147,7 @@ const updatePurchase = async (req, res, next) => {
         if (
             !date ||
             !particulars ||
+            !category ||
             !supplierName ||
             !billNumber ||
             !billDate ||
@@ -130,6 +161,7 @@ const updatePurchase = async (req, res, next) => {
         }
 
         const normalizedFundType = await validateFundType(fundType);
+        const normalizedCategory = validateCategory(category);
 
         const purchase = await Purchase.findById(id);
 
@@ -150,6 +182,7 @@ const updatePurchase = async (req, res, next) => {
         // Update purchase details
         purchase.date = date;
         purchase.particulars = particulars.trim();
+        purchase.category = normalizedCategory;
         purchase.supplierName = supplierName.trim();
         purchase.billNumber = billNumber.trim();
         purchase.billDate = billDate;

@@ -142,6 +142,28 @@ const AdminProvider = ({ children }) => {
             };
         }
     };
+    const deleteFundType = async (id) => {
+    try {
+        const { data } = await axios.delete(`/admin/fund-types/${id}`);
+
+        setFundTypes((current) =>
+            current.filter((fundType) => fundType._id !== id)
+        );
+
+        return {
+            success: true,
+            message: data.message || "Fund type deleted successfully.",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message:
+                error.response?.data?.msg ||
+                error.response?.data?.message ||
+                "Could not delete fund type.",
+        };
+    }
+};
     const addPurchase = async (purchaseData) => {
         try {
             const { data } = await axios.post("/admin/purchases", purchaseData);
@@ -377,6 +399,7 @@ const getResourceAssignmentRequests = async () => {
                 fundTypes,
                 getFundTypes,
                 addFundType,
+                deleteFundType,
                 addPurchase,
                 updatePurchase,
                 getPurchases,
