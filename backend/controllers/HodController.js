@@ -190,8 +190,7 @@ const updateTransferApproval = async (req, res, next) => {
     for (const asset of assets) {
       asset.previousLabName = fromLab.LabName;
       asset.labName = toLab.LabName;
-      asset.labCode = generateAssetId.deriveLabCode(toLab.LabName);
-
+     
       await asset.save();
     }
 

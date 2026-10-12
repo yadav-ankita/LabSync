@@ -5,6 +5,7 @@ const ResourceAssignmentRequest = require("../models/ResourceAssignmentRequest")
 const { BadRequestError, NotFoundError } = require("../error");
 const FundType = require("../models/FundType");
 const { DEFAULT_FUND_TYPES } = require("../utils/fundTypes");
+const generateAssetId = require("../utils/Generateassetid");
 
 const validateFundType = async (value) => {
     const code = String(value || "").trim().toUpperCase();
@@ -43,7 +44,10 @@ const validateCategory = (category) => {
 };
 // POST /api/v1/admin/purchases
 // Record a new purchase
+
 const createPurchase = async (req, res, next) => {
+    let createdPurchase = null;
+
     try {
         const {
             date,
@@ -69,27 +73,43 @@ const createPurchase = async (req, res, next) => {
             !billNumber ||
             !billDate ||
             !fundType ||
-            !quantity ||
-            unitCost === undefined
+            quantity === undefined ||
+            quantity === null ||
+            Number(quantity) <= 0 ||
+            !Number.isInteger(Number(quantity)) ||
+            unitCost === undefined ||
+            !Number.isFinite(Number(unitCost)) ||
+            Number(unitCost) < 0
         ) {
             throw new BadRequestError(
-                "Please provide all required purchase details"
+                "Please provide valid purchase details"
             );
         }
 
         const normalizedFundType = await validateFundType(fundType);
         const normalizedCategory = validateCategory(category);
 
-        // Automatically calculate Total Cost
-        const calculatedTotalCost =
-            Number(quantity) * Number(unitCost);
+        const qty = Number(quantity);
+        const cost = Number(unitCost);
+        const tax = Number(salesTax || 0);
+        const transport = Number(freight || 0);
 
-        // Automatically calculate Grand Total
+        if (
+            !Number.isFinite(tax) ||
+            !Number.isFinite(transport) ||
+            tax < 0 ||
+            transport < 0
+        ) {
+            throw new BadRequestError(
+                "Sales tax and freight must be valid non-negative numbers"
+            );
+        }
+
+        const calculatedTotalCost = qty * cost;
         const calculatedGrandTotal =
-            calculatedTotalCost +
-            Number(salesTax || 0) +
-            Number(freight || 0);
+            calculatedTotalCost + tax + transport;
 
+        // Create the purchase record first.
         const purchase = await Purchase.create({
             date,
             particulars,
@@ -98,29 +118,72 @@ const createPurchase = async (req, res, next) => {
             billNumber,
             billDate,
             fundType: normalizedFundType,
-            quantity,
-            unitCost,
-
+            quantity: qty,
+            unitCost: cost,
             totalCost: calculatedTotalCost,
-
-            salesTax,
-            freight,
-
+            salesTax: tax,
+            freight: transport,
             grandTotal: calculatedGrandTotal,
-
             signature,
             remarks
         });
 
+        createdPurchase = purchase;
+
+        // Create one individual asset record for every purchased unit.
+        const assetRecords = [];
+
+        for (let i = 0; i < qty; i++) {
+            const generated = await generateAssetId.generateProvisionalAssetId({
+                resourceName: particulars,
+                fundType: normalizedFundType
+            });
+
+            assetRecords.push({
+                assetId: generated.assetId,
+                originalAssetId: null,
+                labName: "Not Assigned",
+                previousLabName: null,
+                labCode: null,
+                resourceName: particulars,
+                purchase: purchase._id,
+                resourceCode: generated.resourceCode,
+                serialNumber: generated.serialNumber,
+                status: "Available"
+            });
+        }
+
+        await LabResource.insertMany(assetRecords, {
+            ordered: true
+        });
+
         res.status(StatusCodes.CREATED).json({
-            message: "Purchase recorded successfully",
-            purchase
+            message: "Purchase recorded and assets created successfully",
+            purchase,
+            assetsCreated: assetRecords.length
         });
 
     } catch (error) {
+        // Avoid leaving a purchase record behind if asset creation fails.
+        if (createdPurchase) {
+            try {
+                await LabResource.deleteMany({
+                    purchase: createdPurchase._id
+                });
+
+                await Purchase.findByIdAndDelete(createdPurchase._id);
+            } catch (cleanupError) {
+                console.error(
+                    "Purchase cleanup failed:",
+                    cleanupError
+                );
+            }
+        }
+
         next(error);
     }
 };
+
 
 // PATCH /api/v1/admin/purchases/:id
 // Update an existing purchase
@@ -168,6 +231,21 @@ const updatePurchase = async (req, res, next) => {
         if (!purchase) {
             throw new NotFoundError("Purchase not found");
         }
+
+        if (
+    !Number.isInteger(Number(quantity)) ||
+    Number(quantity) <= 0 ||
+    !Number.isFinite(Number(unitCost)) ||
+    Number(unitCost) < 0 ||
+    !Number.isFinite(Number(salesTax || 0)) ||
+    Number(salesTax || 0) < 0 ||
+    !Number.isFinite(Number(freight || 0)) ||
+    Number(freight || 0) < 0
+) {
+    throw new BadRequestError(
+        "Quantity must be a positive integer, and costs must be non-negative numbers"
+    );
+}
 
         // Automatically calculate Total Cost
         const calculatedTotalCost =
@@ -235,54 +313,48 @@ const getPurchases = async (req, res, next) => {
 
 // GET /api/v1/admin/purchases/resources
 // Get combined resource availability for Resource Management
+
+// GET /api/v1/admin/purchases/resources
+
 const getAvailableResources = async (req, res, next) => {
     try {
-        const LabResource = require("../models/Labresource");
-        const purchases = await Purchase.find({}).sort({ date: -1, createdAt: -1 }).lean();
+        const pendingRequests = await ResourceAssignmentRequest.find({
+            status: "Pending",
+            assets: { $exists: true, $ne: [] },
+        }).select("assets");
 
-        // Keep each purchase distinct: its fund type determines generated asset IDs.
-        const resources = await Promise.all(purchases.map(async (purchase) => {
-            const assignedQuantity = await LabResource.countDocuments({
-                purchase: purchase._id
-            });
+        const pendingAssetIds = pendingRequests.flatMap((request) =>
+            (request.assets || []).map((id) => id.toString())
+        );
 
-            const pendingRequests = await ResourceAssignmentRequest.aggregate([
-                {
-                    $match: {
-                        purchase: purchase._id,
-                        status: "Pending"
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        quantity: { $sum: "$quantity" }
-                    }
-                }
-            ]);
-            const pendingQuantity = pendingRequests[0]?.quantity || 0;
-
-            return {
-                ...purchase,
-                totalQuantity: purchase.quantity,
-                assignedQuantity,
-                pendingQuantity,
-                remainingQuantity: Math.max(
-                    0,
-                    purchase.quantity - assignedQuantity - pendingQuantity
-                )
-            };
-        }));
+        const resources = await LabResource.find({
+            labName: "Not Assigned",
+            status: /*{ $nin: ["Maintenance", "Faulty", "Scrapped"] }*/ "Available",
+            _id: { $nin: pendingAssetIds },
+        })
+            .populate(
+                "purchase",
+                "particulars category fundType supplierName"
+            )
+            .sort({ createdAt: -1 });
 
         res.status(StatusCodes.OK).json({
-            resources,
-            count: resources.length
-        });
+            resources: resources.map((asset) => {
+                const item = asset.toObject();
 
+                return {
+                    ...item,
+                    category: item.purchase?.category,
+                    fundType: item.purchase?.fundType,
+                };
+            }),
+            count: resources.length,
+        });
     } catch (error) {
         next(error);
     }
 };
+
 
 
 

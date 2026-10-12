@@ -173,9 +173,8 @@ if (maintenance.assetConditionAfterRepair === "Beyond Repair") {
   resourceUpdate = {
     status: "Scrapped",
     previousLabName: maintenance.complaint.labName,
-    labName: "Not Assigned",
-      originalAssetId: maintenance.complaint.resourceId,
-  assetId: `SCRAP-${maintenance.complaint.resourceId}`,
+    labName:  maintenance.complaint.labName,
+     
   };
 }
 

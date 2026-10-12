@@ -94,7 +94,8 @@ export function LabResources() {
               <ResourceTag id={r.assetId || r.id || "N/A"} />
             </span>
             <span className="col-span-4 text-sm" style={{ color: "#1F2A24" }}>{r.resourceName || r.name}</span>
-            <span className="col-span-3 flex justify-end">
+           
+            <span className="col-span-3 flex justify-end" >
               <ResourceStatusPill status={r.status || "Available"} />
             </span>
           </div>

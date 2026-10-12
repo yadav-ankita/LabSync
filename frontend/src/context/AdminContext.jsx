@@ -4,6 +4,7 @@ import "../axios";
 
 const AdminContext = createContext();
 
+
 const AdminProvider = ({ children }) => {
     // ---------- Labs ----------
     const [labName, setLabName] = useState([]);
@@ -257,34 +258,49 @@ const AdminProvider = ({ children }) => {
     return [];
   }
 };
-const createResourceAssignmentRequest = async (requestData) => {
-  try {
-    console.log("🔥 Sending request to:", "/admin/resource-assignment-request");
 
-const { data } = await axios.post(
-  "/admin/resource-assignment-request",
-  requestData
-);
 
-    return {
-      success: true,
-      request: data.request,
-      remainingQuantity: data.remainingQuantity,
-    };
-  } catch (err) {
-    
-console.error("🔥 Assignment request error:", err.response?.data || err);
-    const message =
-  err.response?.data?.msg ||
-  err.response?.data?.message ||
-  err.message ||
-  "Could not send resource assignment request.";
+const createResourceAssignmentRequest = async ({
+    labName,
+    assetIds,
+}) => {
+    if (!labName || !Array.isArray(assetIds) || assetIds.length === 0) {
+        return {
+            success: false,
+            message: "Please select a lab and at least one asset.",
+        };
+    }
 
-    return {
-      success: false,
-      message,
-    };
-  }
+    try {
+        const { data } = await axios.post(
+            "/admin/resource-assignment-request",
+            {
+                labName,
+                assetIds,
+            }
+        );
+
+        return {
+            success: true,
+            request: data.request,
+            remainingQuantity: data.remainingQuantity,
+            message: data.message,
+        };
+    } catch (err) {
+        console.error(
+            "Assignment request error:",
+            err.response?.data || err
+        );
+
+        return {
+            success: false,
+            message:
+                err.response?.data?.msg ||
+                err.response?.data?.message ||
+                err.message ||
+                "Could not send resource assignment request.",
+        };
+    }
 };
 const getResourceAssignmentRequests = async () => {
   try {

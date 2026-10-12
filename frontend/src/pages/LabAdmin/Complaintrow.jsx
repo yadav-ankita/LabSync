@@ -9,6 +9,7 @@ export function ComplaintRow({
   onStatusChange,
   onMoveToMaintenance,
   maintenanceExists = false,
+   maintenanceCompleted = false,
 }) {
   const date = new Date(complaint.createdAt);
 
@@ -78,25 +79,28 @@ export function ComplaintRow({
           <StatusPill status={complaint.status} />
 
           {/* Status change */}
-          <select
-            value={complaint.status}
-            onChange={(e) =>
-              onStatusChange(complaint._id, e.target.value)
-            }
-            className="text-xs px-2 py-1.5 rounded-lg border bg-white focus:outline-none"
-            style={{
-              borderColor: "#D8DCD4",
-              color: "#5B6A5F",
-            }}
-          >
-            {STATUS_OPTIONS
-  .filter((s) => !maintenanceExists || s !== "Resolved")
-  .map((s) => (
-    <option key={s} value={s}>
-      Mark as {s}
-    </option>
-  ))}
-          </select>
+         
+<select
+  value={complaint.status}
+  onChange={(e) =>
+    onStatusChange(complaint._id, e.target.value)
+  }
+  disabled={maintenanceCompleted || complaint.status === "Resolved"}
+  className="text-xs px-2 py-1.5 rounded-lg border bg-white focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+  style={{
+    borderColor: "#D8DCD4",
+    color: "#5B6A5F",
+  }}
+>
+  {STATUS_OPTIONS
+    .filter((s) => !maintenanceExists || s !== "Resolved")
+    .map((s) => (
+      <option key={s} value={s}>
+        Mark as {s}
+      </option>
+    ))}
+</select>
+
 
           {/* Move to Maintenance */}
           {complaint.status === "Resolved" ? (

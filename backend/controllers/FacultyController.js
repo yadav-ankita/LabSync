@@ -167,9 +167,11 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
             );
         }
 
+        // Handle rejection
         if (status === "Rejected") {
             request.status = "Rejected";
-            request.rejectionReason = rejectionReason?.trim() || null;
+            request.rejectionReason =
+                rejectionReason?.trim() || null;
 
             await request.save();
 
@@ -179,10 +181,11 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
             });
         }
 
-        const purchase = await Purchase.findById(request.purchase);
-
-        if (!purchase) {
-            throw new NotFoundError("Purchase not found");
+        // Approval requires the specific assets selected in the request
+        if (!request.assets || request.assets.length === 0) {
+            throw new BadRequestError(
+                "This request has no selected assets. Please create a new assignment request."
+            );
         }
 
         const lab = await Lab.findById(request.lab);
@@ -191,74 +194,102 @@ const respondToResourceAssignmentRequest = async (req, res, next) => {
             throw new NotFoundError("Lab not found");
         }
 
-        const totalPurchased = await Purchase.aggregate([
-            {
-                $match: {
-                    particulars: purchase.particulars,
-                },
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalQuantity: { $sum: "$quantity" },
-                },
-            },
-        ]);
+        // Fetch existing assets; do not create new ones
+        const assetIds = request.assets.map((id) => id.toString());
 
-        const totalQuantity =
-            totalPurchased.length > 0
-                ? totalPurchased[0].totalQuantity
-                : 0;
-
-        const assignedQuantity = await LabResource.countDocuments({
-            resourceName: purchase.particulars,
+        const assets = await LabResource.find({
+            _id: { $in: assetIds },
         });
 
-        const approvedResources = [];
-
-        for (let i = 0; i < request.quantity; i++) {
-            const {
-                assetId,
-                labCode,
-                resourceCode,
-                serialNumber,
-            } = await generateAssetId({
-                labName: lab.LabName,
-                resourceName: purchase.particulars,
-                fundType: purchase.fundType,
-            });
-
-            const resource = await LabResource.create({
-                assetId,
-                labName: lab.LabName,
-                labCode,
-                resourceName: purchase.particulars,
-                resourceCode,
-                serialNumber,
-                purchase: purchase._id,
-            });
-
-            approvedResources.push(resource);
+        if (assets.length !== assetIds.length) {
+            throw new BadRequestError(
+                "One or more selected assets could not be found"
+            );
         }
 
-        const totalResources = await LabResource.countDocuments({
+       
+        // Validate every asset before updating any of them
+        for (const asset of assets) {
+            if (asset.labName !== "Not Assigned") {
+                throw new BadRequestError(
+                    `Asset ${asset.assetId} is already assigned to a lab`
+                );
+            }
+
+            if (asset.status !== "Available") {
+                throw new BadRequestError(
+                    `Asset ${asset.assetId} cannot be assigned because its status is ${asset.status}`
+                );
+            }
+        }
+
+
+        // Finalize IDs and assign the selected existing assets
+        const approvedResources = [];
+
+        for (const asset of assets) {
+            // Preserve the provisional ID for reference
+            if (!asset.originalAssetId) {
+                asset.originalAssetId = asset.assetId;
+            }
+
+            const finalized = await generateAssetId.finalizeAssetId({
+                asset,
+                labName: lab.LabName,
+            });
+
+            asset.assetId = finalized.assetId;
+            asset.labCode = finalized.labCode;
+            asset.labName = lab.LabName;
+            asset.status = "Available";
+
+            await asset.save();
+
+            approvedResources.push(asset);
+        }
+
+        // Update the lab's resource count
+        lab.NumResources = await LabResource.countDocuments({
             labName: lab.LabName,
         });
 
-        lab.NumResources = totalResources;
         await lab.save();
 
+        // Mark request approved
         request.status = "Approved";
         request.rejectionReason = null;
+
         await request.save();
 
-        res.status(StatusCodes.OK).json({
+        // Calculate remaining unassigned assets for this purchase
+        // const remainingQuantity = await LabResource.countDocuments({
+        //     purchase: { $in: [request.purchase] },
+        //     labName: "Not Assigned",
+        //     status: {
+        //         $nin: ["Maintenance", "Faulty", "Scrapped"],
+        //     },
+        // });
+
+        const remainingQuantity = await LabResource.countDocuments({
+    purchase: {
+        $in: [
+            ...new Set(
+                assets
+                    .map((asset) => asset.purchase?.toString())
+                    .filter(Boolean)
+            ),
+        ],
+    },
+    labName: "Not Assigned",
+    status: "Available",
+});
+
+        return res.status(StatusCodes.OK).json({
             message: "Resource assignment request approved",
             request,
             resources: approvedResources,
             count: approvedResources.length,
-            remainingQuantity:
-                totalQuantity - assignedQuantity - approvedResources.length,
+            remainingQuantity,
         });
     } catch (error) {
         next(error);

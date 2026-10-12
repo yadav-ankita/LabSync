@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const LabResourceSchema = new mongoose.Schema(
@@ -8,50 +9,64 @@ const LabResourceSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+
     originalAssetId: {
-  type: String,
-  default: null,
-  trim: true,
-},
+      type: String,
+      default: null,
+      trim: true,
+    },
+
     labName: {
       type: String,
-      required: true,
+      default: 'Not Assigned',
       trim: true,
     },
-    
+
     previousLabName: {
-  type: String,
-  trim: true,
-  default: null,
-},
+      type: String,
+      trim: true,
+      default: null,
+    },
+
     labCode: {
       type: String,
-      required: true,
+      default: null,
       trim: true,
     },
+
     resourceName: {
       type: String,
       required: true,
       trim: true,
     },
-    purchase:{
+
+    purchase: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Purchase",
+      ref: 'Purchase',
       required: true,
     },
+
     resourceCode: {
       type: String,
       required: true,
       trim: true,
     },
+
     serialNumber: {
       type: Number,
       default: 1,
     },
+
     status: {
-    type: String,
-    enum: ['Available', 'In Use', 'Maintenance', 'Faulty', 'Scrapped'],
-    default: 'Available',
+      type: String,
+      enum: [
+        'Available',
+        'In Use',
+        'Maintenance',
+        'Faulty',
+        'Scrapped',
+      ],
+      default: 'Available',
     },
   },
   { timestamps: true }

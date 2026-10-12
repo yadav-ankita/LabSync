@@ -16,6 +16,7 @@ export function ComplaintsPanel() {
   const [maintenanceIds, setMaintenanceIds] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
   const [labFilter, setLabFilter] = useState("All Labs");
+  const [completedMaintenanceIds, setCompletedMaintenanceIds] = useState([]);
 
   // Fetch all complaints when page loads
   useEffect(() => {
@@ -23,19 +24,30 @@ export function ComplaintsPanel() {
     getMaintenanceIds();
   }, []);
 
+
+
 const getMaintenanceIds = async () => {
   try {
     const { data } = await axios.get("/admin/maintenance");
+    const maintenance = data.maintenance || [];
 
-    const ids = (data.maintenance || [])
-      .map((item) => item.complaint?._id)
-      .filter(Boolean);
+    setMaintenanceIds(
+      maintenance
+        .map((item) => item.complaint?._id)
+        .filter(Boolean)
+    );
 
-    setMaintenanceIds(ids);
+    setCompletedMaintenanceIds(
+      maintenance
+        .filter((item) => item.status === "Completed")
+        .map((item) => item.complaint?._id)
+        .filter(Boolean)
+    );
   } catch (error) {
     console.error("Error fetching maintenance records:", error);
   }
 };
+
 
   const complaints = Allcomplaints || [];
 console.log("REAL COMPLAINTS:", Allcomplaints);
@@ -169,13 +181,16 @@ const handleMoveToMaintenance = async (complaintId) => {
           </div>
         ) : (
           visible.map((c) => (
-            <ComplaintRow
-              key={c._id}
-              complaint={c}
-              onStatusChange={handleStatusChange}
-               onMoveToMaintenance={handleMoveToMaintenance}
-               maintenanceExists={maintenanceIds.includes(c._id)}
-            />
+          
+<ComplaintRow
+  key={c._id}
+  complaint={c}
+  onStatusChange={handleStatusChange}
+  onMoveToMaintenance={handleMoveToMaintenance}
+  maintenanceExists={maintenanceIds.includes(c._id)}
+  maintenanceCompleted={completedMaintenanceIds.includes(c._id)}
+/>
+
           ))
         )}
       </div>

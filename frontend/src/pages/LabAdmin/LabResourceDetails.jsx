@@ -128,7 +128,7 @@ export function LabResourceDetails() {
 
   return (
     <div
-      className="flex min-h-screen overflow-hidden"
+      className="flex h-screen overflow-hidden"
       style={{
         backgroundColor: "#F2F4F1",
         fontFamily: "'IBM Plex Sans', sans-serif",
@@ -139,14 +139,14 @@ export function LabResourceDetails() {
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"
       />
 
-      <aside className="h-screen shrink-0 overflow-y-auto">
+      <aside className="h-full shrink-0 overflow-hidden">
         <Sidebar
           activeView="LabResources"
           setActiveView={handleSidebarNavigation}
         />
       </aside>
 
-      <main className="flex-1 min-w-0 px-6 py-8 md:px-10 overflow-y-auto">
+      <main className="flex-1 min-w-0 h-full px-6 py-8 md:px-10 overflow-y-auto">
         <button
           type="button"
           onClick={handleBack}

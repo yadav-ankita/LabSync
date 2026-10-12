@@ -1,124 +1,329 @@
-const Counter = require('../models/Counter')
-const FundType = require('../models/FundType')
-const { DEFAULT_FUND_TYPES } = require('./fundTypes')
+// const Counter = require('../models/Counter')
+// const FundType = require('../models/FundType')
+// const { DEFAULT_FUND_TYPES } = require('./fundTypes')
 
-// e.g. "BVM/GIA/HW/F206/RCH/01"
-//        |   |   |  |    |   |
-//        |   |   |  |    |   +-- serial number within this fund/lab/resource
-//        |   |   |  |    |       combination
-//        |   |   |  |    +------ resource code (abbreviation of resource name)
-//        |   |   |  +----------- lab code (derived from lab name)
-//        |   |   +-------------- type code: HW (Hardware) or SW (Software)
-//        |   +------------------ fund type
-//        +---------------------- institute code
-const INSTITUTE_CODE = process.env.INSTITUTE_CODE || 'BVM'
+// // e.g. "BVM/GIA/HW/F206/RCH/01"
+// //        |   |   |  |    |   |
+// //        |   |   |  |    |   +-- serial number within this fund/lab/resource
+// //        |   |   |  |    |       combination
+// //        |   |   |  |    +------ resource code (abbreviation of resource name)
+// //        |   |   |  +----------- lab code (derived from lab name)
+// //        |   |   +-------------- type code: HW (Hardware) or SW (Software)
+// //        |   +------------------ fund type
+// //        +---------------------- institute code
+// const INSTITUTE_CODE = process.env.INSTITUTE_CODE || 'BVM'
 
-const FUND_TYPES = new Set(DEFAULT_FUND_TYPES)
+// const FUND_TYPES = new Set(DEFAULT_FUND_TYPES)
 
-// Curated abbreviations for common lab items, based on the department's
-// existing deadstock register conventions. Extend this as new resource
-// types get added — anything not listed here falls back to an
-// auto-generated code (see deriveResourceCode).
+// // Curated abbreviations for common lab items, based on the department's
+// // existing deadstock register conventions. Extend this as new resource
+// // types get added — anything not listed here falls back to an
+// // auto-generated code (see deriveResourceCode).
+// const RESOURCE_CODE_MAP = {
+//     'pc': 'PC',
+//     'computer': 'PC',
+//     'desktop': 'PC',
+//     'cpu': 'CPU',
+//     'monitor': 'MON',
+//     'projector': 'PROJ',
+//     'keyboard': 'KB',
+//     'mouse': 'MS',
+//     'printer': 'PRN',
+//     'scanner': 'SCN',
+//     'router': 'RTR',
+//     'switch': 'SWT',
+//     'ups': 'UPS',
+//     'server': 'SRV',
+//     'raspberry pi': 'RPI',
+//     'raspberry pi kit': 'RPI',
+//     'raspberry pi 4 kit': 'RPI',
+//     'whiteboard': 'WB',
+//     'white board': 'WB',
+//     'pin board': 'PB',
+//     'podium': 'PD',
+//     'drawer table': 'DTB',
+//     'stool': 'ST',
+//     'digital watch': 'DW',
+//     'round table': 'RTB',
+//     'teaching platform': 'TP',
+//     'fan': 'FAN',
+//     'ceiling light': 'CLT',
+//     'cupboard': 'CUP',
+//     'camera': 'CAM',
+//     'revolving chair': 'RCH',
+//     'chair': 'CHR',
+//     'table': 'TBL',
+//     'ac': 'AC',
+//     'air conditioner': 'AC',
+//     'software license': 'LIC',
+//     'license': 'LIC',
+// }
+
+// // Keeps only A-Z / 0-9, uppercased.
+// const slugCode = (text) =>
+//     text
+//         .toString()
+//         .toUpperCase()
+//         .replace(/[^A-Z0-9]/g, '')
+
+// // "F206 Lab" -> "F206", "DBMS Lab - Block B" -> "DBMSBLOCKB"
+// const deriveLabCode = (labName) => {
+//     const withoutLabWord = labName.toUpperCase().replace(/LAB(ORATORY)?/g, '')
+//     const code = slugCode(withoutLabWord)
+//     return code || slugCode(labName)
+// }
+
+// // Looks up a curated abbreviation first; otherwise builds one from the
+// // resource name itself (initials for multi-word names, first 3 letters
+// // for single-word names).
+// const deriveResourceCode = (resourceName) => {
+//     const key = resourceName.trim().toLowerCase()
+//     if (RESOURCE_CODE_MAP[key]) return RESOURCE_CODE_MAP[key]
+
+//     const words = resourceName.trim().split(/\s+/).filter(Boolean)
+//     if (words.length > 1) {
+//         const initials = words.map((w) => w[0]).join('').toUpperCase()
+//         return initials.length >= 2 ? initials : slugCode(words[0]).slice(0, 3)
+//     }
+//     return slugCode(words[0] || resourceName).slice(0, 3) || 'RES'
+// }
+
+// // Atomically bumps the counter for this (fundType, labCode, resourceCode) combination and
+// // returns the new value — safe even if two "add resource" requests land
+// // at the same time.
+// const nextSerialNumber = async (fundType, labCode, resourceCode) => {
+//     const key = `${fundType}_${labCode}_${resourceCode}`
+//     const counter = await Counter.findOneAndUpdate(
+//         { key },
+//         { $inc: { seq: 1 } },
+//         { new: true, upsert: true }
+//     )
+//     return counter.seq
+// }
+
+// // { labName, resourceName, fundType } -> { assetId, labCode, resourceCode, serialNumber }
+// const generateAssetId = async ({ labName, resourceName, fundType }) => {
+//     const normalizedFundType = String(fundType || '').trim().toUpperCase()
+//     const isDefaultFundType = FUND_TYPES.has(normalizedFundType)
+//     const isAddedFundType = !isDefaultFundType && await FundType.exists({ code: normalizedFundType })
+//     if (!isDefaultFundType && !isAddedFundType) {
+//         throw new Error('fundType must be an existing fund type')
+//     }
+
+//     const labCode = deriveLabCode(labName)
+//     const resourceCode = deriveResourceCode(resourceName)
+//     const serialNumber = await nextSerialNumber(normalizedFundType, labCode, resourceCode)
+//     const serialStr = String(serialNumber).padStart(2, '0')
+
+//     const assetId = `${INSTITUTE_CODE}/${normalizedFundType}/${labCode}/${resourceCode}/${serialStr}`
+
+//     return { assetId, labCode, resourceCode, serialNumber }
+// }
+
+// module.exports = generateAssetId
+// module.exports.deriveLabCode = deriveLabCode
+
+
+
+const Counter = require("../models/Counter");
+const FundType = require("../models/FundType");
+const { DEFAULT_FUND_TYPES } = require("./fundTypes");
+
+const INSTITUTE_CODE = process.env.INSTITUTE_CODE || "BVM";
+const FUND_TYPES = new Set(DEFAULT_FUND_TYPES);
+
 const RESOURCE_CODE_MAP = {
-    'pc': 'PC',
-    'computer': 'PC',
-    'desktop': 'PC',
-    'cpu': 'CPU',
-    'monitor': 'MON',
-    'projector': 'PROJ',
-    'keyboard': 'KB',
-    'mouse': 'MS',
-    'printer': 'PRN',
-    'scanner': 'SCN',
-    'router': 'RTR',
-    'switch': 'SWT',
-    'ups': 'UPS',
-    'server': 'SRV',
-    'raspberry pi': 'RPI',
-    'raspberry pi kit': 'RPI',
-    'raspberry pi 4 kit': 'RPI',
-    'whiteboard': 'WB',
-    'white board': 'WB',
-    'pin board': 'PB',
-    'podium': 'PD',
-    'drawer table': 'DTB',
-    'stool': 'ST',
-    'digital watch': 'DW',
-    'round table': 'RTB',
-    'teaching platform': 'TP',
-    'fan': 'FAN',
-    'ceiling light': 'CLT',
-    'cupboard': 'CUP',
-    'camera': 'CAM',
-    'revolving chair': 'RCH',
-    'chair': 'CHR',
-    'table': 'TBL',
-    'ac': 'AC',
-    'air conditioner': 'AC',
-    'software license': 'LIC',
-    'license': 'LIC',
-}
+  pc: "PC",
+  computer: "PC",
+  desktop: "PC",
+  cpu: "CPU",
+  monitor: "MON",
+  projector: "PROJ",
+  keyboard: "KB",
+  mouse: "MS",
+  printer: "PRN",
+  scanner: "SCN",
+  router: "RTR",
+  switch: "SWT",
+  ups: "UPS",
+  server: "SRV",
+  "raspberry pi": "RPI",
+  "raspberry pi kit": "RPI",
+  "raspberry pi 4 kit": "RPI",
+  whiteboard: "WB",
+  "white board": "WB",
+  "pin board": "PB",
+  podium: "PD",
+  "drawer table": "DTB",
+  stool: "ST",
+  "digital watch": "DW",
+  "round table": "RTB",
+  "teaching platform": "TP",
+  fan: "FAN",
+  "ceiling light": "CLT",
+  cupboard: "CUP",
+  camera: "CAM",
+  "revolving chair": "RCH",
+  chair: "CHR",
+  table: "TBL",
+  ac: "AC",
+  "air conditioner": "AC",
+  "software license": "LIC",
+  license: "LIC",
+};
 
-// Keeps only A-Z / 0-9, uppercased.
 const slugCode = (text) =>
-    text
-        .toString()
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, '')
+  String(text || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
 
-// "F206 Lab" -> "F206", "DBMS Lab - Block B" -> "DBMSBLOCKB"
 const deriveLabCode = (labName) => {
-    const withoutLabWord = labName.toUpperCase().replace(/LAB(ORATORY)?/g, '')
-    const code = slugCode(withoutLabWord)
-    return code || slugCode(labName)
-}
+  const withoutLabWord = String(labName || "")
+    .toUpperCase()
+    .replace(/LAB(ORATORY)?/g, "");
 
-// Looks up a curated abbreviation first; otherwise builds one from the
-// resource name itself (initials for multi-word names, first 3 letters
-// for single-word names).
+  return slugCode(withoutLabWord) || slugCode(labName);
+};
+
 const deriveResourceCode = (resourceName) => {
-    const key = resourceName.trim().toLowerCase()
-    if (RESOURCE_CODE_MAP[key]) return RESOURCE_CODE_MAP[key]
+  const name = String(resourceName || "").trim();
+  const key = name.toLowerCase();
 
-    const words = resourceName.trim().split(/\s+/).filter(Boolean)
-    if (words.length > 1) {
-        const initials = words.map((w) => w[0]).join('').toUpperCase()
-        return initials.length >= 2 ? initials : slugCode(words[0]).slice(0, 3)
-    }
-    return slugCode(words[0] || resourceName).slice(0, 3) || 'RES'
-}
+  if (RESOURCE_CODE_MAP[key]) {
+    return RESOURCE_CODE_MAP[key];
+  }
 
-// Atomically bumps the counter for this (fundType, labCode, resourceCode) combination and
-// returns the new value — safe even if two "add resource" requests land
-// at the same time.
-const nextSerialNumber = async (fundType, labCode, resourceCode) => {
-    const key = `${fundType}_${labCode}_${resourceCode}`
-    const counter = await Counter.findOneAndUpdate(
-        { key },
-        { $inc: { seq: 1 } },
-        { new: true, upsert: true }
-    )
-    return counter.seq
-}
+  const words = name.split(/\s+/).filter(Boolean);
 
-// { labName, resourceName, fundType } -> { assetId, labCode, resourceCode, serialNumber }
+  if (words.length > 1) {
+    return words.map((word) => word[0]).join("").toUpperCase();
+  }
+
+  return slugCode(words[0] || name).slice(0, 3) || "RES";
+};
+
+const validateFundType = async (fundType) => {
+  const normalized = String(fundType || "").trim().toUpperCase();
+
+  const isDefault = FUND_TYPES.has(normalized);
+  const isAdded =
+    !isDefault && (await FundType.exists({ code: normalized }));
+
+  if (!isDefault && !isAdded) {
+    throw new Error("fundType must be an existing fund type");
+  }
+
+  return normalized;
+};
+
+// One serial sequence per fund type and resource type,
+// shared across labs.
+const nextSerialNumber = async (fundType, resourceCode) => {
+  const key = `${fundType}_${resourceCode}`;
+
+  const counter = await Counter.findOneAndUpdate(
+    { key },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+
+  return counter.seq;
+};
+
+// Generate an ID at purchase time:
+// BVM/GIA/PC/01
+const generateProvisionalAssetId = async ({
+  resourceName,
+  fundType,
+}) => {
+  const normalizedFundType = await validateFundType(fundType);
+  const resourceCode = deriveResourceCode(resourceName);
+  const serialNumber = await nextSerialNumber(
+    normalizedFundType,
+    resourceCode
+  );
+
+  const serialStr = String(serialNumber).padStart(2, "0");
+  const assetId =
+    `${INSTITUTE_CODE}/${normalizedFundType}/${resourceCode}/${serialStr}`;
+
+  return {
+    assetId,
+    labCode: null,
+    resourceCode,
+    serialNumber,
+  };
+};
+
+// Add the lab code to an existing provisional ID.
+// Keep the original serial number; do not increment a counter.
+const finalizeAssetId = ({ asset, labName }) => {
+  if (!asset || !asset.assetId || !labName) {
+    throw new Error("Asset and labName are required");
+  }
+
+  const labCode = deriveLabCode(labName);
+
+  // Already assigned: preserve its ID.
+  if (asset.labCode && asset.labName !== "Not Assigned") {
+    return {
+      assetId: asset.assetId,
+      labCode: asset.labCode,
+    };
+  }
+
+  const parts = asset.assetId.split("/");
+
+  if (parts.length !== 4) {
+    throw new Error(
+      `Cannot finalize provisional Asset ID: ${asset.assetId}`
+    );
+  }
+
+  const [instituteCode, fundType, resourceCode, serialNumber] = parts;
+
+  return {
+    assetId: [
+      instituteCode,
+      fundType,
+      labCode,
+      resourceCode,
+      serialNumber,
+    ].join("/"),
+    labCode,
+  };
+};
+
+// Backwards-compatible function for existing callers.
+// New purchase flow should call generateProvisionalAssetId.
 const generateAssetId = async ({ labName, resourceName, fundType }) => {
-    const normalizedFundType = String(fundType || '').trim().toUpperCase()
-    const isDefaultFundType = FUND_TYPES.has(normalizedFundType)
-    const isAddedFundType = !isDefaultFundType && await FundType.exists({ code: normalizedFundType })
-    if (!isDefaultFundType && !isAddedFundType) {
-        throw new Error('fundType must be an existing fund type')
-    }
+  const provisional = await generateProvisionalAssetId({
+    resourceName,
+    fundType,
+  });
 
-    const labCode = deriveLabCode(labName)
-    const resourceCode = deriveResourceCode(resourceName)
-    const serialNumber = await nextSerialNumber(normalizedFundType, labCode, resourceCode)
-    const serialStr = String(serialNumber).padStart(2, '0')
+  if (!labName) {
+    return provisional;
+  }
 
-    const assetId = `${INSTITUTE_CODE}/${normalizedFundType}/${labCode}/${resourceCode}/${serialStr}`
+  const labCode = deriveLabCode(labName);
+  const parts = provisional.assetId.split("/");
 
-    return { assetId, labCode, resourceCode, serialNumber }
-}
+  return {
+    ...provisional,
+    assetId: [
+      parts[0],
+      parts[1],
+      labCode,
+      parts[2],
+      parts[3],
+    ].join("/"),
+    labCode,
+  };
+};
 
-module.exports = generateAssetId
-module.exports.deriveLabCode = deriveLabCode
+module.exports = generateAssetId;
+module.exports.deriveLabCode = deriveLabCode;
+module.exports.deriveResourceCode = deriveResourceCode;
+module.exports.generateProvisionalAssetId = generateProvisionalAssetId;
+module.exports.finalizeAssetId = finalizeAssetId;

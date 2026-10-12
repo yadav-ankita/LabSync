@@ -147,20 +147,22 @@ const handleReject = async (id) => {
 
   return (
     <div
-      className="flex min-h-screen"
+      className="flex h-screen overflow-hidden"
       style={{
         backgroundColor: "#F2F4F1",
         fontFamily: "'IBM Plex Sans', sans-serif",
       }}
     >
       {/* ================= SIDEBAR ================= */}
+      <aside className="h-full shrink-0 overflow-hidden">
       <Sidebar
         activeView={activeView}
         setActiveView={setActiveView}
       />
+      </aside>
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="flex-1 min-w-0 p-7">
+      <main className="flex-1 min-w-0 h-full p-7 overflow-y-auto">
 
         {/* ================= OVERVIEW ================= */}
         {activeView === "home" && (

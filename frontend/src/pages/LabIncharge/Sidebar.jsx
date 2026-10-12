@@ -47,7 +47,7 @@ export function Sidebar({ activeView, setActiveView }) {
 
   return (
     <aside
-      className="w-64 shrink-0 flex flex-col"
+      className="w-64 shrink-0 flex flex-col overflow-hidden"
       style={{
         backgroundColor: "#1F2A24",
         backgroundImage:
@@ -70,8 +70,7 @@ export function Sidebar({ activeView, setActiveView }) {
         </p>
       </div>
 
-      <nav className="flex-1 px-3 py-5 space-y-1">
-        {navItems.map((item) => {
+<nav className="sidebar-scroll flex-1 min-h-0 overflow-y-auto px-3 py-5 space-y-1">        {navItems.map((item) => {
           const Icon = item.icon;
           const active = activeView === item.key;
           return (
@@ -99,7 +98,7 @@ export function Sidebar({ activeView, setActiveView }) {
         })}
       </nav>
 
-      <div className="px-6 py-5 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className=" shrink-0 px-6 py-5 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="flex items-center gap-3">
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold"

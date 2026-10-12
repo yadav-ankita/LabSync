@@ -1,11 +1,14 @@
+
 const mongoose = require("mongoose");
 
 const ResourceAssignmentRequestSchema = new mongoose.Schema(
   {
+    // Optional for requests containing assets from multiple purchases.
+    // Retained for compatibility with older requests.
     purchase: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Purchase",
-      required: true,
+      default: null,
     },
 
     lab: {
@@ -20,12 +23,21 @@ const ResourceAssignmentRequestSchema = new mongoose.Schema(
       required: true,
     },
 
+    // The quantity is determined by the number of selected assets.
     quantity: {
       type: Number,
       required: true,
       min: 1,
       max: 100,
     },
+
+    // Exact existing assets selected for assignment.
+    assets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LabResource",
+      },
+    ],
 
     status: {
       type: String,
@@ -42,7 +54,9 @@ const ResourceAssignmentRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model(
-  "ResourceAssignmentRequest",
-  ResourceAssignmentRequestSchema
-);
+module.exports =
+  mongoose.models.ResourceAssignmentRequest ||
+  mongoose.model(
+    "ResourceAssignmentRequest",
+    ResourceAssignmentRequestSchema
+  );

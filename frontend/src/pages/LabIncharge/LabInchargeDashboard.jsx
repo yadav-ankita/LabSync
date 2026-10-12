@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./ComplaintsPanel";
-import { LabResources } from "./LabResources";
+import { LabResources } from "./Labresources";
 import { EditProfile } from "./EditProfile";
 import { LabManuals } from "./Labmanuals";
 import { ComplaintForm } from "./ComplaintForm";
@@ -18,14 +18,14 @@ export function LabInchargeDashboard() {
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap"
       />
-      <aside className="h-screen shrink-0 overflow-y-auto">
+      <aside className="h-screen shrink-0 overflow-hidden">
     <Sidebar
       activeView={activeView}
       setActiveView={setActiveView}
     />
   </aside>
   
-   <main className="flex-1 min-w-0 px-10 py-8 overflow-y-auto">
+   <main className="flex-1 min-w-0 h-full px-10 py-8 overflow-y-auto">
         {activeView === "home" && <DashboardHome setActiveView={setActiveView} />}
         {activeView === "assignmentApprovals" && (
         <ResourceAssignmentApprovals />
