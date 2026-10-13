@@ -327,6 +327,22 @@ const getAvailableResources = async (req, res, next) => {
             (request.assets || []).map((id) => id.toString())
         );
 
+const projectorPurchases = await Purchase.find({
+    $or: [
+        { particulars: /projector/i },
+        { category: /projector/i },
+    ],
+});
+
+
+for (const purchase of projectorPurchases) {
+    const assets = await LabResource.find({
+        purchase: purchase._id,
+    });
+
+   
+}
+
         const resources = await LabResource.find({
             labName: "Not Assigned",
             status: /*{ $nin: ["Maintenance", "Faulty", "Scrapped"] }*/ "Available",

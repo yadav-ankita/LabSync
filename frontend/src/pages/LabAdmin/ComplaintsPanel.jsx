@@ -7,7 +7,6 @@ import axios from "../../axios";
 const STATUS_FILTERS = ["All", "Pending", "In Progress", "Resolved"];
 
 export function ComplaintsPanel() {
-  console.log("🔥 LAB ADMIN COMPLAINTS PANEL IS RUNNING");
   const {
     Allcomplaints,
     getAllComplaints,
@@ -50,8 +49,6 @@ const getMaintenanceIds = async () => {
 
 
   const complaints = Allcomplaints || [];
-console.log("REAL COMPLAINTS:", Allcomplaints);
-
 
 const handleMoveToMaintenance = async (complaintId) => {
   try {

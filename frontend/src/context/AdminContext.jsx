@@ -31,7 +31,7 @@ const AdminProvider = ({ children }) => {
     const getLabs = async () => {
         try {
             const { data } = await axios.get("/lab");
-            console.log("Labs received from backend:", data.labs);
+          
             setLabName(data.labs);
             return {
                 success: true,
@@ -247,7 +247,6 @@ const AdminProvider = ({ children }) => {
     //     }
     // };
     const getAvailableResources = async () => {
-  console.log("🔥 getAvailableResources CALLED");
 
   try {
     const { data } = await axios.get("/admin/purchases/resources");

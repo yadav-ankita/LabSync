@@ -49,6 +49,12 @@ const purchases = [
 
     try {
       const resources = await getAvailableResources();
+
+
+
+   
+
+
       setAvailableResources(
         Array.isArray(resources) ? resources : []
       );
@@ -336,7 +342,15 @@ const handlePurchaseChange = (purchaseId) => {
         className="border rounded-lg"
         style={{ borderColor: "#E3E6DF" }}
       >
-        {purchaseAssets.map((asset) => (
+{[...purchaseAssets]
+  .sort((a, b) =>
+    (a.assetId || "").localeCompare(
+      b.assetId || "",
+      undefined,
+      { numeric: true, sensitivity: "base" }
+    )
+  )
+  .map((asset) => (
           <label
             key={asset._id}
             className="flex items-center gap-4 px-4 py-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors"
