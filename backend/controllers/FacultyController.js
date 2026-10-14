@@ -79,34 +79,43 @@ const editProfileData = async (req, res, next) => {
     }
 }
 
+
 const getAssignedLabResources = async (req, res, next) => {
-    try {
-        const faculty = await Faculty.findById(req.user.userId);
+  try {
+    const faculty = await Faculty.findById(req.user.userId);
 
-        if (!faculty) {
-            throw new NotFoundError('Faculty not found');
-        }
-
-        const resources = await LabResource.find({ labName: faculty.lab_name }).sort({ createdAt: -1 });
-
-         console.log(
-            "Resources returned:",
-            resources.map(r => ({
-                assetId: r.assetId,
-                labName: r.labName,
-                status: r.status,
-                previousLabName: r.previousLabName
-            }))
-        );
-        res.status(StatusCodes.OK).json({
-            labName: faculty.lab_name,
-            resources,
-            count: resources.length,
-        });
-    } catch (error) {
-        next(error);
+    if (!faculty) {
+      throw new NotFoundError("Faculty not found");
     }
-}
+
+    const resources = await LabResource.find({
+      labName: faculty.lab_name,
+    })
+      .populate("purchase", "category")
+      .sort({ createdAt: -1 });
+
+    console.log(
+      "Resources returned:",
+      resources.map((r) => ({
+        assetId: r.assetId,
+        labName: r.labName,
+        resourceName: r.resourceName,
+        category: r.purchase?.category || "Uncategorized",
+        status: r.status,
+        previousLabName: r.previousLabName,
+      }))
+    );
+
+    res.status(StatusCodes.OK).json({
+      labName: faculty.lab_name,
+      resources,
+      count: resources.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getResourceAssignmentRequests = async (req, res, next) => {
     try {
         console.log("REQ.USER:", req.user);

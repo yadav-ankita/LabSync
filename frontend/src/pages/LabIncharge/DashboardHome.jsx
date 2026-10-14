@@ -17,6 +17,7 @@ import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
 import { Navigate } from "react-router-dom";
 import { ResourcesByCategory } from "../LabAdmin/ResourcesByCategory";
+import { ResourceStatusChart } from "./ResourceStatusChart";
 
 export function DashboardHome({ setActiveView }) {
   const { currentUser } = useAppContext();
@@ -178,9 +179,14 @@ fetchMaintenance();
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 mb-8 lg:grid-cols-2 2xl:grid-cols-3">
-          <ResourcesByCategory resources={facultyResources} />
-        </div>
+        <div className="grid grid-cols-1 gap-4 mb-8 lg:grid-cols-2">
+  <ResourcesByCategory resources={facultyResources} />
+
+  <ResourceStatusChart
+    resources={facultyResources}
+    complaints={complaints}
+  />
+</div>
 
         {/* Quick Actions */}
         <h2

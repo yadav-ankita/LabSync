@@ -1,19 +1,33 @@
 export const ALL_RESOURCE_CATEGORIES = "All categories";
+export const UNCATEGORIZED = "Uncategorized";
 
-export function getResourceCategory(resourceName = "") {
-  const name = resourceName.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  const words = name.split(/\s+/);
+export const RESOURCE_CATEGORIES = [
+  "Computers",
+  "Monitors",
+  "CPUs",
+  "Keyboards",
+  "Mouse",
+  "Printers",
+  "Projectors",
+  "Networking Equipment",
+  "Power Backup",
+  "Servers",
+  "Raspberry Pi Kits",
+  "Furniture",
+  "Electrical Equipment",
+  "Cameras",
+  "Software Licenses",
+];
 
-  if (name.includes("webcam") || name.includes("web cam") || name.includes("web camera") || name.includes("usb camera")) return "Webcam";
-  if (name.includes("computer") || name.includes("desktop") || name.includes("workstation") || name.includes("laptop") || words.includes("pc")) return "Computer";
-  if (name.includes("monitor") || name.includes("display")) return "Monitor";
-  if (name.includes("keyboard")) return "Keyboard";
-  if (name.includes("mouse")) return "Mouse";
-  if (name.includes("projector")) return "Projector";
-  if (name.includes("printer")) return "Printer";
-  if (name.includes("scanner")) return "Scanner";
-  if (name.includes("router") || name.includes("switch") || name.includes("access point")) return "Network Equipment";
-  if (name.includes("camera")) return "Camera";
-  if (name.includes("software") || name.includes("license")) return "Software";
-  return "Other";
+// Match the category using the linked Purchase Register record,
+// exactly as the Lab Admin resource page does.
+export function getResourceCategory(resource) {
+  const category =
+    typeof resource === "object" && resource !== null
+      ? resource.purchase?.category
+      : undefined;
+
+  return RESOURCE_CATEGORIES.includes(category)
+    ? category
+    : UNCATEGORIZED;
 }
