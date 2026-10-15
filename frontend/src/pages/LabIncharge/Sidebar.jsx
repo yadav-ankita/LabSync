@@ -7,7 +7,8 @@ import {
   FileText,
   LogOut,
   BookOpen,
-  MessageSquarePlus
+  MessageSquarePlus,
+  Trash2,
 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
@@ -43,11 +44,12 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "maintenance", label: "Maintenance", icon: Wrench },
     { key: "profile", label: "Edit Profile", icon: FileText },
     { key: "manuals", label: "Lab Manuals", icon: BookOpen },
+    { key: "scrapped", label: "Scrapped Assets", icon: Trash2 },
   ];
 
   return (
     <aside
-      className="w-64 shrink-0 flex flex-col overflow-hidden"
+      className="w-64  h-screen shrink-0 flex flex-col overflow-hidden"
       style={{
         backgroundColor: "#1F2A24",
         backgroundImage:

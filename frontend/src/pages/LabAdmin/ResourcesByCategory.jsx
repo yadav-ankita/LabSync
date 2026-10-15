@@ -53,15 +53,20 @@ export function ResourcesByCategory({
 
   let uncategorizedCount = 0;
 
-  resources.forEach((resource) => {
-    const category = resource.purchase?.category;
+ resources.forEach((resource) => {
+  // Do not include scrapped assets in category totals
+  if ((resource.status || "").trim().toLowerCase() === "scrapped") {
+    return;
+  }
 
-    if (category && CATEGORIES.includes(category)) {
-      groups[category] += 1;
-    } else {
-      uncategorizedCount += 1;
-    }
-  });
+  const category = resource.purchase?.category;
+
+  if (category && CATEGORIES.includes(category)) {
+    groups[category] += 1;
+  } else {
+    uncategorizedCount += 1;
+  }
+});
 
   const data = CATEGORIES
     .filter((category) => groups[category] > 0)

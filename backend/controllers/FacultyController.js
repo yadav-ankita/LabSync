@@ -116,6 +116,34 @@ const getAssignedLabResources = async (req, res, next) => {
   }
 };
 
+
+
+const getFacultyScrappedResources = async (req, res, next) => {
+  try {
+    const faculty = await Faculty.findById(req.user.userId);
+
+    if (!faculty) {
+      throw new NotFoundError("Faculty not found");
+    }
+
+    const resources = await LabResource.find({
+      labName: faculty.lab_name,
+      status: "Scrapped",
+    })
+      .populate("purchase", "category particulars")
+      .sort({ updatedAt: -1 });
+
+    res.status(StatusCodes.OK).json({
+      labName: faculty.lab_name,
+      resources,
+      count: resources.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 const getResourceAssignmentRequests = async (req, res, next) => {
     try {
         console.log("REQ.USER:", req.user);
@@ -756,5 +784,6 @@ module.exports = {
     getLabManuals,
     deleteLabManual,
     raiseComplaints,
-    getLabComplaints
+    getLabComplaints,
+    getFacultyScrappedResources,
 };

@@ -9,6 +9,7 @@ import { ComplaintForm } from "./ComplaintForm";
 import { MaintenanceLog } from "./Maintenancelog";
 import { ResourceRequests } from "./Resourcerequests";
 import { ResourceAssignmentApprovals } from "./ResourceAssignmentApprovals";
+import { ScrappedAssets } from "./ScrappedAssets";
 
 export function LabInchargeDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -37,6 +38,7 @@ export function LabInchargeDashboard() {
         {activeView === "resources" && <LabResources />}
         {activeView === "maintenance" && <MaintenanceLog />}
         {activeView === "profile" && <EditProfile />}
+        {activeView === "scrapped" && <ScrappedAssets />}
 
       </main>
     </div>

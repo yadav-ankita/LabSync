@@ -18,7 +18,7 @@ const {
     getLabComplaints,
     getResourceAssignmentRequests,
     respondToResourceAssignmentRequest,
-    
+      getFacultyScrappedResources,
  } = require("../controllers/FacultyController");
 
 const { getFacultyMaintenance } = require("../controllers/MaintenanceController");
@@ -32,6 +32,8 @@ router.route("/complaints").get(getLabComplaints).post(raiseComplaints);
 router.route("/resourceAssignmentRequests")
     .get(getResourceAssignmentRequests);
 router.get("/maintenance", getFacultyMaintenance);
+router.route("/labResource/scrapped")
+    .get(getFacultyScrappedResources);
 router.route("/resourceAssignmentRequests/:id")
     .patch(respondToResourceAssignmentRequest);
 router.route("/transferRequests")

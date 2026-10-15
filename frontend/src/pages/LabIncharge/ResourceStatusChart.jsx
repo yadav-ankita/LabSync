@@ -1,3 +1,4 @@
+
 import { SectionCard } from "../../components/SectionCard";
 import { DonutChart } from "../../components/DonutChart";
 
@@ -18,27 +19,31 @@ export function ResourceStatusChart({
       .map((c) => String(c.resourceId))
   );
 
-  const availableCount = resources.filter((resource) => {
-    const status = (resource.status || "").trim().toLowerCase();
-    const hasOpenComplaint =
-      openComplaintResourceIds.has(String(resource.assetId)) ||
-      openComplaintResourceIds.has(String(resource._id));
+  const isScrapped = (resource) =>
+    (resource.status || "").trim().toLowerCase() === "scrapped";
 
-    return status !== "scrapped" &&
-      status === "available" &&
-      !hasOpenComplaint;
-  }).length;
+  const hasOpenComplaint = (resource) =>
+    openComplaintResourceIds.has(String(resource.assetId)) ||
+    openComplaintResourceIds.has(String(resource._id));
+
+  const availableCount = resources.filter(
+    (resource) =>
+      (resource.status || "").trim().toLowerCase() === "available" &&
+      !isScrapped(resource) &&
+      !hasOpenComplaint(resource)
+  ).length;
 
   const openComplaintCount = resources.filter(
     (resource) =>
-      openComplaintResourceIds.has(String(resource.assetId)) ||
-      openComplaintResourceIds.has(String(resource._id))
+      !isScrapped(resource) && hasOpenComplaint(resource)
   ).length;
+
+  const scrappedCount = resources.filter(isScrapped).length;
 
   const data = [
     { ...STATUSES[0], value: availableCount },
     { ...STATUSES[1], value: openComplaintCount },
-    { ...STATUSES[2], value: 0 },
+    { ...STATUSES[2], value: scrappedCount },
   ];
 
   return (
