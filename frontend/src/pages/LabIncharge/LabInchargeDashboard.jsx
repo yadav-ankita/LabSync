@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./ComplaintsPanel";
@@ -10,6 +10,7 @@ import { MaintenanceLog } from "./Maintenancelog";
 import { ResourceRequests } from "./Resourcerequests";
 import { ResourceAssignmentApprovals } from "./ResourceAssignmentApprovals";
 import { ScrappedAssets } from "./ScrappedAssets";
+import { Reports } from "./Reports (2)";
 
 export function LabInchargeDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -39,6 +40,7 @@ export function LabInchargeDashboard() {
         {activeView === "maintenance" && <MaintenanceLog />}
         {activeView === "profile" && <EditProfile />}
         {activeView === "scrapped" && <ScrappedAssets />}
+        {activeView === "reports" && <Reports />}
 
       </main>
     </div>

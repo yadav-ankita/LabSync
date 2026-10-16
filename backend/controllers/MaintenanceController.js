@@ -241,9 +241,37 @@ const getFacultyMaintenance = async (req, res, next) => {
   }
 };
 
+const getLabMaintenance = async (req, res, next) => {
+  try {
+    const faculty = await require("../models/Faculty_model").findById(req.user.userId);
+    if (!faculty) {
+      throw new NotFoundError("Faculty not found");
+    }
+
+    if (!faculty.lab_name) {
+      return res.status(StatusCodes.OK).json({ maintenance: [], count: 0 });
+    }
+
+    const complaints = await Complaint.find({ labName: faculty.lab_name }).select("_id");
+    const maintenance = await Maintenance.find({
+      complaint: { $in: complaints.map((complaint) => complaint._id) },
+    })
+      .populate({
+        path: "complaint",
+        populate: { path: "faculty", select: "name email" },
+      })
+      .sort("-createdAt");
+
+    res.status(StatusCodes.OK).json({ maintenance, count: maintenance.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllMaintenance,
   createMaintenance,
   updateMaintenance,
   getFacultyMaintenance,
+  getLabMaintenance,
 };

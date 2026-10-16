@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
@@ -6,7 +6,7 @@ import { ComplaintsPanel } from "./ComplaintsPanel";
 import { ResourceManagement } from "./Resourcemanagement";
 import { Approvals } from "./Approvals";
 import { MaintenanceLog } from "./Maintenancelog";
-import { Reports } from "./Reports";
+import { Reports } from "./Reports (1)";
 import { EditProfile } from "./EditProfile";
 import { AddFaculty } from "./AddFaculty";
 import { PurchaseRegister } from "./PurchaseRegister";

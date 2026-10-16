@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { DashboardHome } from "./DashboardHome";
 import { ComplaintsPanel } from "./ComplaintsPanel";
@@ -6,6 +6,7 @@ import { EditProfile } from "./EditProfile";
 import { LabManuals } from "./Labmanuals";
 import { ComplaintForm } from "./ComplaintForm";
 import { MaintenanceLog } from "./Maintenancelog";
+import { Reports } from "./Reports (3)";
 
 export function FacultyDashboard() {
   const [activeView, setActiveView] = useState("home");
@@ -26,6 +27,7 @@ export function FacultyDashboard() {
         {activeView === "manuals" && <LabManuals/>}
         {activeView === "maintenance" && <MaintenanceLog />}
         {activeView === "profile" && <EditProfile />}
+        {activeView === "reports" && <Reports />}
 
       </main>
     </div>

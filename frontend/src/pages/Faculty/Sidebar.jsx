@@ -39,6 +39,7 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "maintenance", label: "Maintenance", icon: Wrench },
     { key: "profile", label: "Edit Profile", icon: FileText },
     { key: "manuals", label: "Lab Manuals", icon: BookOpen },
+    // { key: "reports", label: "Reports", icon: FileText },
   ];
 
   return (

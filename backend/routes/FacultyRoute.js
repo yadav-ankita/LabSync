@@ -21,7 +21,7 @@ const {
       getFacultyScrappedResources,
  } = require("../controllers/FacultyController");
 
-const { getFacultyMaintenance } = require("../controllers/MaintenanceController");
+const { getFacultyMaintenance, getLabMaintenance } = require("../controllers/MaintenanceController");
 
 router.use(authUser);
 router.route("/myprofile").get(getProfileData).patch(editProfileData);
@@ -32,6 +32,7 @@ router.route("/complaints").get(getLabComplaints).post(raiseComplaints);
 router.route("/resourceAssignmentRequests")
     .get(getResourceAssignmentRequests);
 router.get("/maintenance", getFacultyMaintenance);
+router.get("/labMaintenance", getLabMaintenance);
 router.route("/labResource/scrapped")
     .get(getFacultyScrappedResources);
 router.route("/resourceAssignmentRequests/:id")
