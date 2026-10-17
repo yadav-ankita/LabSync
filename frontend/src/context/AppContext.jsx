@@ -9,6 +9,10 @@ const AppProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
     const [error, setError] = useState("");
+    // ---------- student lab manuals ----------
+const [labManuals, setLabManuals] = useState([]);
+const [loadingManuals, setLoadingManuals] = useState(false);
+const [manualsError, setManualsError] = useState("");
     const register = async ({ name, email, password, phone, role }) => {
         try {
             const { data } = await axios.post("/auth/register", {name,email,password,phone,role});
@@ -37,32 +41,98 @@ const AppProvider = ({ children }) => {
             return {success: false,message};
         }
     };
-    const Studentlogin = async (studentId,password) => {
-        try {
-            const { data } = await axios.post("/student/login",{studentId,password});
-            console.log("data after login is in appcontext is", data);
-            localStorage.setItem(
-                "student",
-                JSON.stringify({
-                    studentInfo: data.student,
-                    token: data.token
-                })
+    const Studentlogin = async (email, password) => {
+    try {
+        const { data } = await axios.post("/student/login", {
+            email,
+            password,
+        });
+
+        localStorage.setItem(
+            "student",
+            JSON.stringify({
+                studentInfo: data.student,
+                token: data.token,
+            })
+        );
+
+        setCurrentUser(data.student);
+        setIsAuthenticated(true);
+
+        return { success: true };
+    } catch (err) {
+        const message =
+            err.response?.data?.message ||
+            err.response?.data?.msg ||
+            "Invalid credentials";
+
+        setError(message);
+        return { success: false, message };
+    }
+};
+
+const getLabManuals = useCallback(async (semester) => {
+    setLoadingManuals(true);
+    setManualsError("");
+
+    try {
+        const studentSession = JSON.parse(
+            localStorage.getItem("student") || "null"
+        );
+
+        const userSession = JSON.parse(
+            localStorage.getItem("user") || "null"
+        );
+
+        // Support both student-specific and common login sessions.
+        const session = studentSession || userSession;
+        const token = session?.token;
+        const loggedInUser =
+            session?.studentInfo || session?.UserInfo;
+
+        if (!token || loggedInUser?.role !== "student") {
+            throw new Error(
+                "Please log in using your student account to view lab manuals."
             );
-            setCurrentUser(data.student);
-            setIsAuthenticated(true);
-            console.log("Login successful, student data: in the app context is this",data.student);
-            return {
-                success: true
-            };
-        } catch (err) {
-            const message =err.response?.data?.msg ||"Invalid credentials";
-            setError(message);
-            return {
-                success: false,
-                message
-            };
         }
-    };
+
+        const params = {};
+        if (semester) {
+            params.semester = semester;
+        }
+
+        const { data } = await axios.get("/student/labManuals", {
+            params,
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        setLabManuals(data.manuals || []);
+
+        return {
+            success: true,
+            manuals: data.manuals || [],
+        };
+    } catch (err) {
+        const message =
+            err.response?.data?.message ||
+            err.response?.data?.msg ||
+            err.message ||
+            "Failed to fetch lab manuals.";
+
+        setManualsError(message);
+        setLabManuals([]);
+
+        return {
+            success: false,
+            message,
+        };
+    } finally {
+        setLoadingManuals(false);
+    }
+}, []);
+
     const logout = () => {
         localStorage.removeItem("student");
         localStorage.removeItem("user");
@@ -119,6 +189,10 @@ const AppProvider = ({ children }) => {
                 error,
                 login,
                 register,
+                labManuals,
+loadingManuals,
+manualsError,
+getLabManuals,
                 logout,
                 facultyLogin: login,
                 Studentlogin,

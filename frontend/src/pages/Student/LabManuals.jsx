@@ -1,102 +1,121 @@
-import React from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { TopBar } from "./TopBar";
 import { LabManualCard } from "./LabManualCard";
-const LAB_MANUALS = [
-  {
-    id: "LM001",
-    subject: "Data Structures Lab",
-    // labName: "DS Lab - Block A",
-    title: "Data Structures Lab Manual",
-    fileType: "PDF",
-    //size: "2.4 MB",
-    updated: "12 Jun 2026",
-  },
-  {
-    id: "LM002",
-    subject: "Database Management Lab",
-    //labName: "DBMS Lab - Block B",
-    title: "SQL Practicals & Schema Guide",
-    fileType: "PDF",
-    //size: "1.8 MB",
-    updated: "03 Jun 2026",
-  },
-  {
-    id: "LM003",
-    subject: "Computer Networks Lab",
-    //labName: "Networks Lab - Block A",
-    title: "Networking Protocols Manual",
-    fileType: "PDF",
-    //size: "3.1 MB",
-    updated: "28 May 2026",
-  },
-  {
-    id: "LM004",
-    subject: "Operating Systems Lab",
-    //labName: "OS Lab - Block B",
-    title: "Process Scheduling Exercises",
-    fileType: "DOCX",
-    //size: "980 KB",
-    updated: "20 May 2026",
-  },
-  {
-    id: "LM005",
-    subject: "Web Technologies Lab",
-    //labName: "WebTech Lab - Block C",
-    title: "Frontend & Backend Lab Guide",
-    fileType: "PDF",
-    //size: "2.0 MB",
-    updated: "15 Jun 2026",
-  },
-  {
-    id: "LM006",
-    subject: "Microprocessors Lab",
-    //labName: "Micro Lab - Block C",
-    title: "8085 Assembly Programs",
-    fileType: "PDF",
-    //size: "1.5 MB",
-    updated: "09 Jun 2026",
-  },
-];
- export function LabManuals() {
-  //  const { labManuals, getLabManuals, loadingManuals, currentUser } = useAppContext();
-  // useEffect(() => {
-  //   getLabManuals();
-  // }, [getLabManuals]);
+import { useAppContext } from "../../context/AppContext";
+import { BookOpen, Loader2 } from "lucide-react";
+
+const SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
+
+export function LabManuals() {
+  const {
+    labManuals = [],
+    getLabManuals,
+    loadingManuals,
+    manualsError,
+    currentUser,
+  } = useAppContext();
+
+  const [selectedSemester, setSelectedSemester] = useState(
+    String(currentUser?.semester || "1")
+  );
+
+  useEffect(() => {
+    getLabManuals?.();
+  }, [getLabManuals]);
+
+  useEffect(() => {
+    if (currentUser?.semester) {
+      setSelectedSemester(String(currentUser.semester));
+    }
+  }, [currentUser?.semester]);
+
+  const filteredManuals = useMemo(() => {
+    return labManuals.filter(
+      (manual) => String(manual.semester) === selectedSemester
+    );
+  }, [labManuals, selectedSemester]);
+
   return (
     <div>
-      <TopBar title="Lab Manuals" subtitle="Manuals available for your enrolled subjects." />
-      <div className="grid grid-cols-3 gap-4">
-        {LAB_MANUALS.map((manual) => (
-          <LabManualCard key={manual.id} manual={manual} />
-        ))}
+      <TopBar
+        title="Lab Manuals"
+        subtitle="Browse and read manuals published for each semester."
+      />
+  {manualsError && (
+  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+    {manualsError}
+  </div>
+)}
+      <div
+        className="bg-white rounded-xl border p-4 mb-5 flex flex-wrap items-end justify-between gap-4"
+        style={{ borderColor: "#E3E6DF" }}
+      >
+        <div>
+          <label
+            htmlFor="manual-semester"
+            className="block text-xs mb-2"
+            style={{ color: "#5B6A5F" }}
+          >
+            Filter by semester
+          </label>
+
+          <select
+            id="manual-semester"
+            value={selectedSemester}
+            onChange={(e) => setSelectedSemester(e.target.value)}
+            className="px-3 py-2 rounded-lg border text-sm bg-white min-w-48"
+            style={{ borderColor: "#D8DCD4", color: "#1F2A24" }}
+          >
+            {SEMESTERS.map((semester) => (
+              <option key={semester} value={semester}>
+                Semester {semester}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <p className="text-xs" style={{ color: "#5B6A5F" }}>
+          {filteredManuals.length}{" "}
+          {filteredManuals.length === 1 ? "manual" : "manuals"} available
+        </p>
       </div>
+
+      {loadingManuals ? (
+        <div
+          className="flex items-center justify-center gap-2 py-12 text-sm"
+          style={{ color: "#5B6A5F" }}
+        >
+          <Loader2 size={18} className="animate-spin" />
+          Loading manuals...
+        </div>
+      ) : filteredManuals.length === 0 ? (
+        <div
+          className="bg-white rounded-xl border p-8 text-center"
+          style={{ borderColor: "#E3E6DF" }}
+        >
+          <BookOpen
+            size={28}
+            className="mx-auto mb-3"
+            color="#D89A4E"
+          />
+          <p className="text-sm font-medium" style={{ color: "#1F2A24" }}>
+            No manuals available
+          </p>
+          <p className="text-xs mt-2" style={{ color: "#5B6A5F" }}>
+            No manuals have been published for Semester {selectedSemester} yet.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredManuals.map((manual) => (
+            <LabManualCard
+              key={manual._id || manual.id}
+              manual={manual}
+            />
+          ))}
+        </div>
+      )}
     </div>
-
-  // <div>
-  //     <TopBar
-  //       title="Lab Manuals"
-  //       subtitle={
-  //         currentUser?.semester
-  //           ? `Manuals available for semester ${currentUser.semester}.`
-  //           : "Set your semester under Edit Profile to see your manuals."
-  //       }
-  //     />
- 
-  //     {loadingManuals && <p className="text-sm" style={{ color: "#5B6A5F" }}>Loading manuals…</p>}
- 
-  //     {!loadingManuals && labManuals.length === 0 && (
-  //       <p className="text-sm" style={{ color: "#5B6A5F" }}>
-  //         No manuals found yet. Make sure your semester is set under Edit Profile.
-  //       </p>
-  //     )}
- 
-  //     <div className="grid grid-cols-3 gap-4">
-  //       {labManuals.map((manual) => (
-  //         <LabManualCard key={manual._id || manual.id} manual={manual} />
-  //       ))}
-  //     </div>
-  //   </div>
-
-
   );
 }
