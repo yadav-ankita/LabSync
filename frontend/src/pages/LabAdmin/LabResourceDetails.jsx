@@ -37,7 +37,6 @@ export function LabResourceDetails() {
     labResorces,
     getLabs,
     getLabResources,
-    deleteLabResource,
   } = useAdminContext();
 
   const [resources, setResources] = useState([]);
@@ -45,7 +44,7 @@ export function LabResourceDetails() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState(ALL_RESOURCE_CATEGORIES);
-
+  const [selectedStatus, setSelectedStatus] = useState("All statuses");
   useEffect(() => {
     let isCurrent = true;
 
@@ -86,35 +85,29 @@ export function LabResourceDetails() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
   const visibleResources = labResources.filter((resource) => {
-    const category = getCategory(resource);
+  const category = getCategory(resource);
 
-    const matchesCategory =
-      selectedCategory === ALL_RESOURCE_CATEGORIES ||
-      category === selectedCategory;
+  const matchesCategory =
+    selectedCategory === ALL_RESOURCE_CATEGORIES ||
+    category === selectedCategory;
 
-    const searchableText =
-      `${resource.resourceName || ""} ${resource.assetId || ""}`.toLowerCase();
+  
+const matchesStatus =
+  selectedStatus === "All statuses" ||
+  (selectedStatus === "Under Maintenance"
+    ? resource.status === "Maintenance"
+    : (resource.status || "Available") === selectedStatus);
 
-    return matchesCategory && searchableText.includes(normalizedSearch);
-  });
 
-  const handleStatusChange = (id, status) => {
-    setResources((current) =>
-      current.map((resource) =>
-        resource._id === id ? { ...resource, status } : resource
-      )
-    );
-  };
+  const searchableText =
+    `${resource.resourceName || ""} ${resource.assetId || ""}`.toLowerCase();
 
-  const handleDelete = async (id) => {
-    const result = await deleteLabResource(id);
-
-    if (result.success) {
-      setResources((current) =>
-        current.filter((resource) => resource._id !== id)
-      );
-    }
-  };
+  return (
+    matchesCategory &&
+    matchesStatus &&
+    searchableText.includes(normalizedSearch)
+  );
+});
 
   const handleBack = () => {
     navigate("/labAdmin-dashboard", {
@@ -213,6 +206,23 @@ export function LabResourceDetails() {
               )}
             </select>
           </label>
+          <label className="sm:w-64">
+  <span className="sr-only">Filter by status</span>
+  <select
+    value={selectedStatus}
+    onChange={(event) => setSelectedStatus(event.target.value)}
+    className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none"
+    style={{
+      borderColor: "#D8DCD4",
+      color: "#1F2A24",
+    }}
+  >
+    <option value="All statuses">All statuses</option>
+    <option value="Available">Available</option>
+    <option value="Under Maintenance">Under Maintenance</option>
+    <option value="Scrapped">Scrapped</option>
+  </select>
+</label>
         </div>
 
         <div
@@ -265,8 +275,6 @@ export function LabResourceDetails() {
               <ResourceRow
                 key={resource._id}
                 resource={resource}
-                onStatusChange={handleStatusChange}
-                onDelete={handleDelete}
               />
             ))
           )}

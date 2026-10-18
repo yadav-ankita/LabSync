@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Search,CheckCircle2, Wrench, Archive } from "lucide-react";
 import { TopBar } from "../../components/TopBar";
 import { ResourceTag } from "../../components/ResourceTag";
 import { ResourceStatusPill } from "../../components/ResourceStatusPill";
@@ -21,15 +21,14 @@ export function LabResources() {
   const [selectedCategory, setSelectedCategory] = useState(
     ALL_RESOURCE_CATEGORIES
   );
+  const [selectedStatus, setSelectedStatus] = useState("All statuses");
 
   useEffect(() => {
     getAssignedLabResources();
   }, []);
 
-  // Exclude scrapped resources from the active inventory.
-  const activeResources = (facultyResources || []).filter(
-    (resource) => resource.status !== "Scrapped"
-  );
+  // Show all resources, including scrapped resources.
+const activeResources = facultyResources || [];
 
   // Derive categories from the linked Purchase Register category.
   const categories = [
@@ -42,18 +41,28 @@ export function LabResources() {
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
   const visibleResources = activeResources.filter((resource) => {
-    const resourceName = resource.resourceName || resource.name || "";
-    const category = getResourceCategory(resource);
+  const resourceName = resource.resourceName || resource.name || "";
+  const category = getResourceCategory(resource);
 
-    const matchesCategory =
-      selectedCategory === ALL_RESOURCE_CATEGORIES ||
-      category === selectedCategory;
+  const matchesCategory =
+    selectedCategory === ALL_RESOURCE_CATEGORIES ||
+    category === selectedCategory;
 
-    const searchableText =
-      `${resourceName} ${resource.assetId || resource.id || ""}`.toLowerCase();
+  const matchesStatus =
+    selectedStatus === "All statuses" ||
+    (selectedStatus === "Under Maintenance"
+      ? resource.status === "Maintenance"
+      : (resource.status || "Available") === selectedStatus);
 
-    return matchesCategory && searchableText.includes(normalizedSearch);
-  });
+  const searchableText =
+    `${resourceName} ${resource.assetId || resource.id || ""}`.toLowerCase();
+
+  return (
+    matchesCategory &&
+    matchesStatus &&
+    searchableText.includes(normalizedSearch)
+  );
+});
 
   return (
     <div>
@@ -121,6 +130,24 @@ export function LabResources() {
             )}
           </select>
         </label>
+        <label className="sm:w-64">
+  <span className="sr-only">Filter by status</span>
+
+  <select
+    value={selectedStatus}
+    onChange={(event) => setSelectedStatus(event.target.value)}
+    className="w-full rounded-lg border bg-white px-3 py-2.5 text-sm outline-none"
+    style={{
+      borderColor: "#D8DCD4",
+      color: "#1F2A24",
+    }}
+  >
+    <option value="All statuses">All statuses</option>
+    <option value="Available">Available</option>
+    <option value="Under Maintenance">Under Maintenance</option>
+    <option value="Scrapped">Scrapped</option>
+  </select>
+</label>
       </div>
 
       {/* Resource inventory table */}
@@ -183,10 +210,49 @@ export function LabResources() {
               </span>
 
               <span className="col-span-3 flex justify-end">
-                <ResourceStatusPill
-                  status={resource.status || "Available"}
-                />
-              </span>
+  {(() => {
+    const status = resource.status || "Available";
+
+    const styles = {
+      Available: {
+        backgroundColor: "#E3EEE5",
+        color: "#246B45",
+      },
+      Maintenance: {
+        backgroundColor: "#FEF0C7",
+        color: "#92400E",
+        border: "1px solid #F59E0B",
+      },
+      Scrapped: {
+        backgroundColor: "#FCE8E6",
+        color: "#B3261E",
+        border: "1px solid #F2B8B5",
+      },
+    };
+
+    const labels = {
+      Available: "Available",
+      Maintenance: "Under Maintenance",
+      Scrapped: "Scrapped",
+    };
+
+    const icons = {
+      Available: <CheckCircle2 size={14} />,
+      Maintenance: <Wrench size={14} />,
+      Scrapped: <Archive size={14} />,
+    };
+
+    return (
+      <span
+        className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium"
+        style={styles[status] || styles.Available}
+      >
+        {icons[status] || icons.Available}
+        {labels[status] || "Available"}
+      </span>
+    );
+  })()}
+</span>
             </div>
           ))
         )}
