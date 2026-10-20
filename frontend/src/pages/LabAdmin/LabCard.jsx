@@ -1,5 +1,16 @@
 import { FlaskConical, Users, Package } from "lucide-react";
 
+const LAB_NAMES = {
+    F106A: "Artificial Intellegence Lab",
+    F106B: "Computing Lab",
+    F206: "COE Image Processing & Computer Vision",
+    F207: "Programming Lab 1",
+    F208: "Programming Lab 2",
+    F209: "Computer Network Lab",
+    F409: "Operating System Lab",
+    F409A: "System Programming Lab",
+    F411: "Database Lab",
+};
 export function LabCard({
     labName,
     faculty = "Not Yet Assigned",
@@ -96,7 +107,7 @@ export function LabCard({
                     className="text-xs"
                     style={{ color: "#5B6A5F" }}
                 >
-                    Laboratory
+                    {LAB_NAMES[labName?.trim()] || "Laboratory"}
                 </span>
             </div>
         </button>

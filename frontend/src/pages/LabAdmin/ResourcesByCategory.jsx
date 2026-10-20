@@ -23,7 +23,8 @@ const CATEGORIES = [
 
 // Fixed, distinct colours for consistent category identification.
 const CATEGORY_COLORS = {
-  Computers: "#F36F52",             // Coral
+  Desktops: "#6366F1",
+  Laptops: "#F36F52",             // Coral
   Monitors: "#4E79D9",              // Blue
   CPUs: "#45C3A0",                  // Mint
   Keyboards: "#9B6BD3",              // Purple

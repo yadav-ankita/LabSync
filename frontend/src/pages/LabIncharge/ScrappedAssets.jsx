@@ -150,10 +150,8 @@ export function ScrappedAssets() {
                     <td className="px-5 py-4 text-gray-500
                       whitespace-nowrap">
                       {resource.updatedAt
-                        ? new Date(
-                            resource.updatedAt
-                          ).toLocaleDateString()
-                        : "—"}
+  ? new Date(resource.updatedAt).toLocaleDateString("en-GB")
+  : "—"}
                     </td>
                   </tr>
                 ))}

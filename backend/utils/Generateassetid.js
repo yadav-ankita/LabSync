@@ -178,11 +178,28 @@ const slugCode = (text) =>
     .replace(/[^A-Z0-9]/g, "");
 
 const deriveLabCode = (labName) => {
-  const withoutLabWord = String(labName || "")
+  const normalized = String(labName || "")
+    .trim()
     .toUpperCase()
-    .replace(/LAB(ORATORY)?/g, "");
+    .replace(/[^A-Z0-9]/g, "");
 
-  return slugCode(withoutLabWord) || slugCode(labName);
+  const validLabCodes = new Set([
+    "F106A",
+    "F106B",
+    "F206",
+    "F207",
+    "F208",
+    "F209",
+    "F409",
+    "F409A",
+    "F411",
+  ]);
+
+  if (validLabCodes.has(normalized)) {
+    return normalized;
+  }
+
+  return normalized.replace(/LAB(ORATORY)?/g, "") || normalized;
 };
 
 const deriveResourceCode = (resourceName) => {
