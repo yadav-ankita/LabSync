@@ -6,7 +6,7 @@ const { BadRequestError, NotFoundError } = require("../error");
 const FundType = require("../models/FundType");
 const { DEFAULT_FUND_TYPES } = require("../utils/fundTypes");
 const generateAssetId = require("../utils/Generateassetid");
-
+const { validateConfiguration } = require("../utils/configurationTemplates");
 const validateFundType = async (value) => {
     const code = String(value || "").trim().toUpperCase();
     const isDefault = DEFAULT_FUND_TYPES.includes(code);
@@ -17,7 +17,8 @@ const validateFundType = async (value) => {
     return code;
 };
 const VALID_CATEGORIES = [
-    "Computers",
+    "Desktops",
+    "Laptops",
     "Monitors",
     "CPUs",
     "Keyboards",
@@ -31,8 +32,7 @@ const VALID_CATEGORIES = [
     "Furniture",
     "Electrical Equipment",
     "Cameras",
-    "Software Licenses",
-    "Other Laboratory Equipment"
+    "Software Licenses"
 ];
 
 const validateCategory = (category) => {
@@ -62,7 +62,9 @@ const createPurchase = async (req, res, next) => {
             salesTax,
             freight,
             signature,
-            remarks
+            remarks,
+            configuration,
+            configurationRemarks
         } = req.body;
 
         if (
@@ -88,6 +90,16 @@ const createPurchase = async (req, res, next) => {
 
         const normalizedFundType = await validateFundType(fundType);
         const normalizedCategory = validateCategory(category);
+        let normalizedConfiguration;
+
+try {
+    normalizedConfiguration = validateConfiguration(
+        normalizedCategory,
+        configuration
+    );
+} catch (error) {
+    throw new BadRequestError(error.message);
+}
 
         const qty = Number(quantity);
         const cost = Number(unitCost);
@@ -125,7 +137,9 @@ const createPurchase = async (req, res, next) => {
             freight: transport,
             grandTotal: calculatedGrandTotal,
             signature,
-            remarks
+            remarks,
+            configuration: normalizedConfiguration,
+            configurationRemarks: (configurationRemarks || "").trim(),
         });
 
         createdPurchase = purchase;
@@ -204,7 +218,9 @@ const updatePurchase = async (req, res, next) => {
             salesTax,
             freight,
             signature,
-            remarks
+            remarks,
+            configuration,
+            configurationRemarks
         } = req.body;
 
         if (
@@ -225,7 +241,16 @@ const updatePurchase = async (req, res, next) => {
 
         const normalizedFundType = await validateFundType(fundType);
         const normalizedCategory = validateCategory(category);
+        let normalizedConfiguration;
 
+try {
+    normalizedConfiguration = validateConfiguration(
+        normalizedCategory,
+        configuration
+    );
+} catch (error) {
+    throw new BadRequestError(error.message);
+}
         const purchase = await Purchase.findById(id);
 
         if (!purchase) {
@@ -276,10 +301,15 @@ const updatePurchase = async (req, res, next) => {
 
         purchase.grandTotal = calculatedGrandTotal;
 
-        purchase.signature = signature?.trim() || "";
-        purchase.remarks = remarks?.trim() || "";
+        
+purchase.signature = signature?.trim() || "";
+purchase.remarks = remarks?.trim() || "";
 
-        await purchase.save();
+purchase.configuration = normalizedConfiguration;
+purchase.configurationRemarks = (configurationRemarks || "").trim();
+
+await purchase.save();
+
 
         res.status(StatusCodes.OK).json({
             message: "Purchase updated successfully",
@@ -348,11 +378,11 @@ for (const purchase of projectorPurchases) {
             status: /*{ $nin: ["Maintenance", "Faulty", "Scrapped"] }*/ "Available",
             _id: { $nin: pendingAssetIds },
         })
-            .populate(
-                "purchase",
-                "particulars category fundType supplierName"
-            )
-            .sort({ createdAt: -1 });
+.populate(
+    "purchase",
+    "particulars category fundType supplierName configuration configurationRemarks date billNumber billDate quantity"
+)            
+.sort({ createdAt: -1 });
 
         res.status(StatusCodes.OK).json({
             resources: resources.map((asset) => {

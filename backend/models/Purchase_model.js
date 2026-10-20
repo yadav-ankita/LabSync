@@ -16,7 +16,8 @@ const purchaseSchema = new mongoose.Schema(
     type: String,
     required: true,
     enum: [
-        "Computers",
+        "Desktops",
+        "Laptops",
         "Monitors",
         "CPUs",
         "Keyboards",
@@ -30,8 +31,7 @@ const purchaseSchema = new mongoose.Schema(
         "Furniture",
         "Electrical Equipment",
         "Cameras",
-        "Software Licenses",
-        "Other Laboratory Equipment"
+        "Software Licenses"
     ]
 },
 
@@ -103,10 +103,25 @@ const purchaseSchema = new mongoose.Schema(
             default: ""
         },
 
-        remarks: {
-            type: String,
-            default: ""
-        }
+        
+remarks: {
+    type: String,
+    default: ""
+},
+
+// Shared initial configuration for the purchased batch
+configuration: {
+    type: Map,
+    of: String,
+    default: {},
+},
+
+configurationRemarks: {
+    type: String,
+    trim: true,
+    default: "",
+}
+
     },
     {
         timestamps: true

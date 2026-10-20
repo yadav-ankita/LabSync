@@ -7,10 +7,10 @@ import { Sidebar } from "./Sidebar";
 import { ResourceRow } from "./Resourcerow";
 
 const ALL_RESOURCE_CATEGORIES = "All categories";
-const UNCATEGORIZED = "Uncategorized";
 
 const RESOURCE_CATEGORIES = [
-  "Computers",
+  "Desktops",
+  "Laptops",
   "Monitors",
   "CPUs",
   "Keyboards",
@@ -37,13 +37,19 @@ export function LabResourceDetails() {
     labResorces,
     getLabs,
     getLabResources,
+    addResourceConfigurationRemark,
   } = useAdminContext();
 
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [activeConfigurationTab, setActiveConfigurationTab] =
+  useState("Configuration");
   const [selectedCategory, setSelectedCategory] =
     useState(ALL_RESOURCE_CATEGORIES);
+    const [remarkText, setRemarkText] = useState("");
+const [savingRemark, setSavingRemark] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("All statuses");
   useEffect(() => {
     let isCurrent = true;
@@ -71,16 +77,10 @@ export function LabResourceDetails() {
 
   // Read the category from the linked Purchase Register record.
   const getCategory = (resource) => {
-    const category = resource.purchase?.category;
+  return resource.purchase?.category || "";
+};
 
-    return RESOURCE_CATEGORIES.includes(category)
-      ? category
-      : UNCATEGORIZED;
-  };
-
-  const hasUncategorizedResources = labResources.some(
-    (resource) => getCategory(resource) === UNCATEGORIZED
-  );
+  
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -198,12 +198,6 @@ const matchesStatus =
                   {category}
                 </option>
               ))}
-
-              {hasUncategorizedResources && (
-                <option value={UNCATEGORIZED}>
-                  {UNCATEGORIZED}
-                </option>
-              )}
             </select>
           </label>
           <label className="sm:w-64">
@@ -229,18 +223,22 @@ const matchesStatus =
           className="bg-white rounded-xl border overflow-hidden"
           style={{ borderColor: "#E3E6DF" }}
         >
-          <div
-            className="grid grid-cols-9 px-5 py-3 text-xs uppercase tracking-wide"
-            style={{
-              color: "#8A968D",
-              borderBottom: "1px solid #E3E6DF",
-              backgroundColor: "#F8F9F7",
-            }}
-          >
-            <span className="col-span-2">Asset ID</span>
-            <span className="col-span-4">Name</span>
-            <span className="col-span-3 text-right">Status</span>
-          </div>
+          
+<div
+  className="grid grid-cols-12 items-center gap-3 px-5 py-3 text-xs uppercase tracking-wide"
+  style={{
+    color: "#8A968D",
+    borderBottom: "1px solid #E3E6DF",
+    backgroundColor: "#F8F9F7",
+  }}
+>
+  <span className="col-span-2">Asset ID</span>
+  <span className="col-span-2">Name</span>
+  <span className="col-span-2">Category</span>
+  <span className="col-span-3 text-center">Configuration</span>
+  <span className="col-span-3 text-right">Status</span>
+</div>
+
 
           {loading ? (
             <div
@@ -272,13 +270,340 @@ const matchesStatus =
             </div>
           ) : (
             visibleResources.map((resource) => (
-              <ResourceRow
-                key={resource._id}
-                resource={resource}
-              />
-            ))
+  <ResourceRow
+    key={resource._id}
+    resource={resource}
+    onViewConfiguration={setSelectedResource}
+  />
+))
           )}
         </div>
+        
+
+{selectedResource && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    onClick={() => setSelectedResource(null)}
+  >
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="configuration-modal-title"
+      className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-2xl"
+      onClick={(event) => event.stopPropagation()}
+      style={{ color: "#1F2A24" }}
+    >
+      {/* Modal header */}
+      <div className="flex items-start justify-between gap-4 border-b px-6 py-5">
+        <div>
+          <h2
+            id="configuration-modal-title"
+            className="text-xl font-semibold"
+          >
+            {selectedResource.assetId}
+          </h2>
+
+          <p className="mt-1 text-sm" style={{ color: "#66736B" }}>
+            {selectedResource.resourceName}
+          </p>
+
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs"
+            style={{ color: "#66736B" }}
+          >
+            <span>Lab: {selectedResource.labName || "—"}</span>
+            <span>Category: {selectedResource.purchase?.category || "—"}</span>
+            <span>Type: {selectedResource.resourceType || "Hardware"}</span>
+            <span>Status: {selectedResource.status || "Available"}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setSelectedResource(null)}
+          className="rounded-lg px-3 py-2 text-sm hover:bg-gray-100"
+        >
+          Close
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-2 border-b px-6 pt-4">
+        {["Configuration", "Remarks & History"].map(
+          (tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveConfigurationTab(tab)}
+              className="border-b-2 px-4 py-3 text-sm font-medium transition-colors"
+              style={{
+                borderColor:
+                  activeConfigurationTab === tab ? "#246B45" : "transparent",
+                color:
+                  activeConfigurationTab === tab ? "#246B45" : "#66736B",
+              }}
+            >
+              {tab}
+            </button>
+          )
+        )}
+      </div>
+
+      <div className="p-6">
+        {/* Configuration tab */}
+        {activeConfigurationTab === "Configuration" && (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <section className="rounded-xl border p-5"
+              style={{ borderColor: "#E3E6DF" }}
+            >
+              <h3 className="mb-1 font-semibold">Current Configuration</h3>
+              <p className="mb-4 text-xs" style={{ color: "#66736B" }}>
+                Latest specifications for this resource.
+              </p>
+
+              {Object.entries(
+                selectedResource.configuration &&
+                Object.keys(selectedResource.configuration).length
+                  ? selectedResource.configuration
+                  : selectedResource.purchase?.configuration || {}
+              ).length > 0 ? (
+                <div className="divide-y">
+                  {Object.entries(
+                    selectedResource.configuration &&
+                    Object.keys(selectedResource.configuration).length
+                      ? selectedResource.configuration
+                      : selectedResource.purchase?.configuration || {}
+                  ).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="grid grid-cols-2 gap-3 py-3 text-sm"
+                    >
+                      <span className="capitalize" style={{ color: "#66736B" }}>
+                        {key.replace(/([A-Z])/g, " $1")}
+                      </span>
+                      <span className="break-words font-medium">
+                        {String(value || "—")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm" style={{ color: "#66736B" }}>
+                  No configuration has been recorded for this resource.
+                </p>
+              )}
+            </section>
+
+            <section className="rounded-xl border p-5"
+              style={{ borderColor: "#E3E6DF" }}
+            >
+              <h3 className="mb-1 font-semibold">Remarks / Configuration History</h3>
+              <p className="mb-4 text-xs" style={{ color: "#66736B" }}>
+                Upgrades and important remarks, in chronological order.
+              </p>
+
+              {selectedResource.configurationHistory?.length > 0 ? (
+                <div className="space-y-4">
+                  {[...selectedResource.configurationHistory]
+                    .sort(
+                      (a, b) =>
+                        new Date(b.changedAt) - new Date(a.changedAt)
+                    )
+                    .map((entry, index) => (
+                      <div
+                        key={entry._id || index}
+                        className="border-l-2 pl-4"
+                        style={{ borderColor: "#B7D8C2" }}
+                      >
+                        <p className="text-xs" style={{ color: "#66736B" }}>
+                          {entry.changedAt
+                            ? new Date(entry.changedAt).toLocaleDateString(
+                                "en-GB",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )
+                            : "Date unavailable"}
+                        </p>
+
+                        <p className="mt-1 text-sm font-semibold">
+                          {entry.remarks || "Configuration updated"}
+                        </p>
+
+                        {entry.changes &&
+                          Object.entries(entry.changes).map(([key, value]) => (
+                            <p key={key} className="mt-1 text-xs"
+                              style={{ color: "#66736B" }}
+                            >
+                              {key}: {String(value)}
+                            </p>
+                          ))}
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <p className="text-sm" style={{ color: "#66736B" }}>
+                  No individual configuration changes have been recorded yet.
+                </p>
+              )}
+
+              {selectedResource.purchase?.configurationRemarks && (
+                <div className="mt-4 rounded-lg p-3"
+                  style={{ backgroundColor: "#F8F9F7" }}
+                >
+                  <p className="text-xs font-medium">Initial Purchase Remarks</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm"
+                    style={{ color: "#66736B" }}
+                  >
+                    {selectedResource.purchase.configurationRemarks}
+                  </p>
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+
+        
+        {/* Remarks & History tab */}
+        {activeConfigurationTab === "Remarks & History" && (
+          <div>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="font-semibold">Remarks / Configuration History</h3>
+                <p className="mt-1 text-sm" style={{ color: "#66736B" }}>
+                  Review dated changes and remarks for this individual asset.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+  <textarea
+    value={remarkText}
+    onChange={(e) => setRemarkText(e.target.value)}
+    placeholder="Enter configuration remark..."
+    className="w-full rounded-lg border p-3 text-sm"
+    rows={3}
+  />
+
+  
+<button
+  type="button"
+  disabled={savingRemark || !remarkText.trim()}
+  onClick={async () => {
+    setSavingRemark(true);
+
+    try {
+      const result = await addResourceConfigurationRemark(
+        selectedResource._id,
+        remarkText.trim()
+      );
+
+      if (!result.success) {
+        alert(result.message);
+        return;
+      }
+
+      setRemarkText("");
+
+      await getLabResources();
+
+      setSelectedResource((current) =>
+        current
+          ? {
+              ...current,
+              configurationHistory:
+                result.resource?.configurationHistory ??
+                current.configurationHistory,
+            }
+          : current
+      );
+
+      alert("Remark saved successfully!");
+    } catch (error) {
+      console.error("Add remark error:", error);
+      alert("Failed to save remark. Check the browser console.");
+    } finally {
+      setSavingRemark(false);
+    }
+  }}
+  className="self-start rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+  style={{ backgroundColor: "#123C35" }}
+>
+  {savingRemark ? "Saving..." : "+ Add Remark"}
+</button>
+
+</div>
+            </div>
+
+            {selectedResource.configurationHistory?.length > 0 ? (
+              <div className="space-y-4">
+                {[...selectedResource.configurationHistory]
+                  .sort(
+                    (a, b) => new Date(b.changedAt) - new Date(a.changedAt)
+                  )
+                  .map((entry, index) => (
+                    <div
+                      key={entry._id || index}
+                      className="rounded-xl border p-4"
+                      style={{ borderColor: "#E3E6DF" }}
+                    >
+                      <p className="text-xs" style={{ color: "#66736B" }}>
+                        {entry.changedAt
+                          ? new Date(entry.changedAt).toLocaleDateString("en-GB")
+                          : "Date unavailable"}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold">
+                        {entry.remarks || "Configuration updated"}
+                      </p>
+                      {entry.changes &&
+                        Object.entries(entry.changes).map(([key, value]) => (
+                          <p key={key} className="mt-1 text-sm"
+                            style={{ color: "#66736B" }}
+                          >
+                            {key}: {String(value)}
+                          </p>
+                        ))}
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="rounded-lg border p-5 text-sm"
+                style={{ borderColor: "#E3E6DF", color: "#66736B" }}
+              >
+                No remarks or configuration changes have been recorded for this asset yet.
+              </p>
+            )}
+
+            {selectedResource.purchase?.configurationRemarks && (
+              <div className="mt-4 rounded-xl border p-4"
+                style={{ borderColor: "#E3E6DF" }}
+              >
+                <p className="text-xs" style={{ color: "#66736B" }}>
+                  Initial purchase configuration
+                </p>
+                <p className="mt-1 text-sm">
+                  {selectedResource.purchase.configurationRemarks}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-end border-t px-6 py-4">
+        <button
+          type="button"
+          onClick={() => setSelectedResource(null)}
+          className="rounded-lg border px-4 py-2 text-sm font-medium"
+          style={{ borderColor: "#D8DCD4" }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </main>
     </div>
   );

@@ -3,7 +3,8 @@ import { SectionCard } from "../../components/SectionCard";
 import { DonutChart } from "../../components/DonutChart";
 
 const CATEGORIES = [
-  "Computers",
+  "Desktops",
+  "Laptops",
   "Monitors",
   "CPUs",
   "Keyboards",

@@ -127,14 +127,82 @@ const getAllLabResources = async (req, res, next) => {
             ? { $eq: filter.labName, $in: existingLabNames }
             : { $in: existingLabNames }
 
-        const resources = await LabResource.find(filter)
-  .populate("purchase", "category particulars")
-  .sort("createdAt")
+        
+const resources = await LabResource.find(filter)
+    .populate(
+        "purchase",
+        "category particulars fundType supplierName configuration configurationRemarks date billNumber billDate quantity"
+    )
+    .sort({ createdAt: -1 });
+
         res.status(StatusCodes.OK).json({ resources, count: resources.length })
     } catch (error) {
         next(error)
     }
 }
+
+const addConfigurationHistory = async (req, res, next) => {
+    try {
+        const { remarks, changes = {} } = req.body;
+
+        if (!remarks || !remarks.trim()) {
+            throw new BadRequestError("Please provide a remark");
+        }
+
+        if (
+            !changes ||
+            typeof changes !== "object" ||
+            Array.isArray(changes)
+        ) {
+            throw new BadRequestError(
+                "Configuration changes must be an object"
+            );
+        }
+
+        const resource = await LabResource.findById(req.params.id);
+
+        if (!resource) {
+            throw new NotFoundError("Resource not found");
+        }
+
+        const recordedChanges = {};
+
+        for (const [key, value] of Object.entries(changes)) {
+            if (typeof value !== "string" || !value.trim()) {
+                throw new BadRequestError(
+                    `A valid value is required for ${key}`
+                );
+            }
+
+            const previousValue = resource.configuration?.get
+                ? resource.configuration.get(key)
+                : resource.configuration?.[key];
+
+            recordedChanges[key] = `${previousValue || "Not recorded"} → ${value.trim()}`;
+
+            if (!resource.configuration) {
+                resource.configuration = new Map();
+            }
+
+            resource.configuration.set(key, value.trim());
+        }
+
+        resource.configurationHistory.push({
+            remarks: remarks.trim(),
+            changedAt: new Date(),
+            changes: recordedChanges,
+        });
+
+        await resource.save();
+
+        res.status(StatusCodes.OK).json({
+            message: "Configuration history saved successfully",
+            resource,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 // DELETE /admin/LabResource/:id
 const deleteLabResource = async (req, res, next) => {
@@ -297,6 +365,7 @@ module.exports = {
     AddResourcesToLab,
     getAllLabResources,
     deleteLabResource,
+    addConfigurationHistory,
     getScrappedResources,
     getAllComplaints,
     getAllComplaintsByLab,

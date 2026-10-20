@@ -1,4 +1,10 @@
-import { CheckCircle2, Wrench, Archive } from "lucide-react";
+
+import {
+  CheckCircle2,
+  Wrench,
+  Archive,
+  Settings2,
+} from "lucide-react";
 import { ResourceTag } from "../../components/ResourceTag";
 
 const getStatusLabel = (status) => {
@@ -38,13 +44,17 @@ const getStatusStyle = (status) => {
   }
 };
 
-
-export function ResourceRow({ resource }) {
+export function ResourceRow({ resource, onViewConfiguration }) {
   const status = getStatusLabel(resource.status);
+
+  const category =
+    resource.category ||
+    resource.purchase?.category ||
+    "—";
 
   return (
     <div
-      className="grid grid-cols-9 items-center px-5 py-3.5 border-t first:border-t-0"
+      className="grid grid-cols-12 items-center gap-3 px-5 py-3.5 border-t first:border-t-0"
       style={{ borderColor: "#E3E6DF" }}
     >
       <span className="col-span-2">
@@ -52,20 +62,43 @@ export function ResourceRow({ resource }) {
       </span>
 
       <span
-        className="col-span-4 text-sm truncate"
+        className="col-span-2 text-sm truncate"
         style={{ color: "#1F2A24" }}
       >
         {resource.resourceName}
       </span>
 
+      <span
+        className="col-span-2 text-sm truncate"
+        style={{ color: "#66736B" }}
+        title={category}
+      >
+        {category}
+      </span>
+
+      <div className="col-span-3 flex justify-center">
+        <button
+          type="button"
+          onClick={() => onViewConfiguration?.(resource)}
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg border px-3 py-2 text-xs font-medium transition-colors hover:bg-gray-50"
+          style={{
+            borderColor: "#D5DBD5",
+            color: "#246B45",
+          }}
+        >
+          <Settings2 size={15} />
+          View Configuration
+        </button>
+      </div>
+
       <span className="col-span-3 flex justify-end">
         <span
-          className="inline-flex items-center  gap-2 rounded-full px-3 py-1.5 text-xs font-medium"
+          className="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium"
           style={getStatusStyle(status)}
         >
           {status === "Available" && <CheckCircle2 size={14} />}
-    {status === "Under Maintenance" && <Wrench size={14} />}
-    {status === "Scrapped" && <Archive size={14} />}
+          {status === "Under Maintenance" && <Wrench size={14} />}
+          {status === "Scrapped" && <Archive size={14} />}
           {status}
         </span>
       </span>

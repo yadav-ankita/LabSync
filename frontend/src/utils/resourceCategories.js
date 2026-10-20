@@ -2,7 +2,8 @@ export const ALL_RESOURCE_CATEGORIES = "All categories";
 export const UNCATEGORIZED = "Uncategorized";
 
 export const RESOURCE_CATEGORIES = [
-  "Computers",
+  "Desktops",
+  "Laptops",
   "Monitors",
   "CPUs",
   "Keyboards",

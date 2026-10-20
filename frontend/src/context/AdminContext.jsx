@@ -384,6 +384,36 @@ const getResourceAssignmentRequests = async () => {
             console.error( "Error fetching lab resources:", error);
         }
     };
+    const addResourceConfigurationRemark = async (id, remarks) => {
+    try {
+        const { data } = await axios.patch(
+            `/admin/LabResource/${id}/configuration-history`,
+            {
+                remarks,
+                changes: {},
+            }
+        );
+
+        return {
+            success: true,
+            resource: data.resource,
+            message: data.message,
+        };
+    } catch (error) {
+        console.error(
+            "Error saving configuration remark:",
+            error.response?.data || error
+        );
+
+        return {
+            success: false,
+            message:
+                error.response?.data?.message ||
+                error.response?.data?.msg ||
+                "Could not save configuration remark.",
+        };
+    }
+};
     const deleteLabResource = async (id) => {
         try {
             const { data } = await axios.delete(`/admin/LabResource/${id}`);
@@ -425,6 +455,7 @@ const getResourceAssignmentRequests = async () => {
                 labResorces,
                 addLabResource,
                 getLabResources,
+                addResourceConfigurationRemark,
                 deleteLabResource
                 
             }}>

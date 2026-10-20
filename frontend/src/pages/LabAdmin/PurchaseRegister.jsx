@@ -11,7 +11,8 @@ import { TopBar } from "../../components/TopBar";
 import { useAdminContext } from "../../context/AdminContext";
 
 const CATEGORIES = [
-    "Computers",
+    "Desktops",
+    "Laptops",
     "Monitors",
     "CPUs",
     "Keyboards",
@@ -28,6 +29,171 @@ const CATEGORIES = [
     "Software Licenses",
 ];
 
+const CONFIGURATION_TEMPLATES = {
+    Desktops: [
+        { key: "brand", label: "Brand" },
+        { key: "display", label: "Display" },
+        { key: "processor", label: "Processor" },
+        { key: "graphicsCard", label: "Graphics Card" },
+        { key: "ram", label: "RAM" },
+        { key: "storage", label: "Storage" },
+        { key: "operatingSystem", label: "Operating System" },
+        { key: "osVersion", label: "OS Version" },
+        { key: "installedSoftware", label: "Installed Software" },
+    ],
+
+    Laptops: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "displaySizeResolution", label: "Display Size and Resolution" },
+        { key: "processor", label: "Processor" },
+        { key: "graphicsCard", label: "Graphics Card" },
+        { key: "ram", label: "RAM" },
+        { key: "storage", label: "Storage" },
+        { key: "operatingSystem", label: "Operating System" },
+        { key: "osVersion", label: "OS Version" },
+        { key: "installedSoftware", label: "Installed Software" },
+    ],
+
+    Servers: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "processors", label: "Processor(s)" },
+        { key: "ram", label: "RAM" },
+        { key: "storageCapacityType", label: "Storage Capacity and Type" },
+        { key: "raidConfiguration", label: "RAID Configuration" },
+        { key: "networkInterfaces", label: "Network Interfaces" },
+        { key: "operatingSystem", label: "Operating System" },
+        { key: "osVersion", label: "OS Version" },
+        { key: "serverRole", label: "Server Role / Purpose" },
+    ],
+    
+    
+    Monitors: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "screenSize", label: "Screen Size" },
+        { key: "resolution", label: "Resolution" },
+        { key: "panelType", label: "Panel Type" },
+        { key: "refreshRate", label: "Refresh Rate" },
+        { key: "ports", label: "Connectivity / Ports" },
+    ],
+
+    CPUs: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "processor", label: "Processor" },
+        { key: "ram", label: "RAM" },
+        { key: "storage", label: "Storage" },
+        { key: "graphicsCard", label: "Graphics Card" },
+        { key: "powerSupply", label: "Power Supply" },
+    ],
+
+    Keyboards: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "keyboardType", label: "Keyboard Type" },
+        { key: "connectivity", label: "Connectivity" },
+        { key: "layout", label: "Layout" },
+    ],
+
+    Mouse: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "mouseType", label: "Mouse Type" },
+        { key: "connectivity", label: "Connectivity" },
+        { key: "dpi", label: "DPI / Sensitivity" },
+    ],
+
+    Printers: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "printerType", label: "Printer Type" },
+        { key: "printTechnology", label: "Print Technology" },
+        { key: "colorSupport", label: "Color Support" },
+        { key: "connectivity", label: "Connectivity" },
+        { key: "duplexPrinting", label: "Duplex Printing" },
+    ],
+
+    Projectors: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "resolution", label: "Resolution" },
+        { key: "brightness", label: "Brightness" },
+        { key: "projectionTechnology", label: "Projection Technology" },
+        { key: "lampLife", label: "Lamp Life" },
+        { key: "connectivity", label: "Connectivity" },
+    ],
+
+    "Networking Equipment": [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "deviceType", label: "Device Type" },
+        { key: "ports", label: "Number / Type of Ports" },
+        { key: "networkSpeed", label: "Network Speed" },
+        { key: "wirelessStandard", label: "Wireless Standard" },
+        { key: "managementCapability", label: "Management Capability" },
+    ],
+
+    "Power Backup": [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "formFactor", label: "Form Factor" },
+        { key: "capacityKVA", label: "Capacity (kVA)" },
+        { key: "powerRatingKW", label: "Power Rating (kW)" },
+        { key: "batteryType", label: "Battery Type" },
+        { key: "backupTime", label: "Backup Time" },
+    ],
+
+    "Raspberry Pi Kits": [
+        { key: "boardModel", label: "Board Model" },
+        { key: "processor", label: "Processor" },
+        { key: "ram", label: "RAM" },
+        { key: "storage", label: "Storage" },
+        { key: "powerSupply", label: "Power Supply" },
+        { key: "includedAccessories", label: "Included Accessories" },
+        { key: "operatingSystem", label: "Operating System" },
+    ],
+
+    Furniture: [
+        { key: "furnitureType", label: "Furniture Type" },
+        { key: "brand", label: "Brand" },
+        { key: "material", label: "Material" },
+        { key: "dimensions", label: "Dimensions" },
+        { key: "color", label: "Color" },
+        { key: "capacity", label: "Seating / Load Capacity" },
+    ],
+
+    "Electrical Equipment": [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "equipmentType", label: "Equipment Type" },
+        { key: "voltage", label: "Voltage" },
+        { key: "powerRating", label: "Power Rating" },
+        { key: "phase", label: "Phase" },
+    ],
+
+    Cameras: [
+        { key: "brand", label: "Brand" },
+        { key: "model", label: "Model" },
+        { key: "cameraType", label: "Camera Type" },
+        { key: "resolution", label: "Resolution" },
+        { key: "sensorType", label: "Sensor Type" },
+        { key: "connectivity", label: "Connectivity" },
+    ],
+
+    "Software Licenses": [
+        { key: "softwareName", label: "Software Name" },
+        { key: "version", label: "Version" },
+        { key: "licenseType", label: "License Type" },
+        { key: "licenseCount", label: "Number of Licenses" },
+        { key: "validity", label: "Validity / Expiry" },
+        { key: "deploymentType", label: "Deployment Type" },
+        { key: "platform", label: "Supported Platform" },
+    ],
+
+};
+
 const emptyForm = {
     date: "",
     particulars: "",
@@ -43,7 +209,9 @@ const emptyForm = {
     freight: "",
     grandTotal: "",
     signature: "",
-    remarks: ""
+    remarks: "",
+    configuration: {},
+configurationRemarks: "",
 };
 
 const Detail = ({ label, value }) => (
@@ -123,7 +291,34 @@ export function PurchaseRegister() {
             };
         });
     };
+    const handleConfigurationChange = (e) => {
+    const { name, value } = e.target;
 
+    setForm((prev) => ({
+        ...prev,
+        configuration: {
+            ...prev.configuration,
+            [name]: value,
+        },
+    }));
+};
+const handleCategoryChange = (e) => {
+    const category = e.target.value;
+    const template = CONFIGURATION_TEMPLATES[category] || [];
+
+    const configuration = Object.fromEntries(
+        template.map(({ key }) => [
+            key,
+            form.configuration?.[key] || "",
+        ])
+    );
+
+    setForm((prev) => ({
+        ...prev,
+        category,
+        configuration,
+    }));
+};
     const resetForm = () => {
         setForm(emptyForm);
         setEditingPurchase(null);
@@ -149,7 +344,9 @@ export function PurchaseRegister() {
             freight: Number(form.freight || 0),
             grandTotal: Number(form.grandTotal),
             signature: form.signature.trim(),
-            remarks: form.remarks.trim()
+remarks: form.remarks.trim(),
+configuration: form.configuration || {},
+configurationRemarks: (form.configurationRemarks || "").trim()
         };
 
         let result;
@@ -222,7 +419,9 @@ export function PurchaseRegister() {
             freight: purchase.freight ?? "",
             grandTotal: purchase.grandTotal ?? "",
             signature: purchase.signature || "",
-            remarks: purchase.remarks || ""
+            remarks: purchase.remarks || "",
+            configuration: purchase.configuration || {},
+configurationRemarks: purchase.configurationRemarks || "",
         });
         setFormMessage(null);
         setShowForm(true);
@@ -365,7 +564,7 @@ export function PurchaseRegister() {
                                     name="category"
                                     required
                                     value={form.category}
-                                    onChange={handleChange}
+                                    onChange={handleCategoryChange}
                                     className="w-full px-3 py-2 rounded-lg border text-sm"
                                 >
                                     <option value="">Select Category</option>
@@ -516,7 +715,54 @@ export function PurchaseRegister() {
                                     className="w-full px-3 py-2 rounded-lg border text-sm"
                                 />
                             </div>
+{form.category &&
+    (CONFIGURATION_TEMPLATES[form.category] || []).length > 0 && (
+        <div className="md:col-span-2 border rounded-xl p-4 space-y-4">
+            <div>
+                <h3 className="text-sm font-semibold">
+                    {form.category} Configuration
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                    Enter the configuration shared by this purchase batch.
+                </p>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {CONFIGURATION_TEMPLATES[form.category].map(
+                    ({ key, label }) => (
+                        <div key={key}>
+                            <label className="block text-xs mb-1">
+                                {label}
+                            </label>
+                            <input
+                                type="text"
+                                name={key}
+                                value={form.configuration?.[key] || ""}
+                                onChange={handleConfigurationChange}
+                                required
+                                placeholder={`Enter ${label.toLowerCase()}`}
+                                className="w-full px-3 py-2 rounded-lg border text-sm"
+                            />
+                        </div>
+                    )
+                )}
+            </div>
+
+            <div>
+                <label className="block text-xs mb-1">
+                    Configuration Remarks
+                </label>
+                <textarea
+                    name="configurationRemarks"
+                    value={form.configurationRemarks || ""}
+                    onChange={handleChange}
+                    rows={2}
+                    placeholder="Additional details about this purchase batch"
+                    className="w-full px-3 py-2 rounded-lg border text-sm"
+                />
+            </div>
+        </div>
+    )}
                             <div className="md:col-span-2">
                                 <label className="block text-xs mb-1">Remarks</label>
                                 <input

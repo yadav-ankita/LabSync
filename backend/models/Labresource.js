@@ -45,7 +45,29 @@ const LabResourceSchema = new mongoose.Schema(
       ref: 'Purchase',
       required: true,
     },
+        configuration: {
+      type: Map,
+      of: String,
+      default: {},
+    },
 
+    configurationHistory: [
+      {
+        remarks: {
+          type: String,
+          trim: true,
+        },
+        changedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        changes: {
+          type: Map,
+          of: String,
+          default: {},
+        },
+      },
+    ],
     resourceCode: {
       type: String,
       required: true,

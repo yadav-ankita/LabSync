@@ -5,6 +5,7 @@ const {
     AddResourcesToLab,
     getAllLabResources,
     deleteLabResource,
+    addConfigurationHistory,
     getAllComplaints,
     getAllComplaintsByLab,
     editComplaintStatus,
@@ -48,4 +49,8 @@ router.route("/complaints/lab/:labName").get(getAllComplaintsByLab);
 router.route("/maintenance").get(getAllMaintenance).post(createMaintenance);
 
 router.route("/maintenance/:id").patch(updateMaintenance);
+router.patch(
+    "/LabResource/:id/configuration-history",
+    addConfigurationHistory
+);
 module.exports = router;

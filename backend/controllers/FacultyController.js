@@ -91,7 +91,7 @@ const getAssignedLabResources = async (req, res, next) => {
     const resources = await LabResource.find({
       labName: faculty.lab_name,
     })
-      .populate("purchase", "category")
+      .populate("purchase", "category particulars configuration configurationRemarks")
       .sort({ createdAt: -1 });
 
     console.log(
@@ -127,11 +127,13 @@ const getFacultyScrappedResources = async (req, res, next) => {
     }
 
     const resources = await LabResource.find({
-      labName: faculty.lab_name,
-      status: "Scrapped",
-    })
-      .populate("purchase", "category particulars")
-      .sort({ updatedAt: -1 });
+  labName: faculty.lab_name,
+})
+  .populate(
+    "purchase",
+    "category particulars configuration configurationRemarks"
+  )
+  .sort({ createdAt: -1 });
 
     res.status(StatusCodes.OK).json({
       labName: faculty.lab_name,
