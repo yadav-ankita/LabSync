@@ -10,8 +10,11 @@ import { FacultyDashboard } from "./pages/Faculty/FacultyDashboard";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import HodDashbaord from "./pages/HOD/HodDashbaord";
+import HODLabResourceDetails from "./pages/HOD/HODLabResourceDetails";
+import { useAppContext } from "./context/AppContext";
 import { LabResourceDetails } from "./pages/LabAdmin/LabResourceDetails";
 export default function App() {
+    const { currentUser } = useAppContext();
     return (
         <>
             <Routes>
@@ -57,21 +60,25 @@ export default function App() {
                     }
                 />
                 <Route
-                    path="/labAdmin-dashboard"
-                    element={
-                        <ProtectedRoute allowedRoles={["admin", "hod"]}>
-                            <LabAdminDashboard />
-                        </ProtectedRoute>
-                    }
-                />
+    path="/labAdmin-dashboard"
+    element={
+        <ProtectedRoute allowedRoles={["admin", "hod"]}>
+            <LabAdminDashboard />
+        </ProtectedRoute>
+    }
+/>
                 <Route
-                    path="/labs/:labName/resource"
-                    element={
-                        <ProtectedRoute allowedRoles={["admin", "hod"]}>
-                            <LabResourceDetails />
-                        </ProtectedRoute>
-                    }
-                />
+  path="/labs/:labName/resource"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "hod"]}>
+      {currentUser?.role === "hod" ? (
+        <HODLabResourceDetails />
+      ) : (
+        <LabResourceDetails />
+      )}
+    </ProtectedRoute>
+  }
+/>
                 <Route
                  path="/HOD-dashboard"
                  element={

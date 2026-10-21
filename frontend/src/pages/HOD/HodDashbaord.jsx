@@ -7,19 +7,41 @@ import {
   Building2,
   User,
   Package,
+  Boxes,
+  CircleDot,
+  Trash2,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import axios from "../../axios";
 import { TopBar } from "../../components/TopBar";
 import { Sidebar } from "./Sidebar";
-
+import { HODLabs } from "./HODLabs";
+import { HODScrapCupboard } from "./HODScrapCupboard";
+// Reuse the existing Lab Admin dashboard cards and charts.
+// If your Admin folder uses different capitalization, update these import paths.
+import { StatCard } from "../LabAdmin/StatCard";
+import { ResourcesByCategory } from "../LabAdmin/ResourcesByCategory";
+import { ResourcesByLab } from "../LabAdmin/ResourcesByLab";
+import { ResourceStatusChart } from "../LabAdmin/ResourceStatusChart";
+import { useLocation } from "react-router-dom";
 export default function HodDashbaord() {
-  const [activeView, setActiveView] = useState("home");
+  const location = useLocation();
+
+const [activeView, setActiveView] = useState(
+  location.state?.activeView || "home"
+);
 
   const [maintenance, setMaintenance] = useState([]);
   const [transferRequests, setTransferRequests] = useState([]);
   const [transferLoading, setTransferLoading] = useState(true);
   const [loading, setLoading] = useState(true);
+
+  // Department-wide overview data reused from the Lab Admin dashboard.
+  const [complaints, setComplaints] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [scrappedCount, setScrappedCount] = useState(0);
+  const [adminApprovalRequests, setAdminApprovalRequests] = useState([]);
 
   const getPendingMaintenance = async () => {
     try {
@@ -58,10 +80,61 @@ export default function HodDashbaord() {
   }
 };
 
+// These requests mirror the data sources already used by Lab Admin.
+const getDepartmentComplaints = async () => {
+  try {
+    const { data } = await axios.get("/admin/complaints");
+    setComplaints(data.complaints || []);
+  } catch (error) {
+    console.error("Error fetching department complaints:", error.response?.data || error);
+    setComplaints([]);
+  }
+};
+
+const getDepartmentResources = async () => {
+  try {
+    const { data } = await axios.get("/admin/LabResource");
+    setResources(data.resources || []);
+  } catch (error) {
+    console.error("Error fetching department resources:", error.response?.data || error);
+    setResources([]);
+  }
+};
+
+const getDepartmentScrappedCount = async () => {
+  try {
+    const { data } = await axios.get("/admin/LabResource/scrapped");
+    setScrappedCount(data.count ?? data.resources?.length ?? 0);
+  } catch (error) {
+    console.error("Error fetching scrapped resource count:", error.response?.data || error);
+    setScrappedCount(0);
+  }
+};
+
+const getDepartmentApprovalRequests = async () => {
+  try {
+    const { data } = await axios.get("/admin/resource-assignment-requests");
+    setAdminApprovalRequests(data.requests || []);
+  } catch (error) {
+    console.error("Error fetching department approval requests:", error.response?.data || error);
+    setAdminApprovalRequests([]);
+  }
+};
+
 useEffect(() => {
   getPendingMaintenance();
   getPendingTransferRequests();
+  getDepartmentComplaints();
+  getDepartmentResources();
+  getDepartmentScrappedCount();
+  getDepartmentApprovalRequests();
 }, []);
+
+const openComplaints = complaints.filter((complaint) => complaint.status !== "Resolved").length;
+const underMaintenance = resources.filter((resource) =>
+  ["maintenance", "under maintenance"].includes((resource.status || "").trim().toLowerCase())
+).length;
+const totalResources = resources.length;
 
 const handleApprove = async (id) => {
   try {
@@ -169,12 +242,20 @@ const handleReject = async (id) => {
           <>
             <TopBar
               title="HOD Dashboard"
-              subtitle="Review and manage laboratory maintenance approvals."
+              subtitle="Department overview, approvals and laboratory resources."
               rightTop="Maintenance Approval"
               rightBottom="HOD Portal"
             />
 
-            {/* Summary Cards */}
+            {/* Department-wide statistics reused from Lab Admin */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-7">
+              <StatCard label="Open Complaints" value={openComplaints} icon={CircleDot} accent="#C9782E" />
+              <StatCard label="Total Resources" value={totalResources} icon={Boxes} accent="#2F6F52" />
+              <StatCard label="Under Maintenance" value={underMaintenance} icon={Wrench} accent="#9A4A1B" />
+              <StatCard label="Scrapped" value={scrappedCount} icon={Trash2} accent="#B3261E" />
+            </div>
+
+            {/* Existing HOD approval cards and workflows remain unchanged */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
 
               {/* Pending Approval */}
@@ -288,6 +369,7 @@ const handleReject = async (id) => {
                 Quick actions
               </h2>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 onClick={() => setActiveView("maintenance")}
                 className="text-left p-5 rounded-xl border bg-white hover:shadow-sm transition-shadow group w-full"
@@ -335,6 +417,41 @@ const handleReject = async (id) => {
                 </div>
               </button>
 
+              <button
+                onClick={() => setActiveView("transferRequests")}
+                className="text-left p-5 rounded-xl border bg-white hover:shadow-sm transition-shadow group w-full"
+                style={{ borderColor: "#E3E6DF" }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <ArrowLeftRight size={20} color="#D89A4E" />
+                    <p className="mt-3 text-sm font-medium" style={{ color: "#1F2A24" }}>
+                      Review Transfer Requests
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: "#5B6A5F" }}>
+                      Review inter-lab resource transfers awaiting HOD approval.
+                    </p>
+                  </div>
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full shrink-0"
+                    style={{ backgroundColor: "#FFF4E5", color: "#A66A20" }}
+                  >
+                    {transferRequests.length} Pending
+                  </span>
+                </div>
+              </button>
+              </div>
+            </div>
+
+            {/* Existing Lab Admin charts */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-7">
+              <ResourcesByCategory resources={resources} />
+              <ResourcesByLab resources={resources} />
+              <ResourceStatusChart
+                resources={resources}
+                scrappedCount={scrappedCount}
+                openComplaints={openComplaints}
+              />
             </div>
 
             {/* Recent Requests */}
@@ -488,6 +605,7 @@ const handleReject = async (id) => {
                 })
               )}
             </div>
+
           </>
         )}
 
@@ -986,6 +1104,12 @@ const handleReject = async (id) => {
     </div>
   </>
 )}
+        {/* ================= LABORATORIES ================= */}
+        {activeView === "labs" && <HODLabs />}
+
+        {/* ================= SCRAP CUPBOARD ================= */}
+        {activeView === "scrap" && <HODScrapCupboard />}
+
         {/* ================= PROFILE ================= */}
         {activeView === "profile" && (
           <>
