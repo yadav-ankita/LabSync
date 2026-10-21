@@ -5,21 +5,10 @@ const STUDENT = {
   semester: "5th Semester",
 };
 import {
-  LayoutGrid,
   BookOpen,
-  MessageSquarePlus,
-  ListChecks,
   FlaskConical,
   FileText,
-  Download,
-  Cpu,
-  Code2,
-  ChevronRight,
-  Clock,
-  CircleDot,
-  CheckCircle2,
-  Loader2,
-  LogOut
+  LogOut,
 } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 export function Sidebar({ activeView, setActiveView }) {
@@ -28,12 +17,9 @@ export function Sidebar({ activeView, setActiveView }) {
     logout();
   }
   const navItems = [
-    { key: "home", label: "Overview", icon: LayoutGrid },
-    { key: "manuals", label: "Lab Manuals", icon: BookOpen },
-    { key: "raise", label: "Raise a Complaint", icon: MessageSquarePlus },
-    { key: "complaints", label: "My Complaints", icon: ListChecks },
-    { key: "profile", label: "Edit Profile", icon: FileText },
-  ];
+  { key: "manuals", label: "Lab Manuals", icon: BookOpen },
+  { key: "profile", label: "Edit Profile", icon: FileText },
+];
 
   return (
     <aside
