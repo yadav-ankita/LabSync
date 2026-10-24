@@ -120,18 +120,15 @@ const respondToResourceAssignmentRequest = async (
     const editFacultyProfile = async (updates) => {
         try {
             const { data } = await axios.patch("/faculty/myprofile", updates);
-            const faculty = {
-                ...data.faculty,
-                role: data.faculty?.role || currentUser?.role || "faculty",
+            const user = {
+                ...currentUser,
+                ...data.user,
+                role: data.user?.role || currentUser?.role || "faculty",
             };
-            const stored = JSON.parse(localStorage.getItem("user") || "{}");
-            localStorage.setItem("user", JSON.stringify({ ...stored, UserInfo: faculty }));
-            setCurrentUser(faculty);
-            return {
-                success: true,
-                faculty,
-                message: data.message
-            };
+            const session = JSON.parse(localStorage.getItem("user") || "{}");
+            localStorage.setItem("user", JSON.stringify({ ...session, UserInfo: user }));
+            setCurrentUser(user);
+            return { success: true, user, message: data.message };
         } catch (err) {
             const message = err.response?.data?.msg || err.response?.data?.message || "Could not update profile.";
             return {

@@ -48,6 +48,8 @@ const [manualsError, setManualsError] = useState("");
             password,
         });
 
+        localStorage.removeItem("user");
+        localStorage.removeItem("faculty");
         localStorage.setItem(
             "student",
             JSON.stringify({
@@ -84,13 +86,18 @@ const getLabManuals = useCallback(async (semester) => {
             localStorage.getItem("user") || "null"
         );
 
-        // Support both student-specific and common login sessions.
-        const session = studentSession || userSession;
-        const token = session?.token;
-        const loggedInUser =
-            session?.studentInfo || session?.UserInfo;
+        // Accept either the student-specific session or a student using common login.
+        const studentAuthSession =
+            studentSession?.token &&
+            studentSession.studentInfo?.role === "student"
+                ? studentSession
+                : userSession?.token &&
+                    userSession.UserInfo?.role === "student"
+                  ? userSession
+                  : null;
+        const token = studentAuthSession?.token;
 
-        if (!token || loggedInUser?.role !== "student") {
+        if (!token) {
             throw new Error(
                 "Please log in using your student account to view lab manuals."
             );

@@ -25,6 +25,7 @@ import { ResourcesByCategory } from "../LabAdmin/ResourcesByCategory";
 import { ResourcesByLab } from "../LabAdmin/ResourcesByLab";
 import { ResourceStatusChart } from "../LabAdmin/ResourceStatusChart";
 import { useLocation } from "react-router-dom";
+import { EditProfile } from "./EditProfile";
 export default function HodDashbaord() {
   const location = useLocation();
 
@@ -1113,28 +1114,7 @@ const handleReject = async (id) => {
         {/* ================= PROFILE ================= */}
         {activeView === "profile" && (
           <>
-            <TopBar
-              title="Edit Profile"
-              subtitle="Manage your HOD profile information."
-              rightTop="HOD Portal"
-              rightBottom="LabSync"
-            />
-
-            <div
-              className="bg-white rounded-xl border p-6"
-              style={{
-                borderColor: "#E3E6DF",
-              }}
-            >
-              <p
-                className="text-sm"
-                style={{
-                  color: "#5B6A5F",
-                }}
-              >
-                Profile management will be added here.
-              </p>
-            </div>
+            <EditProfile/>
           </>
         )}
 

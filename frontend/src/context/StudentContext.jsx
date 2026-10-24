@@ -1,36 +1,79 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import axios from "axios";
 import "../axios";
 import { useAppContext } from "./AppContext";
 const StudentContext = createContext();
+
+const readSession = (key) => {
+    try {
+        return JSON.parse(localStorage.getItem(key) || "null");
+    } catch (error) {
+        console.error(`Could not read ${key} session:`, error);
+        return null;
+    }
+};
+
+const saveStudentProfile = (student) => {
+    const studentSession = readSession("student");
+    const userSession = readSession("user");
+    const storedStudent = { ...student };
+    delete storedStudent.password;
+
+    if (studentSession?.token) {
+        localStorage.setItem(
+            "student",
+            JSON.stringify({ ...studentSession, studentInfo: storedStudent })
+        );
+    } else if (userSession?.token) {
+        localStorage.setItem(
+            "user",
+            JSON.stringify({ ...userSession, UserInfo: storedStudent })
+        );
+    } else {
+        localStorage.setItem(
+            "student",
+            JSON.stringify({ ...(studentSession || {}), studentInfo: storedStudent })
+        );
+    }
+};
+
 const StudentProvider = ({ children }) => {
-    const { currentUser, setCurrentUser, setIsAuthenticated } = useAppContext();
+    const { setCurrentUser, setIsAuthenticated } = useAppContext();
     // ---------- lab manuals ----------
     const [labManuals, setLabManuals] = useState([]);
     const getStudentData = useCallback(async () => {
         try {
             const { data } = await axios.get("/student/profile");
-            setCurrentUser(data.student);
+            const student = { ...data.student, role: "student" };
+            saveStudentProfile(student);
+            setCurrentUser(student);
             setIsAuthenticated(true);
-            return data.student;
+            return student;
         } catch (error) {
             console.error("Error fetching student data:", error);
-            logout();
             return null;
         }
-    }, []);
+    }, [setCurrentUser, setIsAuthenticated]);
     const editProfile = async (updates) => {
         try {
-            const { data } = await axios.patch("/student/profile",updates);
-            console.log("data after edit profile is in appcontext is",data);
-            setCurrentUser(data.student);
+            const { data } = await axios.patch("/student/profile", updates);
+            const student = {
+                ...data.student,
+                role: data.student?.role || "student",
+            };
+            saveStudentProfile(student);
+            setCurrentUser(student);
+            setIsAuthenticated(true);
             return {
                 success: true,
-                student: data.student
+                student,
+                message: data.message,
             };
         } catch (err) {
-            const message =err.response?.data?.msg ||"Could not update profile.";
-            setError(message);
+            const message =
+                err.response?.data?.message ||
+                err.response?.data?.msg ||
+                "Could not update profile.";
             return {
                 success: false,
                 message

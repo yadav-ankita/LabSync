@@ -5,17 +5,25 @@ axios.defaults.baseURL = 'http://localhost:4000/api/v1';
  // Add the token from whichever session is currently active.
 axios.interceptors.request.use(
     (req) => {
-        const session = localStorage.getItem('user') || localStorage.getItem('student');
-        //console.log("the session in axios is this",session)
-        if (session) {
+        const readSession = (key) => {
             try {
-                const { token } = JSON.parse(session);
-                if (token) {
-                    req.headers.Authorization = `Bearer ${token}`;
-                }
+                return JSON.parse(localStorage.getItem(key) || "null");
             } catch (error) {
-                console.error('Error parsing user from localStorage:', error);
+                console.error(`Error parsing ${key} session:`, error);
+                return null;
             }
+        };
+        const studentSession = readSession("student");
+        const userSession = readSession("user");
+        const session =
+            studentSession?.token &&
+            studentSession.studentInfo?.role === "student"
+                ? studentSession
+                : userSession?.token
+                  ? userSession
+                  : studentSession;
+        if (session?.token && !req.headers.Authorization) {
+            req.headers.Authorization = `Bearer ${session.token}`;
         }
         return req;
     },

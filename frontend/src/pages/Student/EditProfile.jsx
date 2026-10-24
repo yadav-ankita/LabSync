@@ -1,53 +1,85 @@
 import { useState, useEffect } from "react";
 import { TopBar } from "./TopBar";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 import { useStudentContext } from "../../context/StudentContext";
 
 const SEMESTERS = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
 export function EditProfile() {
-  const {currentUser}=useAppContext();
-  const { editProfile, getStudentData} =useStudentContext();
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    branch: "",
-    semester: "",
+  const { currentUser } = useAppContext();
+  const { editProfile, getStudentData } = useStudentContext();
+  const [form, setForm] = useState(() => ({
+    name: currentUser?.name || "",
+    email: currentUser?.email || "",
+    branch: currentUser?.department || currentUser?.branch || "",
+    semester: currentUser?.semester || "",
+    currentPassword: currentUser?.password || "",
     password: "",
-  });
+  }));
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const labelStyle = { color: "#1F2A24", fontWeight: 500 };
   const inputStyle = { borderColor: "#D8DCD4", color: "#1F2A24" };
 
+  useEffect(() => {
+    let isActive = true;
+    const loadProfile = async () => {
+      const student = await getStudentData();
+      if (!student || !isActive) return;
+      setForm((currentForm) => ({
+        ...currentForm,
+        name: student.name || "",
+        email: student.email || "",
+        branch: student.department || student.branch || "",
+        semester: student.semester || "",
+        currentPassword: student.password || "",
+      }));
+    };
+
+    loadProfile();
+    return () => {
+      isActive = false;
+    };
+  }, [getStudentData]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaved(false);
+    setErrorMessage("");
     setSaving(true);
 
     const payload = {
-      username: form.username,
+      name: form.name,
       email: form.email,
-      branch: form.branch,
+      department: form.branch,
       semester: form.semester,
     };
-    if (form.password.trim()) payload.password = form.password.trim();
+    if (form.password) payload.password = form.password;
 
-    const result = await editProfile(payload);
-    setSaving(false);
+    try {
+      const result = await editProfile(payload);
 
-    if (result.success) {
+      if (!result.success) {
+        setErrorMessage(result.message);
+        return;
+      }
+
       setSaved(true);
-      setForm((f) => ({
-        username: "",
-        email: "",
-        branch: "",
-        semester: "",
+      setForm((formState) => ({
+        ...formState,
+        currentPassword: result.student.password || "",
         password: "",
-        password: ""
       }));
+      setShowCurrentPassword(false);
+      setShowPassword(false);
       setTimeout(() => setSaved(false), 3000);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -64,9 +96,10 @@ export function EditProfile() {
           <label className="block text-sm mb-1.5" style={labelStyle}>Full name</label>
           <input
             type="text"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="Your full name"
+            required
             className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
             style={inputStyle}
           />
@@ -79,6 +112,7 @@ export function EditProfile() {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="you@college.edu"
+            required
             className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
             style={inputStyle}
           />
@@ -92,6 +126,7 @@ export function EditProfile() {
               value={form.branch}
               onChange={(e) => setForm({ ...form, branch: e.target.value })}
               placeholder="e.g. Computer Science"
+              required
               className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
               style={inputStyle}
             />
@@ -101,6 +136,7 @@ export function EditProfile() {
             <select
               value={form.semester}
               onChange={(e) => setForm({ ...form, semester: e.target.value })}
+              required
               className="w-full px-3 py-2.5 rounded-lg border text-sm bg-white focus:outline-none"
               style={inputStyle}
             >
@@ -112,16 +148,53 @@ export function EditProfile() {
           </div>
         </div>
 
+        <div className="mb-5">
+          <label className="block text-sm mb-1.5" style={labelStyle}>Current password</label>
+          <div className="relative">
+            <input
+              type={showCurrentPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={form.currentPassword}
+              readOnly
+              className="w-full px-3 py-2.5 pr-10 rounded-lg border text-sm focus:outline-none"
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrentPassword((visible) => !visible)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+            >
+              {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+          <p className="mt-1.5 text-xs text-stone-500">
+            This is your current password. Enter a new password below to change it.
+          </p>
+        </div>
+
         <div className="mb-6">
           <label className="block text-sm mb-1.5" style={labelStyle}>New password</label>
-          <input
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            placeholder="Leave blank to keep current password"
-            className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
-            style={inputStyle}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Leave blank to keep current password"
+              minLength={6}
+              className="w-full px-3 py-2.5 pr-10 rounded-lg border text-sm focus:outline-none"
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              aria-label={showPassword ? "Hide new password" : "Show new password"}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
 
         <button
@@ -142,12 +215,12 @@ export function EditProfile() {
           </div>
         )}
 
-        {!saved  && (
+        {errorMessage && (
           <div
             className="flex items-center gap-2 mt-4 px-3 py-2.5 rounded-lg text-sm"
             style={{ backgroundColor: "#FBEAEA", color: "#B3261E" }}
           >
-            {"error here "}
+            {errorMessage}
           </div>
         )}
       </form>

@@ -27,6 +27,12 @@ const UserSchema = new mongoose.Schema(
             trim: true,
             default:"Computer Engineering"
         },
+        semester: {
+            type: String,
+            enum: ["", "1", "2", "3", "4", "5", "6", "7", "8"],
+            default: "",
+            trim: true,
+        },
         role: {
             type: String,
             enum: ['student', 'admin','faculty','hod','labIncharge'],

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { TopBar } from '../../components/TopBar';
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2,Eye, EyeOff  } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
 
@@ -10,20 +10,24 @@ export function EditProfile() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    currentPassword: "",
     password: "",
   });
   const [saved, setSaved] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
       setForm({
         name: currentUser.name || currentUser.faculty_name || "",
         email: currentUser.email || "",
+        currentPassword: currentUser.password || "",
         password: "",
       });
     }
-  }, []);
+  }, [currentUser]);
 
   const labelStyle = { color: "#1F2A24", fontWeight: 500 };
   const inputStyle = { borderColor: "#D8DCD4", color: "#1F2A24" };
@@ -32,23 +36,19 @@ export function EditProfile() {
     e.preventDefault();
     setSaved(false);
     setErrorMessage("");
-
-    const payload = {
+    const result = await editFacultyProfile({
       name: form.name,
       email: form.email,
       ...(form.password ? { password: form.password } : {}),
-    };
-
-    const result = await editFacultyProfile(payload);
-
-    if (result.success) {
-      setSaved(true);
-      setForm((f) => ({ ...f, password: "" }));
-      setTimeout(() => setSaved(false), 3000);
+    });
+    if (!result.success) {
+      setErrorMessage(result.message);
       return;
     }
-
-    setErrorMessage(result.message || "Could not update profile.");
+    setSaved(true);
+    setForm((currentForm) => ({ ...currentForm, password: "" }));
+    setShowPassword(false);
+    setTimeout(() => setSaved(false), 3000);
   };
 
   return (
@@ -91,17 +91,46 @@ export function EditProfile() {
             style={{ borderColor: "#D8DCD4", color: "#5B6A5F" }}
           />
         </div>
-
+           <div className="mb-5">
+          <label className="block text-sm mb-1.5" style={labelStyle}>Current password</label>
+          <div className="relative">
+            <input
+              type={showCurrentPassword ? "text" : "password"}
+              value={form.currentPassword || "********"}
+              className="w-full px-3 py-2.5 pr-10 rounded-lg border text-sm bg-stone-50"
+              style={{ borderColor: "#D8DCD4", color: "#5B6A5F" }}
+              readOnly
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrentPassword((visible) => !visible)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+            >
+              {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
         <div className="mb-6">
           <label className="block text-sm mb-1.5" style={labelStyle}>New password</label>
-          <input
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            placeholder="Leave blank to keep current password"
-            className="w-full px-3 py-2.5 rounded-lg border text-sm focus:outline-none"
-            style={inputStyle}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Leave blank to keep current password"
+              className="w-full px-3 py-2.5 pr-10 rounded-lg border text-sm focus:outline-none"
+              style={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
 
         <button

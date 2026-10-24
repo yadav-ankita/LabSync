@@ -46,40 +46,35 @@ const editProfileData = async (req, res, next) => {
         if (!faculty) {
             throw new NotFoundError('Faculty not found');
         }
+        if (name !== undefined) {
+                    if (!name.trim()) throw new BadRequestError('Name cannot be empty')
+                    faculty.name = name.trim();
+                }
+                if (email !== undefined) {
+                    const normalizedEmail = email.toLowerCase().trim()
+                    if (!normalizedEmail) throw new BadRequestError('Email cannot be empty')
+                    const existing = await Faculty.findOne({ email: normalizedEmail, _id: { $ne: faculty._id } })
+                    if (existing) throw new BadRequestError('A faculty with this email already exists')
+                    faculty.email = normalizedEmail
+                }
+        if (password && password.trim()) faculty.password = password.trim()
 
-        if (name) faculty.name = name.trim();
-        if (email) {
-            const normalizedEmail = email.toLowerCase().trim();
-            const existing = await Faculty.findOne({ email: normalizedEmail, _id: { $ne: faculty._id } });
-            if (existing) {
-                throw new BadRequestError('A faculty with this email already exists');
-            }
-            faculty.email = normalizedEmail;
-        }
-        if (password && password.trim()) {
-            faculty.password = password.trim();
-        }
+        await faculty.save()
 
-        await faculty.save();
-
-        const responseFaculty = {
-            _id: faculty._id,
-            id: faculty._id,
-            name: faculty.name,
-            faculty_name: faculty.name,
-            email: faculty.email,
-            lab_name: faculty.lab_name,
-            password: faculty.password,
-            createdAt: faculty.createdAt,
-        };
-
-        res.status(StatusCodes.OK).json({ faculty: responseFaculty, message: 'Profile updated successfully' });
-    } catch (error) {
+        res.status(StatusCodes.OK).json({
+            user: {
+                id: faculty._id,
+                name: faculty.name,
+                email: faculty.email,
+                password: faculty.password,
+                lab_name: faculty.lab_name,
+                role: req.user.role || 'faculty',
+            },
+            message: 'Profile updated successfully',
+        }) } catch (error) {
         next(error);
     }
 }
-
-
 const getAssignedLabResources = async (req, res, next) => {
   try {
     const faculty = await Faculty.findById(req.user.userId);
