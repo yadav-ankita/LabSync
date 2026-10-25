@@ -45,10 +45,35 @@ const validateCategory = (category) => {
 // POST /api/v1/admin/purchases
 // Record a new purchase
 
+const parsePurchaseData = (req) => {
+  if (!req.body.purchaseData) {
+    return;
+  }
+
+  let purchaseData;
+
+  try {
+    purchaseData = JSON.parse(req.body.purchaseData);
+  } catch {
+    throw new BadRequestError("Invalid purchase data.");
+  }
+
+  if (
+    !purchaseData ||
+    typeof purchaseData !== "object" ||
+    Array.isArray(purchaseData)
+  ) {
+    throw new BadRequestError("Invalid purchase data.");
+  }
+
+  Object.assign(req.body, purchaseData);
+};
+
 const createPurchase = async (req, res, next) => {
     let createdPurchase = null;
 
     try {
+        parsePurchaseData(req);
         const {
             date,
             particulars,
@@ -140,6 +165,9 @@ try {
             remarks,
             configuration: normalizedConfiguration,
             configurationRemarks: (configurationRemarks || "").trim(),
+            billFile: req.file
+  ? `/uploads/purchase-bills/${req.file.filename}`
+  : null,
         });
 
         createdPurchase = purchase;
@@ -204,7 +232,7 @@ try {
 const updatePurchase = async (req, res, next) => {
     try {
         const { id } = req.params;
-
+        parsePurchaseData(req);
         const {
             date,
             particulars,
@@ -307,7 +335,9 @@ purchase.remarks = remarks?.trim() || "";
 
 purchase.configuration = normalizedConfiguration;
 purchase.configurationRemarks = (configurationRemarks || "").trim();
-
+if (req.file) {
+  purchase.billFile = `/uploads/purchase-bills/${req.file.filename}`;
+}
 await purchase.save();
 
 
