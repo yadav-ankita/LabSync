@@ -12,76 +12,87 @@ export function ComplaintsPanel() {
     getAllComplaints,
     editComplaintStatus,
   } = useComplaintContext();
+
   const [maintenanceIds, setMaintenanceIds] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
   const [labFilter, setLabFilter] = useState("All Labs");
+  const [labs, setLabs] = useState([]);
   const [completedMaintenanceIds, setCompletedMaintenanceIds] = useState([]);
 
-  // Fetch all complaints when page loads
   useEffect(() => {
     getAllComplaints();
     getMaintenanceIds();
+    getLabs();
   }, []);
 
-
-
-const getMaintenanceIds = async () => {
+  const getLabs = async () => {
   try {
-    const { data } = await axios.get("/admin/maintenance");
-    const maintenance = data.maintenance || [];
+    const { data } = await axios.get("/lab");
 
-    setMaintenanceIds(
-      maintenance
-        .map((item) => item.complaint?._id)
-        .filter(Boolean)
-    );
+    const labList = Array.isArray(data)
+      ? data
+      : data.labs || [];
 
-    setCompletedMaintenanceIds(
-      maintenance
-        .filter((item) => item.status === "Completed")
-        .map((item) => item.complaint?._id)
+    setLabs(
+      labList
+        .map((lab) =>
+          typeof lab === "string" ? lab : lab.LabName
+        )
         .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b))
     );
   } catch (error) {
-    console.error("Error fetching maintenance records:", error);
+    console.error("Error fetching labs:", error);
   }
 };
 
+  const getMaintenanceIds = async () => {
+    try {
+      const { data } = await axios.get("/admin/maintenance");
+      const maintenance = data.maintenance || [];
+
+      setMaintenanceIds(
+        maintenance
+          .map((item) => item.complaint?._id)
+          .filter(Boolean)
+      );
+
+      setCompletedMaintenanceIds(
+        maintenance
+          .filter((item) => item.status === "Completed")
+          .map((item) => item.complaint?._id)
+          .filter(Boolean)
+      );
+    } catch (error) {
+      console.error("Error fetching maintenance records:", error);
+    }
+  };
 
   const complaints = Allcomplaints || [];
 
-const handleMoveToMaintenance = async (complaintId) => {
-  try {
-    const { data } = await axios.post("/admin/maintenance", {
-      complaintId,
-    });
+  const handleMoveToMaintenance = async (complaintId) => {
+    try {
+      await axios.post("/admin/maintenance", { complaintId });
 
-    console.log("Maintenance created:", data);
+      setMaintenanceIds((prev) =>
+        prev.includes(complaintId)
+          ? prev
+          : [...prev, complaintId]
+      );
 
-    setMaintenanceIds((prev) => [...prev, complaintId]);
+      alert("Complaint moved to Maintenance successfully.");
+    } catch (error) {
+      console.error("Error moving complaint to maintenance:", error);
 
-    alert("Complaint moved to Maintenance successfully.");
-  } catch (error) {
-    console.error("Error moving complaint to maintenance:", error);
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.msg ||
+        "Could not move complaint to maintenance.";
 
-    const message =
-      error.response?.data?.message ||
-      error.response?.data?.msg ||
-      "Could not move complaint to maintenance.";
+      alert(message);
+    }
+  };
 
-    alert(message);
-  }
-};
-  // Get unique labs from actual complaints
-  const labs = [
-    ...new Set(
-      complaints
-        .map((complaint) => complaint.labName)
-        .filter(Boolean)
-    ),
-  ];
-
-  // Change complaint status
   const handleStatusChange = async (id, status) => {
     const result = await editComplaintStatus(id, status);
 
@@ -90,7 +101,6 @@ const handleMoveToMaintenance = async (complaintId) => {
     }
   };
 
-  // Apply filters
   const visible = complaints.filter(
     (c) =>
       (statusFilter === "All" || c.status === statusFilter) &&
@@ -106,34 +116,23 @@ const handleMoveToMaintenance = async (complaintId) => {
         rightBottom="Computer Engineering"
       />
 
-      {/* Filters */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-
         {/* Status filters */}
         <div className="flex gap-2 flex-wrap">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f}
+              type="button"
               onClick={() => setStatusFilter(f)}
               className="text-xs px-3 py-1.5 rounded-full border transition-colors"
               style={{
                 borderColor:
-                  statusFilter === f
-                    ? "#D89A4E"
-                    : "#D8DCD4",
-
+                  statusFilter === f ? "#D89A4E" : "#D8DCD4",
                 backgroundColor:
-                  statusFilter === f
-                    ? "#FBF1E3"
-                    : "white",
-
+                  statusFilter === f ? "#FBF1E3" : "white",
                 color:
-                  statusFilter === f
-                    ? "#9A5F1D"
-                    : "#5B6A5F",
-
-                fontWeight:
-                  statusFilter === f ? 600 : 400,
+                  statusFilter === f ? "#9A5F1D" : "#5B6A5F",
+                fontWeight: statusFilter === f ? 600 : 400,
               }}
             >
               {f}
@@ -141,7 +140,7 @@ const handleMoveToMaintenance = async (complaintId) => {
           ))}
         </div>
 
-        {/* Lab filter */}
+        {/* Lab filter: populated from the backend */}
         <select
           value={labFilter}
           onChange={(e) => setLabFilter(e.target.value)}
@@ -151,9 +150,7 @@ const handleMoveToMaintenance = async (complaintId) => {
             color: "#1F2A24",
           }}
         >
-          <option value="All Labs">
-            All Labs
-          </option>
+          <option value="All Labs">All Labs</option>
 
           {labs.map((lab) => (
             <option key={lab} value={lab}>
@@ -161,10 +158,8 @@ const handleMoveToMaintenance = async (complaintId) => {
             </option>
           ))}
         </select>
-
       </div>
 
-      {/* Complaints */}
       <div
         className="bg-white rounded-xl border overflow-hidden"
         style={{ borderColor: "#E3E6DF" }}
@@ -178,16 +173,14 @@ const handleMoveToMaintenance = async (complaintId) => {
           </div>
         ) : (
           visible.map((c) => (
-          
-<ComplaintRow
-  key={c._id}
-  complaint={c}
-  onStatusChange={handleStatusChange}
-  onMoveToMaintenance={handleMoveToMaintenance}
-  maintenanceExists={maintenanceIds.includes(c._id)}
-  maintenanceCompleted={completedMaintenanceIds.includes(c._id)}
-/>
-
+            <ComplaintRow
+              key={c._id}
+              complaint={c}
+              onStatusChange={handleStatusChange}
+              onMoveToMaintenance={handleMoveToMaintenance}
+              maintenanceExists={maintenanceIds.includes(c._id)}
+              maintenanceCompleted={completedMaintenanceIds.includes(c._id)}
+            />
           ))
         )}
       </div>

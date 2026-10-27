@@ -10,10 +10,11 @@ const {
     updatePurchase
 } = require("../controllers/PurchaseController");
 
+const uploadPurchaseBill = require("../middleware/purchaseBillUpload");
 const router = express.Router();
 
 router.use(authUser, authorizeRoles("admin"));
-
+router.post("/", uploadPurchaseBill.single("billFile"), createPurchase);
 // Record a new purchase
 router.post("/", createPurchase);
 
@@ -26,6 +27,7 @@ router.get("/:id", getPurchase);
 //edit a particular purchase
 router.patch(
     "/:id",
+    uploadPurchaseBill.single("billFile"),
     updatePurchase
 );
 

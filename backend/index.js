@@ -24,6 +24,12 @@ const HodRoute = require("./routes/HodRoute");
 
 const app = express();
 
+app.use(
+  "/uploads/purchase-bills",
+  express.static(
+    path.join(process.cwd(), "uploads", "purchase-bills")
+  )
+);
 app.use(cors({
     origin: ["http://localhost:5173"],
     credentials: true,

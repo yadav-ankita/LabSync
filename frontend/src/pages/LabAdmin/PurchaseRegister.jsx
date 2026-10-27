@@ -253,9 +253,11 @@ export function PurchaseRegister() {
         toDate: ""
     });
     const [form, setForm] = useState(emptyForm);
+    
     const [selectedPurchase, setSelectedPurchase] = useState(null);
     const [loadingPurchase, setLoadingPurchase] = useState(false);
     const [showPurchaseDetails, setShowPurchaseDetails] = useState(false);
+    const [billFile, setBillFile] = useState(null);
 
     useEffect(() => {
         const loadPurchases = async () => {
@@ -320,10 +322,10 @@ const handleCategoryChange = (e) => {
     }));
 };
     const resetForm = () => {
-        setForm(emptyForm);
-        setEditingPurchase(null);
-    };
-
+  setForm(emptyForm);
+  setEditingPurchase(null);
+  setBillFile(null);
+};
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -348,19 +350,39 @@ remarks: form.remarks.trim(),
 configuration: form.configuration || {},
 configurationRemarks: (form.configurationRemarks || "").trim()
         };
+        
+const payload = new FormData();
+
+payload.append("purchaseData", JSON.stringify(purchaseData));
+
+if (billFile) {
+  payload.append("billFile", billFile);
+}
+
 
         let result;
-        try {
-            result = editingPurchase
-                ? await updatePurchase(editingPurchase._id, purchaseData)
-                : await addPurchase(purchaseData);
-        } catch (error) {
-            result = {
-                success: false,
-                message: error?.message || "Something went wrong while saving the purchase."
-            };
-        }
 
+try {
+  const payload = new FormData();
+
+  payload.append("purchaseData", JSON.stringify(purchaseData));
+
+  if (billFile) {
+    payload.append("billFile", billFile);
+  }
+
+  result = editingPurchase
+    ? await updatePurchase(editingPurchase._id, payload)
+    : await addPurchase(payload);
+} catch (error) {
+  result = {
+    success: false,
+    message:
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong while saving the purchase.",
+  };
+}
         setSubmitting(false);
 
         if (result?.success) {
@@ -773,6 +795,43 @@ configurationRemarks: purchase.configurationRemarks || "",
                                     className="w-full px-3 py-2 rounded-lg border text-sm"
                                 />
                             </div>
+                            <div className="md:col-span-3">
+  <label className="block text-xs mb-1">
+    Purchase Bill (PDF or Image)
+  </label>
+
+  <input
+    type="file"
+    accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+    onChange={(e) => {
+      const file = e.target.files?.[0] || null;
+
+      if (file && file.size > 5 * 1024 * 1024) {
+        setFormMessage({
+          type: "error",
+          text: "Purchase bill must be 5 MB or smaller.",
+        });
+        e.target.value = "";
+        setBillFile(null);
+        return;
+      }
+
+      setBillFile(file);
+      setFormMessage(null);
+    }}
+    className="w-full px-3 py-2 rounded-lg border text-sm"
+  />
+
+  <p className="text-xs mt-1" style={{ color: "#7A847D" }}>
+    Optional. PDF, JPG, JPEG, or PNG. Maximum size: 5 MB.
+  </p>
+
+  {billFile && (
+    <p className="text-sm mt-2" style={{ color: "#2F6F52" }}>
+      Selected: {billFile.name}
+    </p>
+  )}
+</div>
                         </div>
 
                         {formMessage && (
@@ -1100,16 +1159,48 @@ configurationRemarks: purchase.configurationRemarks || "",
                                 className="border rounded-lg p-4"
                                 style={{ borderColor: "#E3E6DF" }}
                             >
-                                {selectedPurchase.billFile ? (
-                                    <p className="text-sm">Bill uploaded</p>
-                                ) : (
-                                    <div>
-                                        <p className="text-sm">No bill uploaded.</p>
-                                        <p className="text-xs mt-2" style={{ color: "#7A847D" }}>
-                                            Bill upload functionality will be implemented later.
-                                        </p>
-                                    </div>
-                                )}
+                                
+
+<div>
+  <p className="text-sm font-medium mb-2">Purchase Bill</p>
+
+  {selectedPurchase.billFile ? (
+    <div
+      className="border rounded-lg p-3"
+      style={{ borderColor: "#E3E6DF" }}
+    >
+      {/\.(png|jpe?g|webp)$/i.test(selectedPurchase.billFile) ? (
+        <img
+          src={`http://localhost:4000${selectedPurchase.billFile}`}
+          alt="Purchase bill"
+          className="w-full max-h-[500px] object-contain rounded"
+        />
+      ) : (
+        <iframe
+          src={`http://localhost:4000${selectedPurchase.billFile}`}
+          title="Purchase bill preview"
+          className="w-full h-[500px] rounded"
+        />
+      )}
+
+      
+<a
+  href={`http://localhost:4000${selectedPurchase.billFile}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg text-sm font-medium"
+  style={{ backgroundColor: "#1F2A24", color: "#FFFFFF" }}
+>
+  <span>↓</span> Open / Download Bill
+</a>
+
+    </div>
+  ) : (
+    <p className="text-sm">No bill uploaded.</p>
+  )}
+</div>
+
+
                             </div>
                         </div>
 

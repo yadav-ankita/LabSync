@@ -165,66 +165,61 @@ const AdminProvider = ({ children }) => {
         };
     }
 };
-    const addPurchase = async (purchaseData) => {
-        try {
-            const { data } = await axios.post("/admin/purchases", purchaseData);
-            console.log("the data after adding purchase in appcontext is", data);
-            setPurchases((prev) => [data.purchase, ...prev]);
-            return {
-                success: true,
-                purchase: data.purchase
-            };
-        } catch (err) {
-            const message = err.response?.data?.msg || err.response?.data?.message || "Could not record purchase.";
-            return {
-                success: false,
-                message
-            };
-        }
+    
+
+const addPurchase = async (purchaseData) => {
+  try {
+    const { data } = await axios.post(
+      "/admin/purchases",
+      purchaseData
+    );
+
+    setPurchases((prev) => [data.purchase, ...prev]);
+
+    return {
+      success: true,
+      purchase: data.purchase,
     };
-    const updatePurchase = async (id, purchaseData) => {
-    try {
-        const { data } = await axios.patch(
-            `/admin/purchases/${id}`,
-            purchaseData
-        );
-
-        console.log(
-            "the data after updating purchase in appcontext is",
-            data
-        );
-
-        // Update the purchase in local state
-        setPurchases((prev) =>
-            prev.map((purchase) =>
-                purchase._id === id
-                    ? data.purchase
-                    : purchase
-            )
-        );
-
-        return {
-            success: true,
-            purchase: data.purchase
-        };
-
-    } catch (error) {
-        console.error(
-            "Error updating purchase:",
-            error
-        );
-
-        const message =
-            error.response?.data?.msg ||
-            error.response?.data?.message ||
-            "Could not update purchase.";
-
-        return {
-            success: false,
-            message
-        };
-    }
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        err.response?.data?.msg ||
+        err.response?.data?.message ||
+        "Could not record purchase.",
+    };
+  }
 };
+
+const updatePurchase = async (id, purchaseData) => {
+  try {
+    const { data } = await axios.patch(
+      `/admin/purchases/${id}`,
+      purchaseData
+    );
+
+    setPurchases((prev) =>
+      prev.map((purchase) =>
+        purchase._id === id ? data.purchase : purchase
+      )
+    );
+
+    return {
+      success: true,
+      purchase: data.purchase,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        "Could not update purchase.",
+    };
+  }
+};
+
+
     const getPurchases = async () => {
         try {
             const { data } = await axios.get("/admin/purchases");
