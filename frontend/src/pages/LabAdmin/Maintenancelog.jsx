@@ -22,8 +22,7 @@ export function MaintenanceLog() {
     try {
       const { data } = await axios.get("/admin/maintenance");
 
-      console.log("MAINTENANCE FROM MONGODB:", data.maintenance);
-
+    
       setMaintenance(data.maintenance || []);
     } catch (error) {
       console.error("Error fetching maintenance:", error);
@@ -334,13 +333,13 @@ function MaintenanceUpdateForm({ maintenance, onClose, onUpdated }) {
   }
     try {
       setSaving(true);
-        console.log("Sending maintenance data:", formData);
+       
       const { data } = await axios.patch(
         `/admin/maintenance/${maintenance._id}`,
         formData
       );
 
-      console.log("MAINTENANCE UPDATED:", data);
+     
 
       await onUpdated();
       onClose();

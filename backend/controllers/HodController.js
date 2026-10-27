@@ -24,7 +24,7 @@ const getPendingMaintenance = async (req, res, next) => {
         },
       })
       .sort("-createdAt");
-    console.log(maintenance)
+    
     res.status(StatusCodes.OK).json({
       maintenance,
       count: maintenance.length,

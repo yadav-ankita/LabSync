@@ -48,7 +48,6 @@ const [activeView, setActiveView] = useState(
     try {
       const { data } = await axios.get("/hod/maintenance");
 
-      console.log("HOD MAINTENANCE:", data);
 
       setMaintenance(data.maintenance || []);
     } catch (error) {
@@ -66,7 +65,6 @@ const [activeView, setActiveView] = useState(
   try {
     const { data } = await axios.get("/hod/transferRequests");
 
-    console.log("HOD TRANSFER REQUESTS:", data);
 
     setTransferRequests(data.requests || []);
   } catch (error) {
@@ -144,7 +142,6 @@ const handleApprove = async (id) => {
       approvalStatus: "Approved",
     });
 
-    console.log("Approved:", data);
 
     // Remove the approved request from pending list
     setMaintenance((prev) =>
@@ -167,7 +164,6 @@ const handleTransferApproval = async (id, approvalStatus, hodRemarks= "") => {
       }
     );
 
-    console.log("HOD TRANSFER APPROVAL:", data);
 
     // Remove the approved request from pending HOD requests
     setTransferRequests((prev) =>
@@ -206,7 +202,6 @@ const handleReject = async (id) => {
       hodRemarks: hodRemarks.trim(),
     });
 
-    console.log("Rejected:", data);
 
     setMaintenance((prev) =>
       prev.filter((item) => item._id !== id)

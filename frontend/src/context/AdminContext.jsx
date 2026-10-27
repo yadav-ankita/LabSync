@@ -11,7 +11,7 @@ const AdminProvider = ({ children }) => {
     const AddLabs = async (LabName) => {
         try {
             const { data } = await axios.post("/lab", LabName);
-            console.log("Lab added:", data);
+           
             setLabName((prev) => [
                 ...prev,
                 data.lab
@@ -50,7 +50,6 @@ const AdminProvider = ({ children }) => {
     const addFaculty = async (facultyDetails) => {
         try {
             const { data } = await axios.post("/admin/faculty/", facultyDetails);
-            console.log("the data after adding faculty in appcontext is", data);
             setFaculties((prev) => [
                 data.faculty,
                 ...prev
@@ -70,7 +69,6 @@ const AdminProvider = ({ children }) => {
     const getFaculty = async () => {
         try {
             const { data } = await axios.get("/admin/faculty/");
-            console.log("the data after fetching faculties in appcontext is", data);
             setFaculties(data.faculties);
             return data.faculties;
         } catch (error) {
@@ -103,7 +101,6 @@ const AdminProvider = ({ children }) => {
     const emailCredentialsToFaculty = async (credentials) => {
         try {
             const { data } = await axios.post("/admin/faculty/credentials", credentials);
-            console.log("the data after emailing credentials in appcontext is", data);
             return {
                 success: true,
                 message: data.message
@@ -223,7 +220,6 @@ const updatePurchase = async (id, purchaseData) => {
     const getPurchases = async () => {
         try {
             const { data } = await axios.get("/admin/purchases");
-            console.log("the data after fetching purchases in appcontext is", data);
             setPurchases(data.purchases);
             return data.purchases;
         } catch (error) {
@@ -245,10 +241,9 @@ const updatePurchase = async (id, purchaseData) => {
 
   try {
     const { data } = await axios.get("/admin/purchases/resources");
-    console.log("🔥 purchase resources response:", data);
     return data.resources;
   } catch (error) {
-    console.error("🔥 Error fetching available resources:", error);
+   
     return [];
   }
 };
@@ -342,7 +337,7 @@ const getResourceAssignmentRequests = async () => {
     const addLabResource = async (resourceData) => {
         try {
             const { data } = await axios.post("/admin/LabResource",resourceData);
-            console.log("the data after adding labs in appcontext is",data);
+           
             setLabResorces((prev) => [
                 ...data.resources,
                 ...prev
@@ -373,7 +368,7 @@ const getResourceAssignmentRequests = async () => {
     const getLabResources = async () => {
         try {
             const { data } = await axios.get("/admin/LabResource");
-            console.log("the data after calling getLabResources in appcontext is",data);
+           
             setLabResorces(data.resources);
         } catch (error) {
             console.error( "Error fetching lab resources:", error);

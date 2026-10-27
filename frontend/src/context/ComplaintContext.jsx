@@ -20,7 +20,7 @@ const ComplaintProvider = ({ children }) => {
     const editComplaintStatus = async (complaintId, status) => {
         try {
             const { data } = await axios.patch("/admin/complaints", { complaintId, status });
-            console.log("the data after editing complaint status in appcontext is", data);
+           
             setAllComplaints((prevComplaints) =>
                 prevComplaints.map((complaint) =>
                     complaint._id === complaintId
@@ -52,7 +52,7 @@ const ComplaintProvider = ({ children }) => {
     const getComplaintsByLab = async (labName) => {
         try {
             const { data } = await axios.get(`/admin/complaints/lab/${labName}`);
-            console.log("the data after calling getComplaintsByLab in appcontext is", data);
+          
             setAllComplaints(data.complaints);
         } catch (error) {
             console.error("Error fetching complaints by lab:", error);
@@ -64,7 +64,6 @@ const ComplaintProvider = ({ children }) => {
     const getComplaints = async () => {
         try {
             const { data } = await axios.get("/student/complaints");
-            console.log("the data after calling getcomplaints in app context is", data);
             setComplaints(data.complaints);
         } catch (error) {
             console.error("Error fetching complaints:", error);
@@ -74,11 +73,7 @@ const ComplaintProvider = ({ children }) => {
     try {
         const { data } = await axios.post("/faculty/complaints", complaintData);
 
-        console.log(
-            "the data we get after raise complaints in app context is",
-            data
-        );
-
+      
         setComplaints((prev) => [
             data.complaint,
             ...prev

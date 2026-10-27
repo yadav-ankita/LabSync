@@ -93,17 +93,7 @@ const getAssignedLabResources = async (req, res, next) => {
       .populate("purchase", "category particulars configuration configurationRemarks")
       .sort({ createdAt: -1 });
 
-    console.log(
-      "Resources returned:",
-      resources.map((r) => ({
-        assetId: r.assetId,
-        labName: r.labName,
-        resourceName: r.resourceName,
-        category: r.purchase?.category || "Uncategorized",
-        status: r.status,
-        previousLabName: r.previousLabName,
-      }))
-    );
+   
 
     res.status(StatusCodes.OK).json({
       labName: faculty.lab_name,
@@ -145,7 +135,7 @@ const getFacultyScrappedResources = async (req, res, next) => {
 
 const getResourceAssignmentRequests = async (req, res, next) => {
     try {
-        console.log("REQ.USER:", req.user);
+       
         const requests = await ResourceAssignmentRequest.find({
             labIncharge: req.user.userId,
             status: "Pending",

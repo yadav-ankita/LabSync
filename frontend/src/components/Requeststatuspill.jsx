@@ -1,7 +1,6 @@
 import { CircleDot, CheckCircle2, XCircle } from "lucide-react";
 
 export function RequestStatusPill({ status }) {
-  console.log("STATUS PILL:", status);
   const map = {
   Pending: { bg: "#FDECE3", text: "#9A4A1B", icon: CircleDot },
   Approved: { bg: "#E3EEE5", text: "#2F6F52", icon: CheckCircle2 },

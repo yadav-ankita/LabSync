@@ -56,7 +56,7 @@ async function repairProjectorAssets() {
 
   await LabResource.insertMany(assets, { ordered: true });
 
-  console.log(`Created ${assets.length} assets for the projector purchase.`);
+  //console.log(`Created ${assets.length} assets for the projector purchase.`);
 }
 
 repairProjectorAssets()
