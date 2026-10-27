@@ -1,4 +1,6 @@
 const express = require("express");
+const authUser = require("../middleware/authUser");
+const authorizeRoles = require("../middleware/authorizeRoles");
 
 const {
     createPurchase,
@@ -10,6 +12,7 @@ const {
 
 const router = express.Router();
 
+router.use(authUser, authorizeRoles("admin"));
 
 // Record a new purchase
 router.post("/", createPurchase);

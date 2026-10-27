@@ -1,10 +1,8 @@
-import { Link } from "react-router-dom";
 import {
   GraduationCap,
   FlaskConical,
   ShieldCheck,
   Crown,
-  ArrowRight,
 } from "lucide-react";
 
 const ROLES = [
@@ -12,8 +10,8 @@ const ROLES = [
     icon: GraduationCap,
     title: "Student",
     desc: "Report issues, track your complaints, borrow resources, and browse lab manuals.",
-    href: "/student-login",
-    cta: "Student sign in",
+    href: "/login",
+    cta: "Sign in",
   },
   {
     icon: FlaskConical,
@@ -63,13 +61,13 @@ export function RolesSection() {
                 {r.title}
               </p>
               <p className="text-sm mt-1.5 leading-relaxed flex-1" style={{ color: "#5B6A5F" }}>{r.desc}</p>
-              <Link
+              {/* <Link
                 to={r.href}
                 className="inline-flex items-center gap-1.5 text-sm mt-5 font-medium group"
                 style={{ color: "#9A5F1D" }}
               >
                 {r.cta} <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+              </Link> */}
             </div>
           );
         })}

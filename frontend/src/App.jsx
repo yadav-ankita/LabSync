@@ -1,14 +1,11 @@
 import StudentDashboard from "./pages/Student/StudentDashboard";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/Home";
-import StudentRegister from "./components/StudentRegister";
-import StudentLogin from "./components/StudentLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LabInchargeDashboard } from "./pages/LabIncharge/LabInchargeDashboard";
 import { LabAdminDashboard } from "./pages/LabAdmin/LabAdminDashboard";
 import { FacultyDashboard } from "./pages/Faculty/FacultyDashboard";
 import Login from "./components/Login";
-import Register from "./components/Register";
 import HodDashbaord from "./pages/HOD/HodDashbaord";
 import HODLabResourceDetails from "./pages/HOD/HODLabResourceDetails";
 import { useAppContext } from "./context/AppContext";
@@ -23,18 +20,9 @@ export default function App() {
                   path="/login"
                   element={<Login />}
                 />
-                <Route 
-                 path="/register"  
-                 element={<Register/>}
-                 />
-                <Route
-                    path="/student-register"
-                    element={<StudentRegister />}
-                />
-                <Route
-                    path="/student-login"
-                    element={<StudentLogin />}
-                />
+                <Route path="/register" element={<Navigate to="/login" replace />} />
+                <Route path="/student-register" element={<Navigate to="/login" replace />} />
+                <Route path="/student-login" element={<Navigate to="/login" replace />} />
                 <Route
                     path="/student-dashboard"
                     element={
@@ -46,7 +34,7 @@ export default function App() {
                 <Route
                     path="/labIncharge-dashboard"
                     element={
-                        <ProtectedRoute allowedRoles={["faculty"]}>
+                        <ProtectedRoute allowedRoles={["faculty", "labIncharge"]}>
                             <LabInchargeDashboard />
                         </ProtectedRoute>
                     }
@@ -62,7 +50,7 @@ export default function App() {
                 <Route
     path="/labAdmin-dashboard"
     element={
-        <ProtectedRoute allowedRoles={["admin", "hod"]}>
+        <ProtectedRoute allowedRoles={["admin"]}>
             <LabAdminDashboard />
         </ProtectedRoute>
     }
@@ -87,6 +75,7 @@ export default function App() {
                     </ProtectedRoute>
                  } 
                 />
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </>
     );

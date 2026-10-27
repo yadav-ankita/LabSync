@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router();
 const authUser = require('../middleware/authUser');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const upload = require('../middleware/multer');
 const {
     getProfileData,
@@ -23,7 +24,7 @@ const {
 
 const { getFacultyMaintenance, getLabMaintenance } = require("../controllers/MaintenanceController");
 
-router.use(authUser);
+router.use(authUser, authorizeRoles('faculty', 'labIncharge'));
 router.route("/myprofile").get(getProfileData).patch(editProfileData);
 router.route("/labResource").get(getAssignedLabResources);
 router.route("/labManuals").get(getLabManuals).post(upload.single('pdfFile'), uploadLabManuals);

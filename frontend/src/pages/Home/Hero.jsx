@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, FlaskConical } from "lucide-react";
+import { FlaskConical } from "lucide-react";
 
 export function Hero() {
   return (
@@ -33,9 +32,9 @@ export function Hero() {
           with dedicated, role-based access for students, faculty, and lab administrators.
         </p>
 
-        <div className="flex flex-wrap items-center gap-3 mt-8">
+        {/* <div className="flex flex-wrap items-center gap-3 mt-8">
           <Link
-            to="/student-login"
+            to="/login"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium transition-transform hover:-translate-y-0.5"
             style={{ backgroundColor: "#D89A4E", color: "#1F2A24" }}
           >
@@ -48,7 +47,7 @@ export function Hero() {
           >
             Faculty &amp; Admin Portals
           </a>
-        </div>
+        </div> */}
       </div>
     </section>
   );

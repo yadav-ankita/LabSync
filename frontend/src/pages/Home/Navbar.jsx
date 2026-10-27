@@ -62,7 +62,7 @@ export function Navbar() {
             </a>
           ))}
           <Link
-            to="/student-login"
+            to="/login"
             className="text-sm px-4 py-2 rounded-lg font-medium text-white text-center mt-1"
             style={{ backgroundColor: "#1F2A24" }}
           >

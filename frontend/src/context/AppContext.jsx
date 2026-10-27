@@ -8,71 +8,28 @@ const AppProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authLoading, setAuthLoading] = useState(true);
-    const [error, setError] = useState("");
     // ---------- student lab manuals ----------
 const [labManuals, setLabManuals] = useState([]);
 const [loadingManuals, setLoadingManuals] = useState(false);
 const [manualsError, setManualsError] = useState("");
-    const register = async ({ name, email, password, phone, role }) => {
-        try {
-            const { data } = await axios.post("/auth/register", {name,email,password,phone,role});
-            console.log("data after register is in appcontext is",data);
-            return {
-                success: true
-            };
-        } catch (err) {
-            const message =err.response?.data?.msg ||"Invalid credentials";
-            return {
-                success: false,
-                message
-            };
-        }
-    };
     const login = async (form) => {
         try {
-            const { data } = await axios.post( "/auth/login",form);
+            const { data } = await axios.post("/auth/login", {
+                email: form.email,
+                password: form.password,
+            });
             const user = data.user || data.faculty;
             localStorage.setItem("user",JSON.stringify({UserInfo: user,token: data.token}));
+            localStorage.removeItem("student");
+            localStorage.removeItem("faculty");
             setCurrentUser(user);
             setIsAuthenticated(true);
             return {success: true,user};
         } catch (error) {
-            const message =error.response?.data?.msg ||error.response?.data?.message ||"Failed Faculty Login";
+            const message =error.response?.data?.msg ||error.response?.data?.message ||"Unable to sign in.";
             return {success: false,message};
         }
     };
-    const Studentlogin = async (email, password) => {
-    try {
-        const { data } = await axios.post("/student/login", {
-            email,
-            password,
-        });
-
-        localStorage.removeItem("user");
-        localStorage.removeItem("faculty");
-        localStorage.setItem(
-            "student",
-            JSON.stringify({
-                studentInfo: data.student,
-                token: data.token,
-            })
-        );
-
-        setCurrentUser(data.student);
-        setIsAuthenticated(true);
-
-        return { success: true };
-    } catch (err) {
-        const message =
-            err.response?.data?.message ||
-            err.response?.data?.msg ||
-            "Invalid credentials";
-
-        setError(message);
-        return { success: false, message };
-    }
-};
-
 const getLabManuals = useCallback(async (semester) => {
     setLoadingManuals(true);
     setManualsError("");
@@ -193,16 +150,12 @@ const getLabManuals = useCallback(async (semester) => {
                 isAuthenticated,
                 setIsAuthenticated,
                 authLoading,
-                error,
                 login,
-                register,
                 labManuals,
 loadingManuals,
 manualsError,
 getLabManuals,
                 logout,
-                facultyLogin: login,
-                Studentlogin,
                 editprofileadmin
             }}
         >

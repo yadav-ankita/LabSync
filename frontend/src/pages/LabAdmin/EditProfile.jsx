@@ -94,7 +94,7 @@ export function EditProfile() {
           />
         </div>
 
-        <div className="mb-5">
+        {/* <div className="mb-5">
           <label className="block text-sm mb-1.5" style={labelStyle}>Current password</label>
           <div className="relative">
             <input
@@ -113,7 +113,7 @@ export function EditProfile() {
               {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-        </div>
+        </div> */}
 
         <div className="mb-6">
           <label className="block text-sm mb-1.5" style={labelStyle}>New password</label>

@@ -12,10 +12,12 @@ const path = require("path")
 const { StatusCodes } = require('http-status-codes')
 const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
 const Complaint = require("../models/complaint");
+const { bcrypt } = require("../utils/passwords");
+const User = require("../models/User");
 
 const getProfileData = async (req, res, next) => {
     try {
-        const faculty = await Faculty.findById(req.user.userId).select('-__v');
+        const faculty = await Faculty.findById(req.user.userId).select('-password -__v');
 
         if (!faculty) {
             throw new NotFoundError('Faculty not found');
@@ -28,7 +30,6 @@ const getProfileData = async (req, res, next) => {
             faculty_name: faculty.name,
             email: faculty.email,
             lab_name: faculty.lab_name,
-            password: faculty.password,
             createdAt: faculty.createdAt,
         };
 
@@ -55,9 +56,13 @@ const editProfileData = async (req, res, next) => {
                     if (!normalizedEmail) throw new BadRequestError('Email cannot be empty')
                     const existing = await Faculty.findOne({ email: normalizedEmail, _id: { $ne: faculty._id } })
                     if (existing) throw new BadRequestError('A faculty with this email already exists')
+                    const existingUser = await User.findOne({
+                        email: normalizedEmail,
+                    })
+                    if (existingUser) throw new BadRequestError('A user with this email already exists')
                     faculty.email = normalizedEmail
                 }
-        if (password && password.trim()) faculty.password = password.trim()
+        if (password && password.trim()) faculty.password = await bcrypt.hash(password.trim(), 12)
 
         await faculty.save()
 
@@ -66,7 +71,6 @@ const editProfileData = async (req, res, next) => {
                 id: faculty._id,
                 name: faculty.name,
                 email: faculty.email,
-                password: faculty.password,
                 lab_name: faculty.lab_name,
                 role: req.user.role || 'faculty',
             },

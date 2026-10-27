@@ -3,8 +3,6 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    studentRegister,
-    studentLogin,
     getStudentLabManuals,
     getStudentProfile,
     updateStudentProfile,
@@ -12,11 +10,9 @@ const {
 
 const authStudent = require("../middleware/authStudent");
 
-router.post("/register", studentRegister);
-router.post("/login", studentLogin);
-
-router.get("/profile", authStudent, getStudentProfile);
-router.patch("/profile", authStudent, updateStudentProfile);
-router.get("/labManuals", authStudent, getStudentLabManuals);
+router.use(authStudent);
+router.get("/profile", getStudentProfile);
+router.patch("/profile", updateStudentProfile);
+router.get("/labManuals", getStudentLabManuals);
 
 module.exports = router;

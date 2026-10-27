@@ -12,7 +12,7 @@ import {
   PlusCircleIcon,
   ShoppingCart,
   PlusCircle,
-  Badge
+  Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
@@ -44,6 +44,7 @@ export function Sidebar({ activeView, setActiveView }) {
     { key: "reports", label: "Reports", icon: BarChart3 },
     { key: "profile", label: "Edit Profile", icon: FileText },
     { key: "faculty", label: "Add Faculty", icon: PlusCircleIcon },
+    { key: "students", label: "Bulk Import Students", icon: Users },
     { key: "labs", label: "Add Labs", icon:PlusCircle  },
     { key: "funds", label: "Add Funds", icon: PlusCircle  },
   ];

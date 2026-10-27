@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate } from 'react-router-dom'
-import { FlaskConical, Mail, Lock, Eye, EyeOff, CalendarDays } from "lucide-react";
+import { FlaskConical, Lock, Eye, EyeOff } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { getDashboardPath } from "../authRoutes";
 
@@ -93,7 +93,7 @@ export default function Login() {
                                         value={form.email}
                                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                                         placeholder="abc@gmail.com"
-                                        className={`w-full rounded-lg border bg-white pl-3 pr-3 py-2.5 text-sm text-neutral-900 placeholder:text-stone-400 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${errors.studentId ? "border-red-400" : "border-stone-200"
+                                        className={`w-full rounded-lg border bg-white pl-3 pr-3 py-2.5 text-sm text-neutral-900 placeholder:text-stone-400 outline-none transition-colors focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 ${errors.email ? "border-red-400" : "border-stone-200"
                                             }`}
                                     />
                                 </div>
@@ -141,12 +141,6 @@ export default function Login() {
                                 {submitting ? "Signing in…" : "Sign in"}
                             </button>
                         </form>
-                        <p className="text-center text-sm text-stone-500 mt-6">
-                            Don't have an account?{" "}
-                            <Link to="/register" className="font-medium text-amber-600 hover:text-amber-700">
-                                Create one
-                            </Link>
-                        </p>
                     </div>
                 </div>
             </div>

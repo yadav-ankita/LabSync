@@ -1,26 +1,32 @@
 const { StatusCodes } = require('http-status-codes');
+const User = require('../models/User')
 const Faculty=require('../models/Faculty_model')
 const Lab = require('../models/Lab')
 const sendEmail = require('../utils/sendEmail')
 const { BadRequestError, NotFoundError } = require('../error')
 const crypto = require('crypto')
+const { bcrypt } = require('../utils/passwords')
 
-// Generates a readable random password, e.g. "aK7#pQ2mZ9"
-const generateRandomPassword = (length = 10) => {
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+})[character])
+
+const generateRandomPassword = (length = 8) => {
     const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%'
-    const bytes = crypto.randomBytes(length)
     let password = ''
     for (let i = 0; i < length; i++) {
-        password += charset[bytes[i] % charset.length]
+        password += charset[crypto.randomInt(charset.length)]
     }
     return password
 }
 // module.exports = generateRandomPassword
 // POST /faculty/ -> Lab Admin creates a faculty account, optionally assigning a lab.
 // A faculty account with an assigned lab is a Lab Incharge.
-// A random password is generated on the backend and stored against the
-// faculty record so it can be emailed to them (immediately or later) via
-// the /faculty/credentials endpoint.
+// The credential-email endpoint issues a fresh password and stores only its hash.
 const AddFaculties = async (req, res, next) => {
     try {
         const { name, email, lab_name, lab_id } = req.body
@@ -35,7 +41,10 @@ const AddFaculties = async (req, res, next) => {
         }
 
         const existingFaculty = await Faculty.findOne({ email: email.toLowerCase().trim() })
-        if (existingFaculty) {
+        const existingUser = await User.findOne({
+            email: email.toLowerCase().trim(),
+        })
+        if (existingFaculty || existingUser) {
             throw new BadRequestError('A faculty with this email already exists')
         }
 
@@ -96,7 +105,7 @@ if (lab_id || lab_name) {
     email: email.toLowerCase().trim(),
     lab_name: selectedLab ? selectedLab.LabName : null,
     lab: selectedLab ? selectedLab._id : null,
-    password,
+    password: await bcrypt.hash(password, 12),
 });
 
         // selectedLab.AssignFaculty = faculty._id
@@ -112,7 +121,6 @@ if (lab_id || lab_name) {
                 _id: faculty._id,
                 name: faculty.name,
                 email: faculty.email,
-                password:faculty.password,
                 lab_name: faculty.lab_name,
                 lab: faculty.lab,
                 createdAt: faculty.createdAt,
@@ -126,7 +134,7 @@ if (lab_id || lab_name) {
 // GET /faculty/  -> list all faculties (password never returned to the client)
 const getFaculties = async (req, res, next) => {
     try {
-        const faculties = await Faculty.find({}).populate('lab', 'LabName').sort('-createdAt')
+        const faculties = await Faculty.find({}).select('-password').populate('lab', 'LabName').sort('-createdAt')
         res.status(StatusCodes.OK).json({ faculties, count: faculties.length })
     } catch (error) {
         next(error)
@@ -147,23 +155,34 @@ const emailCredentials = async (req, res, next) => {
             throw new NotFoundError('Faculty not found')
         }
 
+        const previousPassword = faculty.password
+        const password = generateRandomPassword()
+        faculty.password = await bcrypt.hash(password, 12)
+        await faculty.save()
+
         const accountDescription = faculty.lab_name
-            ? `a Lab Incharge account for <b>${faculty.lab_name}</b>`
+            ? `a Lab Incharge account for <b>${escapeHtml(faculty.lab_name)}</b>`
             : 'a Faculty account with no assigned lab';
 
-        await sendEmail({
-            to: faculty.email,
-            subject: 'Your LabSync Faculty Account Credentials',
-            html: `
-                <p>Hello ${faculty.name},</p>
-                <p>Your LabSync account has been created as ${accountDescription}.</p>
-                <p>
-                    <b>Login email:</b> ${faculty.email}<br/>
-                    <b>Password:</b> ${faculty.password}
-                </p>
-                <p>Please log in and change your password after your first login.</p>
-            `,
-        })
+        try {
+            await sendEmail({
+                to: faculty.email,
+                subject: 'Your LabSync Faculty Account Credentials',
+                html: `
+                    <p>Hello ${escapeHtml(faculty.name)},</p>
+                    <p>Your LabSync account has been created as ${accountDescription}.</p>
+                    <p>
+                        <b>Login email:</b> ${escapeHtml(faculty.email)}<br/>
+                        <b>Password:</b> ${escapeHtml(password)}
+                    </p>
+                    <p>Please log in and change your password after your first login.</p>
+                `,
+            })
+        } catch (error) {
+            faculty.password = previousPassword
+            await faculty.save()
+            throw error
+        }
 
         res.status(StatusCodes.OK).json({ message: `Credentials sent to ${faculty.email}` })
     } catch (error) {
@@ -186,7 +205,13 @@ const deleteFaculty = async (req, res, next) => {
         )
 
         res.status(StatusCodes.OK).json({
-            faculty,
+            faculty: {
+                _id: faculty._id,
+                name: faculty.name,
+                email: faculty.email,
+                lab_name: faculty.lab_name,
+                lab: faculty.lab,
+            },
             message: 'Faculty deleted successfully'
         })
     } catch (error) {

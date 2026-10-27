@@ -1,100 +1,67 @@
-require('dotenv').config()
-const Faculty=require("../models/Faculty_model")
-const User=require("../models/User")
-const jwt = require('jsonwebtoken');
-const { StatusCodes } = require('http-status-codes')
-const { BadRequestError, UnauthenticatedError, NotFoundError } = require('../error')
+require("dotenv").config();
 
-const register = async (req, res, next) => {
-    const { name,email,password,phone,role } = req.body;
+const Faculty = require("../models/Faculty_model");
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+const { StatusCodes } = require("http-status-codes");
+const { BadRequestError, UnauthenticatedError } = require("../error");
+const { bcrypt, comparePassword, isBcryptHash } = require("../utils/passwords");
+
+const login = async (req, res, next) => {
     try {
-        if (!name || !email || !password || !phone || !role) {
-            throw new BadRequestError("Please provide name, email, and password, phone, role");
-        }
-        // Email format validation
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
-            throw new BadRequestError("Please provide a valid email address");
-        }
-        // Password strength validation
-        const passwordRegex =
-            /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\S+$).{8,20}$$/;
+        const { email, password } = req.body || {};
 
-        if (!passwordRegex.test(password)) {
-            throw new BadRequestError(
-                "Password must be at least 8 characters and include uppercase, lowercase, number, and special character"
-            );
+        if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
+            throw new BadRequestError("Please provide email and password.");
         }
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            throw new BadRequestError("Email already registered");
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const user = await User.findOne({ email: normalizedEmail });
+        const faculty = user ? null : await Faculty.findOne({ email: normalizedEmail });
+        const account = user || faculty;
+
+        if (!account || !(await comparePassword(password, account.password))) {
+            throw new UnauthenticatedError("Invalid email or password.");
         }
-        const user = await User.create({ name, email, password,role });
+
+        const role = user
+            ? user.role
+            : faculty.lab_name || faculty.lab
+              ? "labIncharge"
+              : "faculty";
+        const allowedRoles = ["student", "admin", "faculty", "labIncharge", "hod"];
+
+        if (!allowedRoles.includes(role)) {
+            throw new UnauthenticatedError("This account does not have an active role.");
+        }
+
+        if (!isBcryptHash(account.password)) {
+            account.password = await bcrypt.hash(password, 12);
+            await account.save();
+        }
+
         const token = jwt.sign(
-            { userId: user._id, name: user.name, role: user.role },
+            { userId: account._id },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_LIFETIME }
-        )
-        res.status(StatusCodes.CREATED).json({
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            },
+        );
+        const authenticatedUser = {
+            _id: account._id,
+            id: account._id,
+            name: account.name,
+            email: account.email,
+            role,
+            ...(faculty ? { lab_name: faculty.lab_name, lab: faculty.lab } : {}),
+        };
+
+        return res.status(StatusCodes.OK).json({
+            message: "Authentication successful.",
             token,
+            user: authenticatedUser,
         });
     } catch (error) {
-        next(error)
+        return next(error);
     }
-}
-const login = async (req, res, next) => {
-    const { email, password } = req.body;
-    try {
-        if (!email || !password) {
-            throw new BadRequestError("Please Provide email and Password")
-        }
+};
 
-        const normalizedEmail = email.toLowerCase().trim();
-        const user = await User.findOne({ email: normalizedEmail });
-        const facultyRecord = user || await Faculty.findOne({ email: normalizedEmail });
-        if (!facultyRecord) {
-            throw new NotFoundError("User not found!")
-        }
-        const passwordMatches = user
-            ? user.password === password
-            : facultyRecord.password === password;
-        if (!passwordMatches) {
-            throw new UnauthenticatedError('Invalid  Credentials')
-        }
-        const token = jwt.sign(
-            {
-                userId: facultyRecord._id,
-                username: facultyRecord.name,
-                email: facultyRecord.email,
-                role: user?.role || 'faculty',
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_LIFETIME }
-        )
-        const faculty = {
-            _id: facultyRecord._id,
-            name: facultyRecord.name,
-            email: facultyRecord.email,
-            lab_name: facultyRecord.lab_name,
-            password: facultyRecord.password,
-            role: user?.role || 'faculty',
-        }
-        res.status(StatusCodes.OK).json(
-            {
-                message: "Authentication successful",
-                token: token,
-                faculty,
-            }
-        )
-    } catch (error) {
-        next(error);
-    }
-}
-module.exports = {  login,register  };
+module.exports = { login };

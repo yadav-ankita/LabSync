@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authUser = require("../middleware/authUser");
+const authorizeRoles = require("../middleware/authorizeRoles");
 
 const {
   getPendingMaintenance,
@@ -10,7 +11,7 @@ const {
   updateTransferApproval,
 } = require("../controllers/HodController");
 
-router.use(authUser);
+router.use(authUser, authorizeRoles("hod"));
 
 router.get("/maintenance", getPendingMaintenance);
 router.patch("/maintenance",updateMaintenanceApproval);

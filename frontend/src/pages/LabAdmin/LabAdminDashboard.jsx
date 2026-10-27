@@ -14,6 +14,7 @@ import {AddLabs} from "./AddLabs";
 import { ScrapCupboard } from "./ScrapCupboard";
 import { LabResources } from "./LabResources";
 import { AddFund } from "./AddFund";
+import { StudentImport } from "./StudentImport";
 export function LabAdminDashboard() {
   const location = useLocation();
   const [activeView, setActiveView] = useState(location.state?.activeView || "home");
@@ -39,6 +40,7 @@ export function LabAdminDashboard() {
         {activeView === "reports" && <Reports />}
         {activeView === "profile" && <EditProfile />}
         {activeView==="faculty" && <AddFaculty/>}
+        {activeView === "students" && <StudentImport />}
         {activeView === "purchases" && <PurchaseRegister />}
         {activeView==="labs" && <AddLabs/>}
         {activeView==="funds" && <AddFund/>}

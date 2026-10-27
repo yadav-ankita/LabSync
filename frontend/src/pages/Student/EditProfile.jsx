@@ -148,7 +148,7 @@ export function EditProfile() {
           </div>
         </div>
 
-        <div className="mb-5">
+        {/* <div className="mb-5">
           <label className="block text-sm mb-1.5" style={labelStyle}>Current password</label>
           <div className="relative">
             <input
@@ -171,7 +171,7 @@ export function EditProfile() {
           <p className="mt-1.5 text-xs text-stone-500">
             This is your current password. Enter a new password below to change it.
           </p>
-        </div>
+        </div> */}
 
         <div className="mb-6">
           <label className="block text-sm mb-1.5" style={labelStyle}>New password</label>

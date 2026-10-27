@@ -6,15 +6,11 @@ const Lab = require('../models/Lab')
 const Purchase = require('../models/Purchase_model')
 const Complaint = require('../models/complaint')
 const User = require('../models/User')
+const Faculty = require('../models/Faculty_model')
 const generateAssetId = require('../utils/Generateassetid')
 const Maintenance = require('../models/Maintenance')
+const { bcrypt } = require('../utils/passwords')
 
-// POST /admin/LabResource
-// body: { purchaseId, labName, quantity }
-// quantity is optional (default 1) — lets the admin add several units of
-// the same resource to the same lab in one request. Each unit gets its own
-// sequential, system-generated assetId, e.g. adding 3 "Revolving Chair"
-// units funded by GIA to "F206 Lab" produces BVM/GIA/F206/RCH/01, .../02, .../03.
 const AddResourcesToLab = async (req, res, next) => {
     try {
         const { purchaseId, labName, quantity = 1 } = req.body
@@ -318,12 +314,13 @@ const editAdminProfile = async (req, res, next) => {
             const normalizedEmail = email.toLowerCase().trim()
             if (!normalizedEmail) throw new BadRequestError('Email cannot be empty')
             const existing = await User.findOne({ email: normalizedEmail, _id: { $ne: admin._id } })
-            if (existing) throw new BadRequestError('A user with this email already exists')
+            const existingFaculty = await Faculty.findOne({ email: normalizedEmail })
+            if (existing || existingFaculty) throw new BadRequestError('A user with this email already exists')
             admin.email = normalizedEmail
         }
         if (phone !== undefined) admin.phone = phone.trim()
         if (department !== undefined) admin.department = department.trim()
-        if (password && password.trim()) admin.password = password.trim()
+        if (password && password.trim()) admin.password = await bcrypt.hash(password.trim(), 12)
 
         await admin.save()
 
@@ -334,7 +331,6 @@ const editAdminProfile = async (req, res, next) => {
                 email: admin.email,
                 phone: admin.phone,
                 department: admin.department,
-                password: admin.password,
                 role: admin.role,
             },
             message: 'Profile updated successfully',
