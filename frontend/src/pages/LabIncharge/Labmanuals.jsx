@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TopBar } from '../../components/TopBar';
-import { AddManualForm } from "./Addmanualform";
-import { ManualCard } from "./ManualCard"
+import { AddManualForm } from "../Faculty/Addmanualform";
+import { ManualCard } from "../Faculty/Manualcard"
 import { useAppContext } from "../../context/AppContext";
 import { useFacultyContext } from "../../context/FacultyContext";
 export function LabManuals() {

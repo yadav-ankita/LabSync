@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TopBar } from '../../components/TopBar';
 import { AddManualForm } from "./Addmanualform";
-import { ManualCard } from "./ManualCard"
+import { ManualCard } from "./Manualcard"
 import { useFacultyContext } from "../../context/FacultyContext";
 export function LabManuals() {
   const { facultyManuals, getFacultyManuals, removeFacultyManual } = useFacultyContext();
