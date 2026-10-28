@@ -8,7 +8,7 @@ const { bcrypt } = require("../utils/passwords");
 const sendEmail = require("../utils/sendEmail");
 const { NotFoundError } = require("../error");
 
-const MAX_ROWS = 100;
+const MAX_ROWS = 800;
 const EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const PHONE_PATTERN = /^\+?[0-9][0-9\s().-]{5,19}$/;
 

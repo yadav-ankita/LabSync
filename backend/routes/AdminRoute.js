@@ -36,7 +36,7 @@ const { getFundTypes, addFundType,deleteFundType } = require("../controllers/Fun
 router.use(authUser)
 const studentImportUpload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+    limits: { fileSize: 100 * 1024 * 1024, files: 1 },
     fileFilter: (req, file, callback) => {
         const extension = file.originalname.toLowerCase().split('.').pop()
         if (!['xlsx', 'csv'].includes(extension)) {

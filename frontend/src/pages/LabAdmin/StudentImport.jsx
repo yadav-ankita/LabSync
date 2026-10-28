@@ -156,7 +156,7 @@ export function StudentImport() {
               }}
               className="block w-full rounded-lg border border-stone-300 bg-white p-2 text-sm"
             />
-            <p className="mt-1 text-xs text-stone-500">Include a header row with “email” and “phone” columns. Maximum 100 students per file.</p>
+            <p className="mt-1 text-xs text-stone-500">Include a header row with “email” and “phone” columns. Maximum 800 students per file.</p>
           </div>
           <button
             type="submit"
