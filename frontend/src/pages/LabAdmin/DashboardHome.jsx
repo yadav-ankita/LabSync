@@ -49,7 +49,7 @@ export function DashboardHome({ setActiveView, animationKey=0 }) {
     try {
       const { data } = await axios.get("/admin/LabResource");
 
-      console.log("Resources:", data);
+     
 
       setResources(data.resources || []);
     } catch (error) {
@@ -78,7 +78,7 @@ export function DashboardHome({ setActiveView, animationKey=0 }) {
     try {
       const { data } = await axios.get("/admin/resource-assignment-requests");
 
-      console.log("Approval Requests:", data);
+      
 
       setApprovalRequests(data.requests || []);
     } catch (error) {

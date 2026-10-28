@@ -184,12 +184,6 @@ const updatedResource = await LabResource.findOneAndUpdate(
   { new: true, runValidators: true }
 );
 
-console.log("RESOURCE AFTER UPDATE:", {
-  assetId: updatedResource?.assetId,
-  status: updatedResource?.status,
-  labName: updatedResource?.labName,
-  previousLabName: updatedResource?.previousLabName,
-});
 
       // Maintenance completed → complaint resolved
       await Complaint.findByIdAndUpdate(

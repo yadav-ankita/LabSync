@@ -51,7 +51,7 @@ export function ComplaintForm() {
       setDescription("");
       setTimeout(() => setSubmitted(false), 3000);
     } catch (error) {
-      console.log("the error in complaint form occurse");
+     
       console.log(error);
     }
 

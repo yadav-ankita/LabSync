@@ -21,15 +21,6 @@ import { useComplaintContext } from "../../context/ComplaintContext";
 import { useState, useEffect } from "react";
 import { useFacultyContext } from "../../context/FacultyContext";
 
-
-/* const LAB_OPTIONS = [
-  "DS Lab - Block A",
-  "DBMS Lab - Block B",
-  "Networks Lab - Block A",
-  "OS Lab - Block B",
-  "WebTech Lab - Block C",
-  "Micro Lab - Block C",
-]; */
 export function ComplaintForm() {
   const {raiseComplaint}=useComplaintContext();
   const {currentUser } = useAppContext();
@@ -52,17 +43,17 @@ const availableResources = facultyResources || [];
   const handleSubmit = async (e) => {
 e.preventDefault();
     if (!labName) {
-  console.log("No assigned lab found");
+
   return;
 }
 
 if (!resourceId) {
-  console.log("Please select a resource");
+ 
   return;
 }
 
 if (!description.trim()) {
-  console.log("Please enter a description");
+ 
   return;
 }
     
@@ -87,7 +78,7 @@ if (!description.trim()) {
      }
       
     } catch (error) {
-      console.log("the error in complaint form occurse");
+     
       console.log(error);
     }
 

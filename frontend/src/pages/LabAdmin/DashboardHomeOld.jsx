@@ -58,7 +58,7 @@ const getResources = async () => {
   try {
     const { data } = await axios.get("/admin/LabResource");
 
-    console.log("Resources:", data);
+   
 
     setResources(data.resources || []);
   } catch (error) {
@@ -74,7 +74,7 @@ const getApprovalRequests = async () => {
   try {
     const { data } = await axios.get("/admin/resource-assignment-requests");
 
-    console.log("Approval Requests:", data);
+   
 
     setApprovalRequests(data.requests || []);
   } catch (error) {

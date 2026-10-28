@@ -71,8 +71,6 @@ export function AddFaculty() {
   lab_name: selectedLab?.LabName || null,
 });
 
-  console.log("addFaculty result:", result);
-
   setSubmitting(false);
 
   if (result.success) {
